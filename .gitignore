@@ -1,0 +1,11 @@
+*.pyc
+UpdaterUI/Debug/
+UpdaterUI/Release/
+Service/Debug/
+Service/Release/
+*.ncb
+*.suo
+*.aps
+*.idc
+Service/Service.vcproj.KJK-X200S.kkowalczyk.user
+UpdaterUI/UpdaterUI.vcproj.KJK-X200S.kkowalczyk.user
