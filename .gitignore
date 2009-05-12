@@ -4,6 +4,7 @@ UpdaterUI/Release/
 Service/Debug/
 Service/Release/
 src/ApiKey.h
+opendns-sign.pfx
 *.ncb
 *.suo
 *.aps
