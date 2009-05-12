@@ -3,6 +3,7 @@ UpdaterUI/Debug/
 UpdaterUI/Release/
 Service/Debug/
 Service/Release/
+src/ApiKey.h
 *.ncb
 *.suo
 *.aps
