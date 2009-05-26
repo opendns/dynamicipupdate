@@ -83,7 +83,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				OutputFile=".\Release/OpenDNSDynamicIp.exe"
+				OutputFile=".\Release/OpenDNSUpdater.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
@@ -183,7 +183,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				OutputFile=".\Debug/OpenDNSDynamicIp.exe"
+				OutputFile=".\Debug/OpenDNSUpdater.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
@@ -229,6 +229,14 @@
 			</File>
 			<File
 				RelativePath=".\MainFrm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MainFrm2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MainFrm2.h"
 				>
 			</File>
 			<File

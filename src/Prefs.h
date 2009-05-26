@@ -31,7 +31,8 @@ typedef struct Prefs {
 	M(unique_id, NULL, false) \
 	M(token, NULL, true) \
 	M(hostname, NULL, false) \
-	M(user_networks_state, UNS_OK, false)
+	M(user_networks_state, UNS_OK, false) \
+	M(send_updates, "1", false)
 
 // g_pref_hostname - NULL means invalid, empty string means default
 
@@ -48,6 +49,21 @@ void GenUidIfNotExists();
 static inline void SetPrefVal(char **s, const char *newVal)
 {
 	StrSetCopy(s, newVal);
+}
+
+static inline void SetPrefValBool(char **s, BOOL val)
+{
+	const char *sval = "1";
+	if (FALSE == val)
+		sval = "0";
+	StrSetCopy(s, sval);
+}
+
+static inline BOOL GetPrefValBool(char *s)
+{
+	if (streq("0", s))
+		return FALSE;
+	return TRUE;
 }
 
 #endif

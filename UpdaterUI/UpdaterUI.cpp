@@ -4,13 +4,20 @@
 
 #include "stdafx.h"
 
+#define USE_MAIN_FRM2 1
+
 #include "base64decode.h"
 #include "WTLThread.h"
 #include "MiscUtil.h"
 #include "resource.h"
 
 #include "CrashHandler.h"
+#if USE_MAIN_FRM2
+#include "MainFrm2.h"
+#else
 #include "MainFrm.h"
+#endif
+
 #include "Prefs.h"
 #include "SimpleLog.h"
 #include "SingleInstance.h"
@@ -55,7 +62,11 @@ int Run(LPTSTR /* cmdLine */, int /* nCmdShow */)
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
 
+#if USE_MAIN_FRM2
+	CMainFrame2 wndMain;
+#else
 	CMainFrame wndMain;
+#endif
 	CString appDataDir = AppDataDir();
 	RECT r = { CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT };
 	if (wndMain.CreateEx(NULL, r) == NULL)
@@ -380,7 +391,7 @@ static void DoUpgradeCheck(bool simulateUpgrade)
 	if (!url2)
 		goto Exit;
 
-	int ret = ::MessageBox(NULL, _T("New version of OpenDNS Updater is available. Download new version?"), MAIN_FRAME_TITLE, MB_OKCANCEL);
+	int ret = ::MessageBox(NULL, _T("New version of OpenDNS Updater is available. Download new version?"), MAIN_FRAME_TITLE, MB_YESNO);
 	if (ret == IDOK) {
 		LaunchUrl(url2);
 	}

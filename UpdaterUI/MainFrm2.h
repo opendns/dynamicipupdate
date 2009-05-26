@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MAIN_FRM_H__
-#define MAIN_FRM_H__
+#ifndef MAIN_FRM2_H__
+#define MAIN_FRM2_H__
 
 #include "DnsQuery.h"
 #include "UpdaterThread.h"
@@ -71,7 +71,7 @@ static void CrashMe()
 	*p = 0;
 }
 
-class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
+class CMainFrame2 : public CFrameWindowImpl<CMainFrame2>, public CUpdateUI<CMainFrame2>,
 		public CMessageFilter, public CIdleHandler, public UpdaterThreadObserver
 {
 public:
@@ -121,7 +121,7 @@ public:
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
 
-	BEGIN_MSG_MAP(CMainFrame)
+	BEGIN_MSG_MAP(CMainFrame2)
 		MSG_WM_CREATE(OnCreate)
 		MSG_WM_ERASEBKGND(OnEraseBkgnd)
 		MSG_WM_SIZE(OnSize)
@@ -139,15 +139,15 @@ public:
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_SELCHANGE, OnSelChange)
 		NOTIFY_HANDLER_EX(IDC_LINK_ABOUT, NM_CLICK, OnLinkAbout)
 
-		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
-		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
+		CHAIN_MSG_MAP(CUpdateUI<CMainFrame2>)
+		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame2>)
 	END_MSG_MAP()
 
 	BEGIN_UPDATE_UI_MAP(CMainFrame)
 	END_UPDATE_UI_MAP()
 
-	CMainFrame();
-	~CMainFrame();
+	CMainFrame2();
+	~CMainFrame2();
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();

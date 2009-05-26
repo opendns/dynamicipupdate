@@ -137,9 +137,9 @@ Section "Install" SecInstall
     KillProc::KillProcesses
     Sleep 1000
 
-    File /oname=${UI_EXE_NAME} UpdaterUI\Release\OpenDNSDynamicIp.exe
+    File /oname=${UI_EXE_NAME} UpdaterUI\Release\OpenDNSUpdater.exe
 
-    ;File /oname=${UI_EXE_NAME} UpdaterUI\Debug\OpenDNSDynamicIp.exe
+    ;File /oname=${UI_EXE_NAME} UpdaterUI\Debug\OpenDNSUpdater.exe
 
     Call GuiOnInstall
 

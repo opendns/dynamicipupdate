@@ -112,6 +112,31 @@ public:
 	}
 };
 
+class CUICheckBoxButtonSizer : public CUITextSizer {
+	CButton m_button;
+	static const int CHECKBOX_DX = 20; // to account for the checkbox
+public:
+	CUICheckBoxButtonSizer(CButton b) {
+		m_button = b;
+		SetWindow(b);
+	}
+
+	virtual void GetIdealSize(int& dxOut, int& dyOut)
+	{
+		TCHAR *txt = MyGetWindowText(m_button);
+		if (!txt)
+			txt = tstrdup(_T(" "));
+		SetText(txt);
+		free(txt);
+		CUITextSizer::GetIdealSize(dxOut, dyOut);
+		dxOut += CHECKBOX_DX;
+		/*SIZE s;
+		m_button.GetIdealSize(&s);
+		dxOut = s.cx;
+		dyOut = s.cy;*/
+	}
+};
+
 class CUIButtonSizer : public CUISizer {
 	CButton m_button;
 public:

@@ -9,7 +9,7 @@
 
 extern UINT g_errorNotifMsg;
 
-#define PROGRAM_VERSION  _T("2.0b1")
+#define PROGRAM_VERSION  _T("2.0b2")
 
 // PROGRAM_VERSION_SIMULATE_UPGRADE must be lower than PROGRAM_VERSION
 #define PROGRAM_VERSION_SIMULATE_UPGRADE _T("0.8")
@@ -31,8 +31,9 @@ extern UINT g_errorNotifMsg;
 
 #define SERVICE_EXE_NAME _T("OpenDNSDynamicIpService.exe")
 #define SERVICE_EXE_NAME_WITHOUT_EXE _T("OpenDNSDynamicIpService")
-#define GUI_EXE_NAME _T("OpenDNSDynamicIp.exe")
-#define GUI_EXE_NAME_WITHOUT_EXE _T("OpenDNSDynamicIp")
+
+#define GUI_EXE_NAME _T("OpenDNSUpdater.exe")
+#define GUI_EXE_NAME_WITHOUT_EXE _T("OpenDNSUpdater")
 
 // names of cmd-line arguments that services uses when launching
 // ui to inform it about some condition
