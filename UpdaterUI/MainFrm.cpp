@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 
+#ifndef MAIN_FRM
 #include "MainFrm.h"
 
 static TCHAR *TBufAppend(TCHAR *start, TCHAR *end, TCHAR *toAppend)
@@ -968,7 +969,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_buttonSendIpUpdates.Create(m_hWnd, r, _T("Send background IP updates"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX);
 	m_buttonSendIpUpdates.SetFont(m_defaultGuiFont);
 	//m_buttonSendIpUpdates.SetFont(m_topBarFont);
-	m_buttonSendIpUpdates.SetDlgCtrlID(IDC_BUTTON_SEND_UPDATES);
+	m_buttonSendIpUpdates.SetDlgCtrlID(IDC_CHECK_SEND_UPDATES);
 	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
 	m_buttonSendIpUpdates.SetCheck(sendingUpdates);
 
@@ -1033,3 +1034,5 @@ LRESULT CMainFrame::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lPar
 	}
 	return 0;
 }
+
+#endif

@@ -5,6 +5,12 @@
 #ifndef MAIN_FRM_H__
 #define MAIN_FRM_H__
 
+#if MAIN_FRM == 2
+#include "MainFrm2.h"
+#elif MAIN_FRM == 3
+#include "MainFrm3.h"
+#else
+
 #include "DnsQuery.h"
 #include "UpdaterThread.h"
 #include "Errors.h"
@@ -53,7 +59,7 @@ static bool g_showDebug = false;
 #define TOP_BAR_TXT _T("OpenDNS Updater")
 
 enum {
-	IDC_BUTTON_SEND_UPDATES = 3000
+	IDC_CHECK_SEND_UPDATES = 3000
 	, IDC_LINK_ABOUT
 	, IDC_EDIT_STATUS
 };
@@ -194,5 +200,7 @@ public:
 
 	int OnCreate(LPCREATESTRUCT /* lpCreateStruct */);
 };
+
+#endif
 
 #endif

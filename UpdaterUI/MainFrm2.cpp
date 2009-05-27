@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 
+#if MAIN_FRM == 2
 #include "MainFrm2.h"
 
 #define TXT_DIV_ACCOUNT _T("OpenDNS account")
@@ -107,7 +108,7 @@ static TCHAR *AccountName()
 	return StrToTStr(name);
 }
 
-CMainFrame2::CMainFrame2()
+CMainFrame::CMainFrame()
 {
 	m_ipFromDns = IP_UNKNOWN;
 	m_ipFromHttp = NULL;
@@ -124,19 +125,19 @@ CMainFrame2::CMainFrame2()
 	m_winBgColorBrush = ::CreateSolidBrush(winBgColor);
 }
 
-CMainFrame2::~CMainFrame2()
+CMainFrame::~CMainFrame()
 {
 	free(m_ipFromHttp);
 	free(m_defaultFontName);
 	DeleteObject(m_winBgColorBrush);
 }
 
-BOOL CMainFrame2::PreTranslateMessage(MSG* pMsg)
+BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-	return CFrameWindowImpl<CMainFrame2>::PreTranslateMessage(pMsg);
+	return CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg);
 }
 
-void CMainFrame2::OnClose()
+void CMainFrame::OnClose()
 {
 	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
 	if (CanSendIPUpdates() && sendingUpdates && !IsLeftAltAndCtrlPressed()) {
@@ -147,13 +148,13 @@ void CMainFrame2::OnClose()
 	}
 }
 
-LRESULT CMainFrame2::OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/)
+LRESULT CMainFrame::OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/)
 {
 	SetFocus();
 	return 0;
 }
 
-void CMainFrame2::OnGetMinMaxInfo(LPMINMAXINFO lpMMI)
+void CMainFrame::OnGetMinMaxInfo(LPMINMAXINFO lpMMI)
 {
 	lpMMI->ptMinTrackSize.x = m_minWinDx;
 	lpMMI->ptMinTrackSize.y = m_minWinDy;
@@ -161,7 +162,7 @@ void CMainFrame2::OnGetMinMaxInfo(LPMINMAXINFO lpMMI)
 
 // returns true if the time has changed and we need to update
 // the text in UI
-bool CMainFrame2::GetLastIpUpdateTime()
+bool CMainFrame::GetLastIpUpdateTime()
 {
 	// optimization: not showing ui => no need to update
 	if (m_uiState != UI_STATE_VISIBLE)
@@ -178,47 +179,47 @@ bool CMainFrame2::GetLastIpUpdateTime()
 	return true;
 }
 
-void CMainFrame2::UpdateLastUpdateText()
+void CMainFrame::UpdateLastUpdateText()
 {
 	if (!GetLastIpUpdateTime())
 		return;
 	UpdateStatusEdit();
 }
 
-BOOL CMainFrame2::OnIdle()
+BOOL CMainFrame::OnIdle()
 {
 	return FALSE;
 }
 
-void CMainFrame2::ChangeNetwork(int supressFlags)
+void CMainFrame::ChangeNetwork(int supressFlags)
 {
 	StartDownloadNetworks(g_pref_token, supressFlags);
 	UpdateStatusEdit();
 }
 
-LRESULT CMainFrame2::OnSelChange(LPNMHDR /*pnmh*/)
+LRESULT CMainFrame::OnSelChange(LPNMHDR /*pnmh*/)
 {
 	SetFocus();
 	return 0;
 }
 
-void CMainFrame2::OnChangeAccount(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
+void CMainFrame::OnChangeAccount(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
 {
 	ChangeAccount();
 }
 
-void CMainFrame2::OnChangeNetwork(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
+void CMainFrame::OnChangeNetwork(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
 {
 	ChangeNetwork(0);
 }
 
-void CMainFrame2::OnSendUpdate(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
+void CMainFrame::OnSendUpdate(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
 {
 	m_updaterThread->ForceSendIpUpdate();
 	UpdateStatusEdit();
 }
 
-void CMainFrame2::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
+void CMainFrame::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
 {
 	CButton b = wndCtl;
 	BOOL checked = b.GetCheck();
@@ -227,33 +228,33 @@ void CMainFrame2::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, 
 }
 
 // sent by rich edit control so that we can know its desired height
-LRESULT CMainFrame2::OnRequestResize(LPNMHDR pnmh)
+LRESULT CMainFrame::OnRequestResize(LPNMHDR pnmh)
 {
 	REQRESIZE* r = (REQRESIZE*)pnmh;
 	m_statusMsgEditRequestedDy =  RectDy(r->rc);
 	return 0;
 }
 
-bool CMainFrame2::IsLink(HWND hwnd)
+bool CMainFrame::IsLink(HWND hwnd)
 {
 	if (hwnd == m_linkAbout.m_hWnd)
 		return true;
 	return false;
 }
 
-bool CMainFrame2::IsCheckBoxButton(HWND hwnd)
+bool CMainFrame::IsCheckBoxButton(HWND hwnd)
 {
 	if (hwnd == m_buttonSendIpUpdates.m_hWnd)
 		return true;
 	return false;
 }
 
-bool CMainFrame2::IsStatic(HWND /*hwnd*/)
+bool CMainFrame::IsStatic(HWND /*hwnd*/)
 {
 	return false;
 }
 
-void CMainFrame2::DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect)
+void CMainFrame::DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect)
 {
 	CRect      rc;
 	GetClientRect(rc);
@@ -269,7 +270,7 @@ void CMainFrame2::DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect)
 	dc.SelectFont(prevFont);
 }
 
-BOOL CMainFrame2::OnEraseBkgnd(CDCHandle dc)
+BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 {
 	CRect		rc;
 	TCHAR *		txt;
@@ -313,8 +314,8 @@ BOOL CMainFrame2::OnEraseBkgnd(CDCHandle dc)
 		DrawDividerLine(dc2, TXT_DIV_STATUS, m_txtStatusRect);
 		DrawDividerLine(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
-		HFONT prevFont = dc.SelectFont(m_dividerTextFont);
-		//HFONT prevFont = dc.SelectFont(m_defaultGuiFont);
+		//HFONT prevFont = dc.SelectFont(m_dividerTextFont);
+		HFONT prevFont = dc.SelectFont(m_defaultGuiFont);
 		dc.SetBkMode(TRANSPARENT);
 		dc.SetTextColor(colBlack);
 		x = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN;
@@ -366,7 +367,7 @@ BOOL CMainFrame2::OnEraseBkgnd(CDCHandle dc)
 	return 1;
 }
 
-HBRUSH CMainFrame2::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
+HBRUSH CMainFrame::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 {
 	HWND hwnd = wnd;
 	// TODO: could probabably do IsLink() and IsStatic() by
@@ -390,7 +391,7 @@ HBRUSH CMainFrame2::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 	return (HBRUSH)::GetStockObject(NULL_BRUSH);
 }
 
-bool CMainFrame2::IsLoggedIn()
+bool CMainFrame::IsLoggedIn()
 {
 	if (SE_NOT_LOGGED_IN == m_simulatedError)
 		return false;
@@ -402,14 +403,14 @@ bool CMainFrame2::IsLoggedIn()
 // returns true if we get valid ip address from both
 // http query and dns query and they are not the same
 // (it does happen)
-bool CMainFrame2::DnsVsHttpIpMismatch()
+bool CMainFrame::DnsVsHttpIpMismatch()
 {
 	if (!RealIpAddress(m_ipFromDns) || !m_ipFromHttp)
 		return false;
 	return (0 != m_ipFromDnsStr.Compare(m_ipFromHttp));
 }
 
-TCHAR *CMainFrame2::LastUpdateTxt()
+TCHAR *CMainFrame::LastUpdateTxt()
 {
 	if (m_minutesSinceLastUpdate < 0)
 		return NULL;
@@ -425,7 +426,7 @@ TCHAR *CMainFrame2::LastUpdateTxt()
 	return tstrdup(res);
 }
 
-TCHAR* CMainFrame2::IpAddress()
+TCHAR* CMainFrame::IpAddress()
 {
 	IP4_ADDRESS a = m_ipFromDns;
 	if (!RealIpAddress(a))
@@ -437,7 +438,7 @@ TCHAR* CMainFrame2::IpAddress()
 	return tstrdup(res);
 }
 
-void CMainFrame2::BuildStatusEditRtf(RtfTextInfo& ti)
+void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 {
 	CString s;
 	CUITextSizer sizer(*this);
@@ -617,7 +618,7 @@ void CMainFrame2::BuildStatusEditRtf(RtfTextInfo& ti)
 	m_minStatusEditDx = minDx;
 }
 
-void CMainFrame2::UpdateStatusEdit(bool doLayout)
+void CMainFrame::UpdateStatusEdit(bool doLayout)
 {
 	GetLastIpUpdateTime();
 	BuildStatusEditRtf(m_rti);
@@ -651,7 +652,7 @@ void CMainFrame2::UpdateStatusEdit(bool doLayout)
 		PostMessage(WMAPP_DO_LAYOUT);
 }
 
-void CMainFrame2::SetRtfLinks(RtfTextInfo *rti)
+void CMainFrame::SetRtfLinks(RtfTextInfo *rti)
 {
 	RtfLinkInfo *link = rti->firstLink;
 	while (link) {
@@ -667,7 +668,7 @@ void CMainFrame2::SetRtfLinks(RtfTextInfo *rti)
 	}
 }
 
-LRESULT CMainFrame2::OnLinkStatusEdit(LPNMHDR pnmh)
+LRESULT CMainFrame::OnLinkStatusEdit(LPNMHDR pnmh)
 {
 	ENLINK *e = (ENLINK *)pnmh;
 	if (e->msg != WM_LBUTTONDOWN)
@@ -708,7 +709,7 @@ LRESULT CMainFrame2::OnLinkStatusEdit(LPNMHDR pnmh)
 	return 0;
 }
 
-void CMainFrame2::ChangeAccount()
+void CMainFrame::ChangeAccount()
 {
 	CSignInDlg dlg;
 	INT_PTR nRet = dlg.DoModal();
@@ -723,7 +724,7 @@ void CMainFrame2::ChangeAccount()
 // Calculate @rectOut for a divider line with text @txt, starting at position @y,
 // given current widht of client area is @clientDx.
 // Returns minimum required size to display text
-int CMainFrame2::SizeDividerLineText(TCHAR *txt, int y, int clientDx, CRect& rectOut)
+int CMainFrame::SizeDividerLineText(TCHAR *txt, int y, int clientDx, CRect& rectOut)
 {
 	CUITextSizer textSizer;
 	textSizer.SetWindow(m_hWnd); // doesn't matter which window
@@ -745,7 +746,7 @@ int CMainFrame2::SizeDividerLineText(TCHAR *txt, int y, int clientDx, CRect& rec
 // I want all three bugttons on the left be the same size, so this will
 // calculate common dx/dy of the buttons. Dy should be always the same,
 // dx is the biggest of them
-void CMainFrame2::SizeButtons(int& dxOut, int& dyOut)
+void CMainFrame::SizeButtons(int& dxOut, int& dyOut)
 {
 	int dxMax, dy;
 	int dxTmp, dyTmp;
@@ -776,7 +777,7 @@ void CMainFrame2::SizeButtons(int& dxOut, int& dyOut)
 	dyOut = dy + 12;
 }
 
-void CMainFrame2::DoLayout()
+void CMainFrame::DoLayout()
 {
 	int x, y;
 	int btnDx, btnDy;
@@ -964,14 +965,14 @@ void CMainFrame2::DoLayout()
 	m_minWinDy = RectDy(r);
 }
 
-LRESULT CMainFrame2::OnLayout(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
+LRESULT CMainFrame::OnLayout(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	DoLayout();
 	Invalidate();
 	return 0;
 }
 
-void CMainFrame2::OnIpCheckResult(IP4_ADDRESS myIp)
+void CMainFrame::OnIpCheckResult(IP4_ADDRESS myIp)
 {
 	if (m_ipFromDns == myIp) {
 		// since this is called every minute, we use this
@@ -992,7 +993,7 @@ void CMainFrame2::OnIpCheckResult(IP4_ADDRESS myIp)
 	m_updaterThread->ForceSendIpUpdate();
 }
 
-LRESULT CMainFrame2::OnLinkAbout(LPNMHDR /*pnmh*/)
+LRESULT CMainFrame::OnLinkAbout(LPNMHDR /*pnmh*/)
 {
 	/* Show debug info when clicking on a link while pressing left alt key */
 	if (IsLeftAltPressed()) {
@@ -1007,7 +1008,7 @@ LRESULT CMainFrame2::OnLinkAbout(LPNMHDR /*pnmh*/)
 	return 0;
 }
 
-void CMainFrame2::OnIpUpdateResult(char *ipUpdateRes)
+void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 {
 	IpUpdateResult ipUpdateResult =	IpUpdateResultFromString(ipUpdateRes);
 	LogIpUpdate(ipUpdateRes);
@@ -1032,7 +1033,7 @@ void CMainFrame2::OnIpUpdateResult(char *ipUpdateRes)
 	PostMessage(WMAPP_UPDATE_STATUS);
 }
 
-LRESULT CMainFrame2::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
+LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
 {
 	TCHAR *url = (TCHAR*)wParam;
 	int ret = ::MessageBox(NULL, _T("New version of OpenDNS Updater client is available. Download new version?"), MAIN_FRAME_TITLE, MB_YESNO);
@@ -1043,7 +1044,7 @@ LRESULT CMainFrame2::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*
 	return 0;
 }
 
-void CMainFrame2::OnNewVersionAvailable(char *updateUrl)
+void CMainFrame::OnNewVersionAvailable(char *updateUrl)
 {
 	TCHAR *url = StrToTStr(updateUrl);
 	if (!url)
@@ -1051,7 +1052,7 @@ void CMainFrame2::OnNewVersionAvailable(char *updateUrl)
 	PostMessage(WMAPP_NEW_VERSION, (WPARAM)url);
 }
 
-void CMainFrame2::OnSize(UINT nType, CSize /*size*/)
+void CMainFrame::OnSize(UINT nType, CSize /*size*/)
 {
 	if (SIZE_MINIMIZED == nType)
 		return;
@@ -1064,7 +1065,7 @@ void CMainFrame2::OnSize(UINT nType, CSize /*size*/)
 	PostMessage(WMAPP_DO_LAYOUT);
 }
 
-void CMainFrame2::StartDownloadNetworks(char *token, int supressFlags)
+void CMainFrame::StartDownloadNetworks(char *token, int supressFlags)
 {
 	CString params = ApiParamsNetworksGet(token);
 	const char *paramsTxt = TStrToStr(params);
@@ -1084,7 +1085,7 @@ static BOOL IsBitSet(int flags, int bit)
 	return false;
 }
 
-LRESULT CMainFrame2::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam)
+LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam)
 {
 	NetworkInfo *ni = NULL;
 	char *jsonTxt = NULL;
@@ -1204,7 +1205,7 @@ Error:
 	goto Exit;
 }
 
-NetworkInfo *CMainFrame2::SelectNetwork(NetworkInfo *ni)
+NetworkInfo *CMainFrame::SelectNetwork(NetworkInfo *ni)
 {
 	CSelectNetworkDlg dlg(ni);
 	INT_PTR nRet = dlg.DoModal();
@@ -1215,7 +1216,7 @@ NetworkInfo *CMainFrame2::SelectNetwork(NetworkInfo *ni)
 	return selected;
 }
 
-int CMainFrame2::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
+int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 {
 	SetMenu(NULL);
 
@@ -1321,28 +1322,28 @@ int CMainFrame2::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	return 0;
 }
 
-LRESULT CMainFrame2::OnUpdateStatus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
+LRESULT CMainFrame::OnUpdateStatus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	UpdateStatusEdit();
 	return 0;
 }
 
-void CMainFrame2::SwitchToVisibleState()
+void CMainFrame::SwitchToVisibleState()
 {
 	ShowWindow(SW_SHOW);
 	m_uiState = UI_STATE_VISIBLE;
 	UpdateStatusEdit();
 }
 
-void CMainFrame2::SwitchToHiddenState()
+void CMainFrame::SwitchToHiddenState()
 {
 	ShowWindow(SW_HIDE);
 	m_uiState = UI_STATE_HIDDEN;
 }
 
-LRESULT CMainFrame2::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lParam*/)
+LRESULT CMainFrame::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lParam*/)
 {
-	slog("CMainFrame2::OnErrorNotif(): "); 
+	slog("CMainFrame::OnErrorNotif(): "); 
 	if (SPECIAL_CMD_SHOW == specialCmd) {
 		SwitchToVisibleState();
 		slog("SPECIAL_CMD_SHOW\n");
@@ -1357,3 +1358,5 @@ LRESULT CMainFrame2::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lPa
 	}
 	return 0;
 }
+
+#endif

@@ -5,6 +5,10 @@
 #ifndef MAIN_FRM2_H__
 #define MAIN_FRM2_H__
 
+#if MAIN_FRM != 2
+#error "need to define MAIN_FRM to 2"
+#endif
+
 #include "DnsQuery.h"
 #include "UpdaterThread.h"
 #include "Errors.h"
@@ -74,7 +78,7 @@ static void CrashMe()
 	*p = 0;
 }
 
-class CMainFrame2 : public CFrameWindowImpl<CMainFrame2>, public CUpdateUI<CMainFrame2>,
+class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
 		public CMessageFilter, public CIdleHandler, public UpdaterThreadObserver
 {
 public:
@@ -140,7 +144,7 @@ public:
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
 
-	BEGIN_MSG_MAP(CMainFrame2)
+	BEGIN_MSG_MAP(CMainFrame)
 		MSG_WM_CREATE(OnCreate)
 		MSG_WM_ERASEBKGND(OnEraseBkgnd)
 		MSG_WM_SIZE(OnSize)
@@ -161,15 +165,15 @@ public:
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_SELCHANGE, OnSelChange)
 		NOTIFY_HANDLER_EX(IDC_LINK_ABOUT, NM_CLICK, OnLinkAbout)
 
-		CHAIN_MSG_MAP(CUpdateUI<CMainFrame2>)
-		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame2>)
+		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
+		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
 	END_MSG_MAP()
 
 	BEGIN_UPDATE_UI_MAP(CMainFrame)
 	END_UPDATE_UI_MAP()
 
-	CMainFrame2();
-	~CMainFrame2();
+	CMainFrame();
+	~CMainFrame();
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
