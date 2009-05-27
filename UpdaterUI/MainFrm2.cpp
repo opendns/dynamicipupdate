@@ -122,7 +122,7 @@ CMainFrame::CMainFrame()
 	m_minStatusEditDx = 320 - 16;
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
-	m_winBgColorBrush = ::CreateSolidBrush(winBgColor);
+	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 }
 
 CMainFrame::~CMainFrame()
@@ -254,16 +254,16 @@ bool CMainFrame::IsStatic(HWND /*hwnd*/)
 	return false;
 }
 
-void CMainFrame::DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect)
+void CMainFrame::DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect)
 {
 	CRect      rc;
 	GetClientRect(rc);
 
-	dc.FillSolidRect(rect, colBlack);
+	dc.FillSolidRect(rect, colDividerBg);
 
 	HFONT prevFont = dc.SelectFont(m_dividerTextFont);
 	dc.SetBkMode(TRANSPARENT);
-	dc.SetTextColor(colWhite);
+	dc.SetTextColor(colDividerTxt);
 	int x = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN;
 	int y = rect.top + DIVIDER_TEXT_TOP_MARGIN;
 	dc.TextOut(x, y, txt);
@@ -306,13 +306,13 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		// paint solid background everywhere except in top bar
 		//rc.MoveToY(TOP_BAR_DY);
 		rc.MoveToY(0);
-		dc.FillSolidRect(rc, winBgColor);
+		dc.FillSolidRect(rc, colWinBg);
 
-		DrawDividerLine(dc2, TXT_DIV_ACCOUNT, m_txtAccountRect);
-		DrawDividerLine(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
-		DrawDividerLine(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
-		DrawDividerLine(dc2, TXT_DIV_STATUS, m_txtStatusRect);
-		DrawDividerLine(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
+		DrawDivider(dc2, TXT_DIV_ACCOUNT, m_txtAccountRect);
+		DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
+		DrawDivider(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
+		DrawDivider(dc2, TXT_DIV_STATUS, m_txtStatusRect);
+		DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
 		//HFONT prevFont = dc.SelectFont(m_dividerTextFont);
 		HFONT prevFont = dc.SelectFont(m_defaultGuiFont);
@@ -375,10 +375,10 @@ HBRUSH CMainFrame::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 	// with ATOM corresponding to syslink and static classes found
 	// with GetClassInfo()
 	if (IsLink(hwnd)) {
-		dc.SetBkColor(winBgColor);
+		dc.SetBkColor(colWinBg);
 		return 0;
 	} else if (IsStatic(hwnd)) {
-		//dc.SetBkColor(winBgColor);
+		//dc.SetBkColor(colWinBg);
 		dc.SetTextColor(colBlack);
 		dc.SetBkMode(TRANSPARENT);
 	} else if (IsCheckBoxButton(hwnd)) {
@@ -1301,7 +1301,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_statusMsgEdit.SetReadOnly(TRUE);
 	m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK | ENM_SELCHANGE);
 	//m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK);
-	m_statusMsgEdit.SetBackgroundColor(winBgColor);
+	m_statusMsgEdit.SetBackgroundColor(colWinBg);
 	m_statusMsgEdit.SetDlgCtrlID(IDC_EDIT_STATUS);
 
 	if (strempty(g_pref_user_name) ||

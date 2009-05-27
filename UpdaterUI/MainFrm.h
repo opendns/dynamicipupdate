@@ -107,8 +107,8 @@ public:
 
 	TCHAR *			m_editFontName;
 
-	//static const COLORREF winBgColor = RGB(0xf9, 0xf9, 0xf9);
-	static const COLORREF winBgColor = RGB(0xd6, 0xdf, 0xf7);
+	//static const COLORREF colWinBg = RGB(0xf9, 0xf9, 0xf9);
+	static const COLORREF colWinBg = RGB(0xd6, 0xdf, 0xf7);
 	static const COLORREF colWhite	 = RGB(0xff,0xff,0xff);
 	static const COLORREF colBlack	 = RGB(0x00, 0x00, 0x00);
 	static const COLORREF colRed	 = RGB(0xff, 0x00, 0x00);

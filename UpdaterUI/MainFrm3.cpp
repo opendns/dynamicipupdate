@@ -122,9 +122,9 @@ CMainFrame::CMainFrame()
 	m_minStatusEditDx = 320 - 16;
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
-	winBgColor = ::GetSysColor(COLOR_APPWORKSPACE);
-	winBgColor = RGB(0xef, 0xeb, 0xde);
-	m_winBgColorBrush = ::CreateSolidBrush(winBgColor);
+	colWinBg = ::GetSysColor(COLOR_APPWORKSPACE);
+	colWinBg = RGB(0xef, 0xeb, 0xde);
+	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 }
 
 CMainFrame::~CMainFrame()
@@ -269,7 +269,7 @@ static void DrawEtchedLine(CDCHandle *dc, int y, int x1, int x2, int x3, int x4)
 	dc->DrawEdge(&r, EDGE_ETCHED, BF_TOP);
 }
 
-void CMainFrame::DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect)
+void CMainFrame::DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect)
 {
 	CRect      rc;
 	GetClientRect(rc);
@@ -330,13 +330,13 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		// paint solid background everywhere except in top bar
 		//rc.MoveToY(TOP_BAR_DY);
 		rc.MoveToY(0);
-		dc.FillSolidRect(rc, winBgColor);
+		dc.FillSolidRect(rc, colWinBg);
 
-		DrawDividerLine(dc2, TXT_DIV_ACCOUNT, m_txtAccountRect);
-		DrawDividerLine(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
-		DrawDividerLine(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
-		DrawDividerLine(dc2, TXT_DIV_STATUS, m_txtStatusRect);
-		DrawDividerLine(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
+		DrawDivider(dc2, TXT_DIV_ACCOUNT, m_txtAccountRect);
+		DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
+		DrawDivider(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
+		DrawDivider(dc2, TXT_DIV_STATUS, m_txtStatusRect);
+		DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
 		//HFONT prevFont = dc.SelectFont(m_dividerTextFont);
 		HFONT prevFont = dc.SelectFont(m_textFont);
@@ -399,10 +399,10 @@ HBRUSH CMainFrame::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 	// with ATOM corresponding to syslink and static classes found
 	// with GetClassInfo()
 	if (IsLink(hwnd)) {
-		dc.SetBkColor(winBgColor);
+		dc.SetBkColor(colWinBg);
 		return 0;
 	} else if (IsStatic(hwnd)) {
-		//dc.SetBkColor(winBgColor);
+		//dc.SetBkColor(colWinBg);
 		dc.SetTextColor(colBlack);
 		dc.SetBkMode(TRANSPARENT);
 	} else if (IsCheckBoxButton(hwnd)) {
@@ -1336,7 +1336,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_statusMsgEdit.SetReadOnly(TRUE);
 	m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK | ENM_SELCHANGE);
 	//m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK);
-	m_statusMsgEdit.SetBackgroundColor(winBgColor);
+	m_statusMsgEdit.SetBackgroundColor(colWinBg);
 	m_statusMsgEdit.SetDlgCtrlID(IDC_EDIT_STATUS);
 
 	if (strempty(g_pref_user_name) ||

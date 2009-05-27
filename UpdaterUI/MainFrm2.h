@@ -116,12 +116,14 @@ public:
 
 	TCHAR *			m_editFontName;
 
-	//static const COLORREF winBgColor = RGB(0xf9, 0xf9, 0xf9);
-	//static const COLORREF winBgColor = RGB(0xd6, 0xdf, 0xf7);
-	static const COLORREF winBgColor = RGB(0xff, 0xff, 0xff);
-	static const COLORREF colWhite	 = RGB(0xff,0xff,0xff);
-	static const COLORREF colBlack	 = RGB(0x00, 0x00, 0x00);
-	static const COLORREF colRed	 = RGB(0xff, 0x00, 0x00);
+	//static const COLORREF colWinBg    = RGB(0xf9, 0xf9, 0xf9);
+	//static const COLORREF colWinBg    = RGB(0xd6, 0xdf, 0xf7);
+	static const COLORREF colWinBg      = RGB(0xf7, 0xfb, 0xff);
+	static const COLORREF colDividerBg  = RGB(0xc6, 0xdf, 0xff);
+	static const COLORREF colDividerTxt = RGB(0x52, 0x61, 0xb5);
+	static const COLORREF colWhite	    = RGB(0xff,0xff,0xff);
+	static const COLORREF colBlack	    = RGB(0x00, 0x00, 0x00);
+	static const COLORREF colRed	    = RGB(0xff, 0x00, 0x00);
 
 	HBRUSH				m_winBgColorBrush;
 
@@ -201,7 +203,7 @@ public:
 	LRESULT OnLinkStatusEdit(LPNMHDR pnmh);
 	void ChangeAccount();
 	LRESULT OnLinkAbout(LPNMHDR /*pnmh*/);
-	void DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect);
+	void DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect);
 	void OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
 	void OnChangeAccount(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
 	void OnChangeNetwork(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);

@@ -100,7 +100,7 @@ CMainFrame::CMainFrame()
 	m_minStatusEditDx = 320 - 16;
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
-	m_winBgColorBrush = ::CreateSolidBrush(winBgColor);
+	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 }
 
 CMainFrame::~CMainFrame()
@@ -248,7 +248,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 		// paint solid background everywhere except in top bar
 		rc.MoveToY(TOP_BAR_DY);
-		dc.FillSolidRect(rc, winBgColor);
+		dc.FillSolidRect(rc, colWinBg);
 
 		// draw top bar text
 		HFONT prevFont = dc.SelectFont(m_topBarFont);
@@ -268,10 +268,10 @@ HBRUSH CMainFrame::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 	// with ATOM corresponding to syslink and static classes found
 	// with GetClassInfo()
 	if (IsLink(hwnd)) {
-		dc.SetBkColor(winBgColor);
+		dc.SetBkColor(colWinBg);
 		return 0;
 	} else if (IsStatic(hwnd)) {
-		//dc.SetBkColor(winBgColor);
+		//dc.SetBkColor(colWinBg);
 		dc.SetTextColor(colBlack);
 		dc.SetBkMode(TRANSPARENT);
 	} else if (IsCheckBoxButton(hwnd)) {
@@ -977,7 +977,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_statusMsgEdit.SetReadOnly(TRUE);
 	m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK | ENM_SELCHANGE);
 	//m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK);
-	m_statusMsgEdit.SetBackgroundColor(winBgColor);
+	m_statusMsgEdit.SetBackgroundColor(colWinBg);
 	m_statusMsgEdit.SetDlgCtrlID(IDC_EDIT_STATUS);
 
 	if (strempty(g_pref_user_name) ||
