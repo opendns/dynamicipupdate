@@ -202,6 +202,22 @@ LRESULT CMainFrame2::OnSelChange(LPNMHDR /*pnmh*/)
 	return 0;
 }
 
+void CMainFrame2::OnChangeAccount(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
+{
+	ChangeAccount();
+}
+
+void CMainFrame2::OnChangeNetwork(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
+{
+	ChangeNetwork(0);
+}
+
+void CMainFrame2::OnSendUpdate(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
+{
+	m_updaterThread->ForceSendIpUpdate();
+	UpdateStatusEdit();
+}
+
 void CMainFrame2::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
 {
 	CButton b = wndCtl;
@@ -1220,7 +1236,7 @@ int CMainFrame2::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_buttonSendIpUpdates.Create(m_hWnd, r, _T("Send background IP updates"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX);
 	m_buttonSendIpUpdates.SetFont(m_defaultGuiFont);
 	//m_buttonSendIpUpdates.SetFont(m_topBarFont);
-	m_buttonSendIpUpdates.SetDlgCtrlID(IDC_BUTTON_SEND_UPDATES);
+	m_buttonSendIpUpdates.SetDlgCtrlID(IDC_CHECK_SEND_UPDATES);
 	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
 	m_buttonSendIpUpdates.SetCheck(sendingUpdates);
 
@@ -1232,12 +1248,12 @@ int CMainFrame2::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_buttonChangeConfigureNetwork.Create(m_hWnd, r, _T("Change network"),  WS_CHILD | WS_VISIBLE);
 	m_buttonChangeConfigureNetwork.SetFont(m_defaultGuiFont);
 	//m_buttonChangeConfigureNetwork.SetFont(m_topBarFont);
-	m_buttonChangeConfigureNetwork.SetDlgCtrlID(IDC_BUTTON_CONFIGURE_NETWORK);
+	m_buttonChangeConfigureNetwork.SetDlgCtrlID(IDC_BUTTON_CHANGE_NETWORK);
 	//m_buttonChangeAccount.ShowWindow(SW_HIDE);
 
 	m_buttonUpdate.Create(m_hWnd, r, _T("Update now"),  WS_CHILD | WS_VISIBLE);
 	m_buttonUpdate.SetFont(m_defaultGuiFont);
-	m_buttonUpdate.SetDlgCtrlID(IDC_BUTTON_SEND_UPDATES);
+	m_buttonUpdate.SetDlgCtrlID(IDC_BUTTON_SEND_IP_UPDATE);
 	//m_buttonChangeAccount.ShowWindow(SW_HIDE);
 
 	m_statusMsgEdit.Create(m_hWnd, r, _T(""), WS_CHILD | WS_VISIBLE | ES_MULTILINE);

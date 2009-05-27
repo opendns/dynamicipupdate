@@ -53,9 +53,10 @@ static bool g_showDebug = false;
 #define TOP_BAR_TXT _T("OpenDNS Updater")
 
 enum {
-	IDC_BUTTON_SEND_UPDATES = 3000,
+	IDC_CHECK_SEND_UPDATES = 3000,
 	IDC_BUTTON_CHANGE_ACCOUNT,
-	IDC_BUTTON_CONFIGURE_NETWORK,
+	IDC_BUTTON_CHANGE_NETWORK,
+	IDC_BUTTON_SEND_IP_UPDATE,
 	IDC_LINK_ABOUT,
 	IDC_EDIT_STATUS,
 };
@@ -150,7 +151,10 @@ public:
 		MESSAGE_HANDLER_EX(WMAPP_DO_LAYOUT, OnLayout)
 		MESSAGE_HANDLER_EX(WMAPP_UPDATE_STATUS, OnUpdateStatus)
 		MESSAGE_HANDLER_EX(WMAPP_NEW_VERSION, OnNewVersion)
-		COMMAND_HANDLER_EX(IDC_BUTTON_SEND_UPDATES, BN_CLICKED, OnSendUpdatesButtonClicked)
+		COMMAND_HANDLER_EX(IDC_CHECK_SEND_UPDATES, BN_CLICKED, OnSendUpdatesButtonClicked)
+		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_ACCOUNT, BN_CLICKED, OnChangeAccount)
+		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_NETWORK, BN_CLICKED, OnChangeNetwork)
+		COMMAND_HANDLER_EX(IDC_BUTTON_SEND_IP_UPDATE, BN_CLICKED, OnSendUpdate)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_LINK, OnLinkStatusEdit)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_REQUESTRESIZE, OnRequestResize)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_SELCHANGE, OnSelChange)
@@ -196,6 +200,9 @@ public:
 	LRESULT OnLinkAbout(LPNMHDR /*pnmh*/);
 	void DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect);
 	void OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
+	void OnChangeAccount(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
+	void OnChangeNetwork(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
+	void OnSendUpdate(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
 	int SizeDividerLineText(TCHAR *txt, int y, int clientDx, CRect& rectOut);
 	void DoLayout();
 	LRESULT OnLayout(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
