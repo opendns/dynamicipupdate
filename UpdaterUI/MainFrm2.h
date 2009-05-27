@@ -86,6 +86,7 @@ public:
 	CFont			m_dividerTextFont;
 	CFont			m_statusEditFont;
 	CFont			m_topBarFont;
+	CFont			m_buttonsFont;
 
 	CRect			m_topBarRect;
 	CRect			m_txtAccountRect;
@@ -216,7 +217,7 @@ public:
 	bool IsLoggedIn();
 	bool GetLastIpUpdateTime();
 	bool DnsVsHttpIpMismatch();
-
+	void SizeButtons(int& dxOut, int& dyOut);
 	void SwitchToVisibleState();
 	void SwitchToHiddenState();
 

@@ -742,6 +742,40 @@ int CMainFrame2::SizeDividerLineText(TCHAR *txt, int y, int clientDx, CRect& rec
 	return minDx;
 }
 
+// I want all three bugttons on the left be the same size, so this will
+// calculate common dx/dy of the buttons. Dy should be always the same,
+// dx is the biggest of them
+void CMainFrame2::SizeButtons(int& dxOut, int& dyOut)
+{
+	int dxMax, dy;
+	int dxTmp, dyTmp;
+	TCHAR *txt;
+
+	CUITextSizer textSizer;
+	textSizer.SetWindow(m_hWnd); // doesn't matter which window
+
+	txt = MyGetWindowText(m_buttonChangeAccount);
+	textSizer.GetIdealSize(txt, m_buttonsFont, dxMax, dy);
+	free(txt);
+
+	txt = MyGetWindowText(m_buttonChangeConfigureNetwork);
+	textSizer.GetIdealSize(txt, m_buttonsFont, dxTmp, dyTmp);
+	free(txt);
+	assert(dy == dyTmp);
+	if (dxTmp > dxMax)
+		dxMax = dxTmp;
+
+	txt = MyGetWindowText(m_buttonUpdate);
+	textSizer.GetIdealSize(txt, m_buttonsFont, dxTmp, dyTmp);
+	free(txt);
+	assert(dy == dyTmp);
+	if (dxTmp > dxMax)
+		dxMax = dxTmp;
+
+	dxOut = dxMax + 32;
+	dyOut = dy + 12;
+}
+
 void CMainFrame2::DoLayout()
 {
 	int x, y;
@@ -758,6 +792,8 @@ void CMainFrame2::DoLayout()
 	if (!ok) return;
 	int clientDx = RectDx(clientRect);
 	int clientDy = RectDy(clientRect);
+
+	SizeButtons(btnDx, btnDy);
 
 	// position "Send IP updates" check-box in the bottom right corner
 	CUICheckBoxButtonSizer sendIpUpdatsSizer(m_buttonSendIpUpdates);
@@ -806,7 +842,7 @@ void CMainFrame2::DoLayout()
 	// position account name text and "Change account" button
 	y += Y_SPACING * 2;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	buttonSizer.GetIdealSize(&m_buttonChangeAccount, btnDx, btnDy);
+	//buttonSizer.GetIdealSize(&m_buttonChangeAccount, btnDx, btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
 	m_buttonChangeAccount.MoveWindow(x, y, btnDx, btnDy);
 	dxLine += btnDx;
@@ -824,7 +860,7 @@ void CMainFrame2::DoLayout()
 	// position network name and "Change network"/"Configure network" button
 	y += Y_SPACING * 2;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	buttonSizer.GetIdealSize(&m_buttonChangeConfigureNetwork, btnDx, btnDy);
+	//buttonSizer.GetIdealSize(&m_buttonChangeConfigureNetwork, btnDx, btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
 	m_buttonChangeConfigureNetwork.MoveWindow(x, y, btnDx, btnDy);
 	dxLine += btnDx;
@@ -876,7 +912,7 @@ void CMainFrame2::DoLayout()
 	// position "Last updated: " text and "Update now" button
 	y += Y_SPACING * 2;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	buttonSizer.GetIdealSize(&m_buttonUpdate, btnDx, btnDy);
+	//buttonSizer.GetIdealSize(&m_buttonUpdate, btnDx, btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
 	m_buttonUpdate.MoveWindow(x, y, btnDx, btnDy);
 	y += btnDy;
@@ -1221,6 +1257,8 @@ int CMainFrame2::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 
 	m_defaultGuiFont = AtlGetDefaultGuiFont();
 
+	m_buttonsFont = AtlGetDefaultGuiFont();
+
 	CLogFont logFontDivider(AtlGetDefaultGuiFont());
 	//_tcscpy_s(logFontDefault.lfFaceName, dimof(logFontDefault.lfFaceName), "Tahoma");
 	logFontDivider.SetBold();
@@ -1234,24 +1272,26 @@ int CMainFrame2::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_linkAbout.SetDlgCtrlID(IDC_LINK_ABOUT);
 
 	m_buttonSendIpUpdates.Create(m_hWnd, r, _T("Send background IP updates"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX);
-	m_buttonSendIpUpdates.SetFont(m_defaultGuiFont);
+	m_buttonSendIpUpdates.SetFont(m_buttonsFont);
 	//m_buttonSendIpUpdates.SetFont(m_topBarFont);
 	m_buttonSendIpUpdates.SetDlgCtrlID(IDC_CHECK_SEND_UPDATES);
 	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
 	m_buttonSendIpUpdates.SetCheck(sendingUpdates);
 
 	m_buttonChangeAccount.Create(m_hWnd, r, _T("Change account"),  WS_CHILD | WS_VISIBLE);
-	m_buttonChangeAccount.SetFont(m_defaultGuiFont);
+	m_buttonChangeAccount.SetFont(m_buttonsFont);
 	m_buttonChangeAccount.SetDlgCtrlID(IDC_BUTTON_CHANGE_ACCOUNT);
 	//m_buttonChangeAccount.ShowWindow(SW_HIDE);
 
 	m_buttonChangeConfigureNetwork.Create(m_hWnd, r, _T("Change network"),  WS_CHILD | WS_VISIBLE);
-	m_buttonChangeConfigureNetwork.SetFont(m_defaultGuiFont);
+	m_buttonChangeConfigureNetwork.SetFont(m_buttonsFont);
 	//m_buttonChangeConfigureNetwork.SetFont(m_topBarFont);
 	m_buttonChangeConfigureNetwork.SetDlgCtrlID(IDC_BUTTON_CHANGE_NETWORK);
 	//m_buttonChangeAccount.ShowWindow(SW_HIDE);
 
 	m_buttonUpdate.Create(m_hWnd, r, _T("Update now"),  WS_CHILD | WS_VISIBLE);
+	// TODO: long text here will not size the window
+	//m_buttonUpdate.Create(m_hWnd, r, _T("Update now because this is a long text"),  WS_CHILD | WS_VISIBLE);
 	m_buttonUpdate.SetFont(m_defaultGuiFont);
 	m_buttonUpdate.SetDlgCtrlID(IDC_BUTTON_SEND_IP_UPDATE);
 	//m_buttonChangeAccount.ShowWindow(SW_HIDE);
