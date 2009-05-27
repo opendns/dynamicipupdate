@@ -10,7 +10,8 @@ enum VersionUpdateCheckType {
 enum IpUpdateResult {
 	IpUpdateOk,
 	IpUpdateNotYours,
-	IpUpdateBadAuth
+	IpUpdateBadAuth,
+	IpUpdateNotAvailable
 };
 
 char* SendIpUpdate();

@@ -90,11 +90,18 @@ public:
 		FreeText();
 	}
 
-	virtual void GetIdealSize(int& dx, int &dy)
+	void GetIdealSize(const TCHAR *txt, HFONT font, int& dxOut, int& dyOut)
+	{
+		SetText(txt);
+		SetFont(font);
+		GetIdealSize(dxOut, dyOut);
+	}
+
+	virtual void GetIdealSize(int& dxOut, int& dyOut)
 	{
 		if (!m_txt) {
-			dx = 0;
-			dy = 0;
+			dxOut = 0;
+			dyOut = 0;
 			return;
 		}
 
@@ -106,9 +113,9 @@ public:
 			prevFont = dc.SelectFont(m_window.GetFont());
 		SIZE size;
 		dc.GetTextExtent(m_txt, m_txtLen, &size);
-		dx = size.cx;
-		dy = size.cy;
 		dc.SelectFont(prevFont);
+		dxOut = size.cx;
+		dyOut = size.cy;
 	}
 };
 
@@ -138,16 +145,30 @@ public:
 };
 
 class CUIButtonSizer : public CUISizer {
-	CButton m_button;
+	CButton *m_button;
 public:
-	CUIButtonSizer(CButton b) {
+	CUIButtonSizer() {
+		m_button = NULL;
+	}
+
+	CUIButtonSizer(CButton* b) {
+		SetButton(b);
+	}
+
+	void SetButton(CButton* b) {
 		m_button = b;
+	}
+
+	void GetIdealSize(CButton* b, int& dxOut, int& dyOut)
+	{
+		m_button = b;
+		GetIdealSize(dxOut, dyOut);
 	}
 
 	virtual void GetIdealSize(int& dxOut, int& dyOut)
 	{
-		CDC dc = m_button.GetDC();
-		TCHAR *txt = MyGetWindowText(m_button);
+		CDC dc = m_button->GetDC();
+		TCHAR *txt = MyGetWindowText(*m_button);
 		if (!txt)
 			txt = tstrdup(_T(" "));
 		int slen = tstrlen(txt);

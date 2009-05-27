@@ -53,9 +53,11 @@ static bool g_showDebug = false;
 #define TOP_BAR_TXT _T("OpenDNS Updater")
 
 enum {
-	IDC_BUTTON_SEND_UPDATES = 3000
-	, IDC_LINK_ABOUT
-	, IDC_EDIT_STATUS
+	IDC_BUTTON_SEND_UPDATES = 3000,
+	IDC_BUTTON_CHANGE_ACCOUNT,
+	IDC_BUTTON_CONFIGURE_NETWORK,
+	IDC_LINK_ABOUT,
+	IDC_EDIT_STATUS,
 };
 
 // TODO: ensure those are unique by gathering them in a common file
@@ -80,13 +82,22 @@ public:
 	UIState			m_uiState;
 	CFont			m_defaultFont;
 	CFont			m_defaultGuiFont;
+	CFont			m_dividerTextFont;
 	CFont			m_statusEditFont;
 	CFont			m_topBarFont;
 
 	CRect			m_topBarRect;
+	CRect			m_txtAccountRect;
+	CRect			m_txtNetworkRect;
+	CRect			m_txtIpAddressRect;
+	CRect			m_txtStatusRect;
+	CRect			m_txtUpdateRect;
 
 	CLinkCtrl		m_linkAbout;
 	CButton			m_buttonSendIpUpdates;
+	CButton			m_buttonChangeAccount;
+	CButton			m_buttonChangeConfigureNetwork;
+	CButton			m_buttonUpdate;
 
 	RtfTextInfo		m_rti;
 
@@ -102,7 +113,8 @@ public:
 	TCHAR *			m_defaultFontName;
 
 	//static const COLORREF winBgColor = RGB(0xf9, 0xf9, 0xf9);
-	static const COLORREF winBgColor = RGB(0xd6, 0xdf, 0xf7);
+	//static const COLORREF winBgColor = RGB(0xd6, 0xdf, 0xf7);
+	static const COLORREF winBgColor = RGB(0xff, 0xff, 0xff);
 	static const COLORREF colWhite	 = RGB(0xff,0xff,0xff);
 	static const COLORREF colBlack	 = RGB(0x00, 0x00, 0x00);
 	static const COLORREF colRed	 = RGB(0xff, 0x00, 0x00);
@@ -112,6 +124,11 @@ public:
 	static const int TOP_BAR_DY = 32;
 	static const int LEFT_MARGIN = 8;
 	static const int RIGHT_MARGIN = LEFT_MARGIN;
+	static const int DIVIDER_TEXT_LEFT_MARGIN = 6;
+	static const int DIVIDER_TEXT_RIGHT_MARGIN = 6;
+	static const int DIVIDER_TEXT_TOP_MARGIN = 4;
+	static const int DIVIDER_TEXT_BOTTOM_MARGIN = 4;
+	static const int Y_SPACING = 4;
 
 	IP4_ADDRESS			m_ipFromDns;
 	CString				m_ipFromDnsStr;
@@ -166,6 +183,8 @@ public:
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
 	void BuildStatusEditRtf(RtfTextInfo& ti);
 	void UpdateStatusEdit(bool doLayout=true);
+	TCHAR *LastUpdateTxt();
+	TCHAR *IpAddress();
 	void SetRtfLinks(RtfTextInfo *rti);
 	LRESULT OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/);
 	void OnGetMinMaxInfo(LPMINMAXINFO lpMMI);
@@ -175,7 +194,9 @@ public:
 	LRESULT OnLinkStatusEdit(LPNMHDR pnmh);
 	void ChangeAccount();
 	LRESULT OnLinkAbout(LPNMHDR /*pnmh*/);
+	void DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect);
 	void OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
+	int SizeDividerLineText(TCHAR *txt, int y, int clientDx, CRect& rectOut);
 	void DoLayout();
 	LRESULT OnLayout(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
 	LRESULT OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lParam*/);

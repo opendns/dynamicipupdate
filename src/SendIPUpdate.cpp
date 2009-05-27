@@ -40,6 +40,8 @@ char* SendIpUpdate()
 
 IpUpdateResult IpUpdateResultFromString(const char *s)
 {
+	if (StrStartsWithI(s, "The service is not available"))
+		return IpUpdateNotAvailable;
 	if (StrStartsWithI(s, "good"))
 		return IpUpdateOk;
 	if (StrStartsWithI(s, "!yours"))
