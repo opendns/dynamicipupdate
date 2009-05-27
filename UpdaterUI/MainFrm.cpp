@@ -93,7 +93,7 @@ CMainFrame::CMainFrame()
 	m_ipUpdateResult = IpUpdateOk;
 	m_simulatedError = SE_NO_ERROR;
 	m_statusMsgEditRequestedDy = 0;
-	m_defaultFontName = NULL;
+	m_editFontName = NULL;
 	m_minWinDx = 320;
 	// this is absolute minimum height of the window's client area
 	m_minWinDy = 200;
@@ -106,7 +106,7 @@ CMainFrame::CMainFrame()
 CMainFrame::~CMainFrame()
 {
 	free(m_ipFromHttp);
-	free(m_defaultFontName);
+	free(m_editFontName);
 	DeleteObject(m_winBgColorBrush);
 }
 
@@ -311,7 +311,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	int minDx = 80;
 	int dx;
 
-	ti.Init(m_defaultFontName, EDIT_CTRL_FONT_SIZE);
+	ti.Init(m_editFontName, EDIT_CTRL_FONT_SIZE);
 	ti.StartBoldStyle();
 	if (IsLoggedIn()) {
 		s = "Logged in as ";
@@ -946,12 +946,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 #endif
 
 	CLogFont lf(m_defaultFont);
-	m_defaultFontName = tstrdup(lf.lfFaceName);
-	//m_defaultFontName = tstrdup(_T("Tahoma"));
-	//m_defaultFontName = tstrdup(_T("Times New Roman"));
-	//m_defaultFontName = tstrdup(_T("Arial"));
-	//m_defaultFontName = tstrdup(_T("Trebuchet MS"));
-	//m_defaultFontName = tstrdup(_T("Fixedsys"));
+	m_editFontName = tstrdup(lf.lfFaceName);
+	//m_editFontName = tstrdup(_T("Tahoma"));
+	//m_editFontName = tstrdup(_T("Times New Roman"));
+	//m_editFontName = tstrdup(_T("Arial"));
+	//m_editFontName = tstrdup(_T("Trebuchet MS"));
+	//m_editFontName = tstrdup(_T("Fixedsys"));
 
 	m_topBarFont = m_defaultFont;
 

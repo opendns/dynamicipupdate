@@ -105,7 +105,7 @@ public:
 
 	int				m_minutesSinceLastUpdate;
 
-	TCHAR *			m_defaultFontName;
+	TCHAR *			m_editFontName;
 
 	//static const COLORREF winBgColor = RGB(0xf9, 0xf9, 0xf9);
 	static const COLORREF winBgColor = RGB(0xd6, 0xdf, 0xf7);

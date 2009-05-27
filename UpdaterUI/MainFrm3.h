@@ -5,7 +5,7 @@
 #ifndef MAIN_FRM2_H__
 #define MAIN_FRM2_H__
 
-#if MAIN_FRM == 2
+#if MAIN_FRM == 3
 
 #include "DnsQuery.h"
 #include "UpdaterThread.h"
@@ -89,6 +89,7 @@ public:
 	CFont			m_statusEditFont;
 	CFont			m_topBarFont;
 	CFont			m_buttonsFont;
+	CFont			m_textFont;
 
 	CRect			m_topBarRect;
 	CRect			m_txtAccountRect;
@@ -118,12 +119,13 @@ public:
 
 	//static const COLORREF winBgColor = RGB(0xf9, 0xf9, 0xf9);
 	//static const COLORREF winBgColor = RGB(0xd6, 0xdf, 0xf7);
-	static const COLORREF winBgColor = RGB(0xff, 0xff, 0xff);
+	//static const COLORREF winBgColor = RGB(0xff, 0xff, 0xff);
 	static const COLORREF colWhite	 = RGB(0xff,0xff,0xff);
 	static const COLORREF colBlack	 = RGB(0x00, 0x00, 0x00);
 	static const COLORREF colRed	 = RGB(0xff, 0x00, 0x00);
 
 	HBRUSH				m_winBgColorBrush;
+	COLORREF			winBgColor;
 
 	static const int TOP_BAR_DY = 32;
 	static const int LEFT_MARGIN = 8;

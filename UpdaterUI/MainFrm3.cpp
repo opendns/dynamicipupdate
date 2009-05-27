@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 
-#if MAIN_FRM == 2
-#include "MainFrm2.h"
+#if MAIN_FRM == 3
+#include "MainFrm3.h"
 
 #define TXT_DIV_ACCOUNT _T("OpenDNS account")
 #define TXT_DIV_NETWORK_TO_UPDATE _T("Network to update")
@@ -122,6 +122,8 @@ CMainFrame::CMainFrame()
 	m_minStatusEditDx = 320 - 16;
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
+	winBgColor = ::GetSysColor(COLOR_APPWORKSPACE);
+	winBgColor = RGB(0xef, 0xeb, 0xde);
 	m_winBgColorBrush = ::CreateSolidBrush(winBgColor);
 }
 
@@ -254,19 +256,41 @@ bool CMainFrame::IsStatic(HWND /*hwnd*/)
 	return false;
 }
 
+static void DrawEtchedLine(CDCHandle *dc, int y, int x1, int x2, int x3, int x4)
+{
+	//COLORREF colTop    = RGB(0x84, 0x82, 0x84);
+	//COLORREF colBottom = RGB(0xff, 0xff, 0xff);
+
+	RECT r = {x1, y, x2, y+1};
+	dc->DrawEdge(&r, EDGE_ETCHED, BF_TOP);
+
+	r.left = x3;
+	r.right = x4;
+	dc->DrawEdge(&r, EDGE_ETCHED, BF_TOP);
+}
+
 void CMainFrame::DrawDividerLine(CDCHandle dc, const TCHAR *txt, CRect& rect)
 {
 	CRect      rc;
 	GetClientRect(rc);
 
-	dc.FillSolidRect(rect, colBlack);
+	//dc.FillSolidRect(rect, colBlack);
 
 	HFONT prevFont = dc.SelectFont(m_dividerTextFont);
 	dc.SetBkMode(TRANSPARENT);
-	dc.SetTextColor(colWhite);
-	int x = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN;
+	dc.SetTextColor(colBlack);
+	int x = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN + 12;
 	int y = rect.top + DIVIDER_TEXT_TOP_MARGIN;
 	dc.TextOut(x, y, txt);
+
+	SIZE textSize;
+	dc.GetTextExtent(txt, -1, &textSize);
+	int lineY = rect.top + RectDy(rect) / 2;
+	int x1 = LEFT_MARGIN;
+	int x2 = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN + 10;
+	int x3 = x2 + 4 + textSize.cx + 2;
+	int x4 = rc.right - RIGHT_MARGIN;
+	DrawEtchedLine(&dc, lineY, x1, x2, x3 ,x4);
 	dc.SelectFont(prevFont);
 }
 
@@ -315,7 +339,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		DrawDividerLine(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
 		//HFONT prevFont = dc.SelectFont(m_dividerTextFont);
-		HFONT prevFont = dc.SelectFont(m_defaultGuiFont);
+		HFONT prevFont = dc.SelectFont(m_textFont);
 		dc.SetBkMode(TRANSPARENT);
 		dc.SetTextColor(colBlack);
 		x = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN;
@@ -1232,19 +1256,21 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	HDC dc = GetWindowDC();
 	CLogFont logFontDefault(AtlGetDefaultGuiFont());
 	//_tcscpy_s(logFontDefault.lfFaceName, dimof(logFontDefault.lfFaceName), "Tahoma");
+	//_tcscpy_s(logFontDefault.lfFaceName, dimof(logFontDefault.lfFaceName), "Comic Sans MS");
 	logFontDefault.SetBold();
 	logFontDefault.SetHeight(DEFAULT_FONT_SIZE, dc);
 	m_defaultFont.Attach(logFontDefault.CreateFontIndirect());
 
 	CLogFont logFontEditFont(AtlGetDefaultGuiFont());
+	//_tcscpy_s(logFontEditFont.lfFaceName, dimof(logFontEditFont.lfFaceName), "Comic Sans MS");
 	logFontEditFont.SetBold();
 	logFontEditFont.SetHeight(EDIT_CTRL_FONT_SIZE, dc);
 	m_statusEditFont.Attach(logFontEditFont.CreateFontIndirect());
+	m_editFontName = tstrdup(logFontEditFont.lfFaceName);
 	ReleaseDC(dc);
 #endif
 
 	CLogFont lf(m_defaultFont);
-	m_editFontName = tstrdup(lf.lfFaceName);
 	//m_editFontName = tstrdup(_T("Tahoma"));
 	//m_editFontName = tstrdup(_T("Times New Roman"));
 	//m_editFontName = tstrdup(_T("Arial"));
@@ -1258,12 +1284,21 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 
 	m_defaultGuiFont = AtlGetDefaultGuiFont();
 
-	m_buttonsFont = AtlGetDefaultGuiFont();
+	CLogFont logFontButtons(AtlGetDefaultGuiFont());
+	//_tcscpy_s(logFontButtons.lfFaceName, dimof(logFontButtons.lfFaceName), "Comic Sans MS");
+	//logFontButtons.SetBold();
+	m_buttonsFont.Attach(logFontButtons.CreateFontIndirect());
 
 	CLogFont logFontDivider(AtlGetDefaultGuiFont());
-	//_tcscpy_s(logFontDefault.lfFaceName, dimof(logFontDefault.lfFaceName), "Tahoma");
+	//_tcscpy_s(logFontDivider.lfFaceName, dimof(logFontDivider.lfFaceName), "Comic Sans MS");
+	//logFontDivider.SetHeight(DEFAULT_FONT_SIZE, dc);
 	logFontDivider.SetBold();
 	m_dividerTextFont.Attach(logFontDivider.CreateFontIndirect());
+
+	CLogFont logFontText(AtlGetDefaultGuiFont());
+	//_tcscpy_s(logFontText.lfFaceName, dimof(logFontText.lfFaceName), "Comic Sans MS");
+	//logFontText.SetBold();
+	m_textFont.Attach(logFontText.CreateFontIndirect());
 
 	// TODO: tried using LWS_TRANSPARENT and/or WS_EX_TRANSPARENT but they don't
 	// seem to work as expected (i.e. create transparent background for the link
@@ -1293,7 +1328,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_buttonUpdate.Create(m_hWnd, r, _T("Update now"),  WS_CHILD | WS_VISIBLE);
 	// TODO: long text here will not size the window
 	//m_buttonUpdate.Create(m_hWnd, r, _T("Update now because this is a long text"),  WS_CHILD | WS_VISIBLE);
-	m_buttonUpdate.SetFont(m_defaultGuiFont);
+	m_buttonUpdate.SetFont(m_buttonsFont);
 	m_buttonUpdate.SetDlgCtrlID(IDC_BUTTON_SEND_IP_UPDATE);
 	//m_buttonChangeAccount.ShowWindow(SW_HIDE);
 
