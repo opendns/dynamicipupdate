@@ -123,6 +123,7 @@ CMainFrame::CMainFrame()
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
 	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
+	m_updaterThread = NULL;
 }
 
 CMainFrame::~CMainFrame()
@@ -806,7 +807,7 @@ void CMainFrame::ChangeAccount()
 		// nothing has changed
 		return;
 	}
-	StartDownloadNetworks(g_pref_token, SupressAll );
+	StartDownloadNetworks(g_pref_token, SupressAll);
 	UpdateStatusEdit();
 }
 
@@ -889,15 +890,23 @@ void CMainFrame::DoLayout()
 	if (IsLoggedIn()) {
 		m_buttonChangeAccount.SetWindowText(_T("Change account"));
 		m_buttonChangeConfigureNetwork.ShowWindow(SW_SHOW);
+		m_buttonSendIpUpdates.ShowWindow(SW_SHOW);
 	} else {
 		m_buttonChangeAccount.SetWindowText(_T("Log in"));
 		m_buttonChangeConfigureNetwork.ShowWindow(SW_HIDE);
+		m_buttonSendIpUpdates.ShowWindow(SW_HIDE);
 	}
 
 	if (m_showStatusMsgEdit)
 		m_statusMsgEdit.ShowWindow(SW_SHOW);
 	else
 		m_statusMsgEdit.ShowWindow(SW_HIDE);
+
+	BOOL sendUpdates = GetPrefValBool(g_pref_send_updates);
+	if (sendUpdates)
+		m_buttonUpdate.EnableWindow(TRUE);
+	else
+		m_buttonUpdate.EnableWindow(FALSE);
 
 	if (NoNetworksConfigured())
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Refresh network list"));
@@ -1444,12 +1453,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 		dlg.DoModal();
 	}
 
+	m_updaterThread = new UpdaterThread(this);
+	if (strempty(g_pref_hostname))
+		ChangeNetwork(SupressAll);
+
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
 	ATLASSERT(pLoop != NULL);
 	pLoop->AddMessageFilter(this);
 	pLoop->AddIdleHandler(this);
 
-	m_updaterThread = new UpdaterThread(this);
 	m_updaterThread->ForceSendIpUpdate();
 	m_updaterThread->ForceSoftwareUpdateCheck();
 	return 0;
