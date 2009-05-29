@@ -353,7 +353,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
 		DrawDivider(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
 		DrawDivider(dc2, TXT_DIV_STATUS, m_txtStatusRect);
-		if (IsLoggedIn() && !NoNetworksConfigured())
+		if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured())
 			DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
 		HFONT prevFont = dc.SelectFont(m_textFont);
@@ -376,6 +376,8 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			y = m_txtNetworkRect.bottom + DIVIDER_Y_SPACING + 6;
 			if (NoNetworksConfigured()) {
 				DrawErrorText(&dc2, x, y, _T("No networks"));
+			} else if (NetworkNotSelected()) {
+				DrawErrorText(&dc2, x, y, _T("Network not selected"));
 			} else {
 				txt = GetNetworkName();
 				dc.TextOut(x, y, txt);
@@ -397,7 +399,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			DrawErrorText(&dc2, x, y, _T("No"));
 
 		// Draw last updated time (e.g. "5 minutes ago")
-		if (IsLoggedIn() && !NoNetworksConfigured()) {
+		if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured()) {
 			y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
 			BOOL sendUpdates = GetPrefValBool(g_pref_send_updates);
 			if (sendUpdates) {
@@ -538,6 +540,15 @@ bool CMainFrame::NoInternetConnectivity()
 	return false;
 }
 
+bool CMainFrame::NetworkNotSelected()
+{
+	if (streq(UNS_NO_NETWORK_SELECTED, g_pref_user_networks_state))
+		return true;
+	if (SE_NO_NETWORK_SELECTED == m_simulatedError)
+		return true;
+	return false;
+}
+
 void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 {
 	CString s;
@@ -649,13 +660,16 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 			ti.AddLink("choose a network", LINK_SELECT_NETWORK);
 			ti.AddPara();
 			ti.AddPara();
-		} else if (streq(UNS_NO_NETWORK_SELECTED, g_pref_user_networks_state) || (SE_NO_NETWORK_SELECTED == m_simulatedError)) {
+		}
+#if 0 // TODO: remove this
+		else if (NetworkNotSelected()) {
 			m_showStatusMsgEdit = true;
 			ti.AddTxt("You need to select one of your networks for IP updates. ");
 			ti.AddLink("Select network.", LINK_SELECT_NETWORK);
 			ti.AddPara();
 			ti.AddPara();
 		}
+#endif
 	}
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
@@ -919,7 +933,12 @@ void CMainFrame::DoLayout()
 	else
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Change network"));
 
-	if (IsLoggedIn() && !NoNetworksConfigured())
+	if (NetworkNotSelected())
+		m_buttonChangeConfigureNetwork.SetWindowText(_T("Select network"));
+	else
+		m_buttonChangeConfigureNetwork.SetWindowText(_T("Change network"));
+
+	if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured())
 		m_buttonUpdate.ShowWindow(SW_SHOW);
 	else
 		m_buttonUpdate.ShowWindow(SW_HIDE);
@@ -1034,7 +1053,7 @@ void CMainFrame::DoLayout()
 	y += m_btnDy;
 
 	// position "Update" divider line
-	if (IsLoggedIn() && !NoNetworksConfigured()) {
+	if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured()) {
 		y += DIVIDER_Y_SPACING;
 		dxLine = SizeDividerLineText(TXT_DIV_UPDATE, y, clientDx, m_txtUpdateRect);
 		if (dxLine > minDx)

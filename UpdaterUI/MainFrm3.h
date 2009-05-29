@@ -230,10 +230,12 @@ public:
 	bool IsLink(HWND hwnd);
 	bool IsStatic(HWND /*hwnd*/);
 	bool IsCheckBoxButton(HWND hwnd);
+
 	bool IsUsingOpenDns();
 	bool NoNetworksConfigured();
 	bool IsLoggedIn();
 	bool NoInternetConnectivity();
+	bool NetworkNotSelected();
 
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
 	void BuildStatusEditRtf(RtfTextInfo& ti);
