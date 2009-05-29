@@ -228,6 +228,9 @@ public:
 	bool IsStatic(HWND /*hwnd*/);
 	bool IsCheckBoxButton(HWND hwnd);
 	bool IsUsingOpenDns();
+	bool HasNetworks();
+	bool IsLoggedIn();
+	bool NoInternetConnectivity();
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
 	void BuildStatusEditRtf(RtfTextInfo& ti);
 	void UpdateStatusEdit(bool doLayout=true);
@@ -242,6 +245,7 @@ public:
 	LRESULT OnLinkStatusEdit(LPNMHDR pnmh);
 	void ChangeAccount();
 	LRESULT OnLinkAbout(LPNMHDR /*pnmh*/);
+	void DrawErrorText(CDCHandle *dc, int x, int y, const TCHAR *txt);
 	void DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect);
 	void OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
 	void OnChangeAccount(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
@@ -257,7 +261,6 @@ public:
 	void StartDownloadNetworks(char *token, int supressFlags = 0);
 	LRESULT OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/);
 	NetworkInfo *SelectNetwork(NetworkInfo *ni);
-	bool IsLoggedIn();
 	bool GetLastIpUpdateTime();
 	bool DnsVsHttpIpMismatch();
 	void SizeButtons(int& dxOut, int& dyOut);

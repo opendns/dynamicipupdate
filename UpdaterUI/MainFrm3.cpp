@@ -299,6 +299,15 @@ void CMainFrame::DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect)
 	dc.SelectFont(prevFont);
 }
 
+void CMainFrame::DrawErrorText(CDCHandle *dc, int x, int y, const TCHAR *txt)
+{
+	HFONT fontPrev = dc->SelectFont(m_dividerTextFont); // reusing, it's about being bold
+	COLORREF colPrev = dc->SetTextColor(colRed2);
+	dc->TextOutA(x, y, txt);
+	dc->SetTextColor(colPrev);
+	dc->SelectFont(fontPrev);
+}
+
 BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 {
 	CRect		rc;
@@ -335,7 +344,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		// paint solid background everywhere except in top bar
 		//rc.MoveToY(TOP_BAR_DY);
 		rc.MoveToY(0);
-		dc.FillSolidRect(rc, colWinBg);
+		dc2.FillSolidRect(rc, colWinBg);
 
 		DrawDivider(dc2, TXT_DIV_ACCOUNT, m_txtAccountRect);
 		DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
@@ -343,7 +352,6 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		DrawDivider(dc2, TXT_DIV_STATUS, m_txtStatusRect);
 		DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
-		//HFONT prevFont = dc.SelectFont(m_dividerTextFont);
 		HFONT prevFont = dc.SelectFont(m_textFont);
 		dc.SetBkMode(TRANSPARENT);
 		dc.SetTextColor(colBlack);
@@ -351,9 +359,13 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 		// Draw account
 		y = m_txtAccountRect.bottom + DIVIDER_Y_SPACING + 6;
-		txt = AccountName();
-		dc.TextOut(x, y, txt);
-		free(txt);
+		if (IsLoggedIn()) {
+			txt = AccountName();
+			dc.TextOut(x, y, txt);
+			free(txt);
+		} else {
+			DrawErrorText(&dc2, x, y, _T("Not logged in"));
+		}
 
 		// Draw network name
 		y = m_txtNetworkRect.bottom + DIVIDER_Y_SPACING + 6;
@@ -369,15 +381,11 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 		// Draw "Yes"/"No" (for 'Using OpenDNS?' part)
 		y = m_txtStatusRect.bottom + DIVIDER_Y_SPACING + 6;
-		if (IsUsingOpenDns()) {
+		if (IsUsingOpenDns())
 			dc.TextOutA(x, y, _T("Yes"));
-		} else {
-			HFONT fontPrev2 = dc.SelectFont(m_dividerTextFont); // reusing, it's about being bold
-			COLORREF colPrev = dc.SetTextColor(colRed2);
-			dc.TextOutA(x, y, _T("No"));
-			dc.SetTextColor(colPrev);
-			dc.SelectFont(fontPrev2);
-		}
+		else
+			DrawErrorText(&dc2, x, y, _T("No"));
+
 		// Draw last updated time (e.g. "5 minutes ago")
 		y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = LastUpdateTxt();
@@ -435,15 +443,6 @@ HBRUSH CMainFrame::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 	return (HBRUSH)::GetStockObject(NULL_BRUSH);
 }
 
-bool CMainFrame::IsLoggedIn()
-{
-	if (SE_NOT_LOGGED_IN == m_simulatedError)
-		return false;
-	if (strempty(g_pref_user_name))
-		return false;
-	return true;
-}
-
 // returns true if we get valid ip address from both
 // http query and dns query and they are not the same
 // (it does happen)
@@ -482,9 +481,39 @@ TCHAR* CMainFrame::IpAddress()
 	return tstrdup(res);
 }
 
+bool CMainFrame::IsLoggedIn()
+{
+	if (SE_NOT_LOGGED_IN == m_simulatedError)
+		return false;
+	if (strempty(g_pref_user_name))
+		return false;
+	return true;
+}
+
 bool CMainFrame::IsUsingOpenDns()
 {
-	if (RealIpAddress(m_ipFromDns))
+	if (IP_NOT_USING_OPENDNS == m_ipFromDns)
+		return false;
+	if (SE_NOT_USING_OPENDNS == m_simulatedError)
+		return false;
+	return true;
+}
+
+// return true if the user has 
+bool CMainFrame::HasNetworks()
+{
+	if (streq(UNS_NO_NETWORKS, g_pref_user_networks_state))
+		return false;
+	if (SE_NO_NETWORKS_CONFIGURED == m_simulatedError)
+		return false;
+	return true;
+}
+
+bool CMainFrame::NoInternetConnectivity()
+{
+	if (IP_DNS_RESOLVE_ERROR == m_ipFromDns)
+		return true;
+	if (SE_NO_INTERNET == m_simulatedError)
 		return true;
 	return false;
 }
@@ -495,13 +524,11 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	CUITextSizer sizer(*this);
 	sizer.SetFont(m_statusEditFont);
 	int minDx = 80;
-	int dx;
-
-	IP4_ADDRESS myNewIp = m_ipFromDns;
 
 	ti.Init(m_editFontName, EDIT_FONT_SIZE);
 
 #if 0
+	int dx;
 	ti.StartBoldStyle();
 	if (IsLoggedIn()) {
 		s = "Logged in as ";
@@ -537,8 +564,8 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		}
 	}
 
-	if (RealIpAddress(myNewIp)) {
-		IP4_ADDRESS a = myNewIp;
+	if (RealIpAddress(m_ipFromDns)) {
+		IP4_ADDRESS a = m_ipFromDns;
 		s.Format(_T("Your IP address is %u.%u.%u.%u"), (a >> 24) & 255, (a >> 16) & 255, (a >> 8) & 255, a & 255);
 		ti.AddTxt(s);
 		ti.AddPara();
@@ -563,34 +590,22 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 #endif
 
 	// show error scenarios at the end, in bold red
-	ti.StartBoldStyle();
 	ti.StartFgCol(RtfTextInfo::ColRed);
+	ti.StartBoldStyle();
 
-	if (!IsLoggedIn()) {
-		s = "You're not logged to your OpenDNS account. ";
-		ti.AddTxt(s);
-		ti.AddLink("Log in.", LINK_CHANGE_ACCOUNT);
-		s += "Log in. ";
-		sizer.SetText(s);
-		dx = sizer.GetIdealSizeDx();
-		if (dx > minDx)
-			minDx = dx;
-		ti.AddPara();
-	}
-
-	if ((IP_NOT_USING_OPENDNS == myNewIp) || (SE_NOT_USING_OPENDNS == m_simulatedError)) {
+	if (!IsUsingOpenDns()) {
 		ti.AddTxt("You're not using OpenDNS service. Learn how to ");
 		ti.AddLink("setup OpenDNS.", LINK_SETUP_OPENDNS);
 		ti.AddPara();
 		ti.AddPara();
-	} else if ((IP_DNS_RESOLVE_ERROR == myNewIp) || (SE_NO_INTERNET == m_simulatedError)) {
+	} else if (NoInternetConnectivity()) {
 		ti.AddTxt("Looks like there's no internet connectivity.");
 		ti.AddPara();
 		ti.AddPara();
 	}
 
-	if (!strempty(g_pref_user_name)) {
-		if (streq(UNS_NO_NETWORKS, g_pref_user_networks_state) || (SE_NO_NETWORKS_CONFIGURED == m_simulatedError)) {
+	if (IsLoggedIn()) {
+		if (!HasNetworks()) {
 #if 1
 			ti.AddTxt("You don't have any networks configured. ");
 			ti.AddLink("Configure a network", LINK_CONFIGURE_NETWORKS);
@@ -639,8 +654,8 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddPara();
 	}
 
-	ti.EndCol();
 	ti.EndStyle();
+	ti.EndCol();
 
 	if (g_showDebug) {
 		if (UsingDevServers()) {
@@ -837,13 +852,17 @@ void CMainFrame::DoLayout()
 	SIZE s;
 	TCHAR *txt;
 
-	// place exit button on the lower right corner
 	BOOL ok;
 	RECT clientRect;
 	ok = GetClientRect(&clientRect);
 	if (!ok) return;
 	int clientDx = RectDx(clientRect);
 	int clientDy = RectDy(clientRect);
+
+	if (!IsLoggedIn())
+		m_buttonChangeAccount.SetWindowText(_T("Log in"));
+	else
+		m_buttonChangeAccount.SetWindowText(_T("Change account"));
 
 	SizeButtons(btnDx, m_btnDy);
 
