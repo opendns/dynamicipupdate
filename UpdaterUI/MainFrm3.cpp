@@ -347,10 +347,12 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		dc2.FillSolidRect(rc, colWinBg);
 
 		DrawDivider(dc2, TXT_DIV_ACCOUNT, m_txtAccountRect);
-		DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
+		if (IsLoggedIn())
+			DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
 		DrawDivider(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
 		DrawDivider(dc2, TXT_DIV_STATUS, m_txtStatusRect);
-		DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
+		if (IsLoggedIn())
+			DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
 		HFONT prevFont = dc.SelectFont(m_textFont);
 		dc.SetBkMode(TRANSPARENT);
@@ -367,11 +369,13 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			DrawErrorText(&dc2, x, y, _T("Not logged in"));
 		}
 
-		// Draw network name
-		y = m_txtNetworkRect.bottom + DIVIDER_Y_SPACING + 6;
-		txt = GetNetworkName();
-		dc.TextOut(x, y, txt);
-		free(txt);
+		if (IsLoggedIn()) {
+			// Draw network name
+			y = m_txtNetworkRect.bottom + DIVIDER_Y_SPACING + 6;
+			txt = GetNetworkName();
+			dc.TextOut(x, y, txt);
+			free(txt);
+		}
 
 		// Draw IP address
 		y = m_txtIpAddressRect.bottom + DIVIDER_Y_SPACING + 6;
@@ -386,11 +390,13 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		else
 			DrawErrorText(&dc2, x, y, _T("No"));
 
-		// Draw last updated time (e.g. "5 minutes ago")
-		y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
-		txt = LastUpdateTxt();
-		dc.TextOutA(x, y, txt);
-		free(txt);
+		if (IsLoggedIn()) {
+			// Draw last updated time (e.g. "5 minutes ago")
+			y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
+			txt = LastUpdateTxt();
+			dc.TextOutA(x, y, txt);
+			free(txt);
+		}
 
 		dc.SelectFont(prevFont);
 
@@ -825,19 +831,23 @@ void CMainFrame::SizeButtons(int& dxOut, int& dyOut)
 	textSizer.GetIdealSize(txt, m_buttonsFont, dxMax, dy);
 	free(txt);
 
-	txt = MyGetWindowText(m_buttonChangeConfigureNetwork);
-	textSizer.GetIdealSize(txt, m_buttonsFont, dxTmp, dyTmp);
-	free(txt);
-	assert(dy == dyTmp);
-	if (dxTmp > dxMax)
-		dxMax = dxTmp;
+	if (m_buttonChangeConfigureNetwork.IsWindowVisible()) {
+		txt = MyGetWindowText(m_buttonChangeConfigureNetwork);
+		textSizer.GetIdealSize(txt, m_buttonsFont, dxTmp, dyTmp);
+		free(txt);
+		assert(dy == dyTmp);
+		if (dxTmp > dxMax)
+			dxMax = dxTmp;
+	}
 
-	txt = MyGetWindowText(m_buttonUpdate);
-	textSizer.GetIdealSize(txt, m_buttonsFont, dxTmp, dyTmp);
-	free(txt);
-	assert(dy == dyTmp);
-	if (dxTmp > dxMax)
-		dxMax = dxTmp;
+	if (m_buttonUpdate.IsWindowVisible()) {
+		txt = MyGetWindowText(m_buttonUpdate);
+		textSizer.GetIdealSize(txt, m_buttonsFont, dxTmp, dyTmp);
+		free(txt);
+		assert(dy == dyTmp);
+		if (dxTmp > dxMax)
+			dxMax = dxTmp;
+	}
 
 	dxOut = dxMax + 32;
 	dyOut = dy + 12;
@@ -859,10 +869,15 @@ void CMainFrame::DoLayout()
 	int clientDx = RectDx(clientRect);
 	int clientDy = RectDy(clientRect);
 
-	if (!IsLoggedIn())
-		m_buttonChangeAccount.SetWindowText(_T("Log in"));
-	else
+	if (IsLoggedIn()) {
 		m_buttonChangeAccount.SetWindowText(_T("Change account"));
+		m_buttonChangeConfigureNetwork.ShowWindow(SW_SHOW);
+		m_buttonUpdate.ShowWindow(SW_SHOW);
+	} else {
+		m_buttonChangeAccount.SetWindowText(_T("Log in"));
+		m_buttonChangeConfigureNetwork.ShowWindow(SW_HIDE);
+		m_buttonUpdate.ShowWindow(SW_HIDE);
+	}
 
 	SizeButtons(btnDx, m_btnDy);
 
@@ -922,24 +937,24 @@ void CMainFrame::DoLayout()
 		minDx = dxLine;
 
 	// position "Network to update" divider line
-	y += DIVIDER_Y_SPACING;
-	dxLine = SizeDividerLineText(TXT_DIV_NETWORK_TO_UPDATE, y, clientDx, m_txtNetworkRect);
-	if (dxLine > minDx)
-		minDx = dxLine;
-	y += m_txtNetworkRect.Height();
+	if (IsLoggedIn()) {
+		y += DIVIDER_Y_SPACING;
+		dxLine = SizeDividerLineText(TXT_DIV_NETWORK_TO_UPDATE, y, clientDx, m_txtNetworkRect);
+		if (dxLine > minDx)
+			minDx = dxLine;
+		y += m_txtNetworkRect.Height();
 
-	// position network name and "Change network"/"Configure network" button
-	y += DIVIDER_Y_SPACING;
-	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	//buttonSizer.GetIdealSize(&m_buttonChangeConfigureNetwork, btnDx, m_btnDy);
-	x = clientDx - RIGHT_MARGIN - btnDx;
-	m_buttonChangeConfigureNetwork.MoveWindow(x, y, btnDx, m_btnDy);
-	dxLine += btnDx;
-	if (dxLine > minDx)
-		minDx = dxLine;
-	y += m_btnDy;
-
-	//m_buttonChangeConfigureNetwork.ShowWindow(SW_HIDE);
+		// position network name and "Change network"/"Configure network" button
+		y += DIVIDER_Y_SPACING;
+		dxLine = LEFT_MARGIN + RIGHT_MARGIN;
+		//buttonSizer.GetIdealSize(&m_buttonChangeConfigureNetwork, btnDx, m_btnDy);
+		x = clientDx - RIGHT_MARGIN - btnDx;
+		m_buttonChangeConfigureNetwork.MoveWindow(x, y, btnDx, m_btnDy);
+		dxLine += btnDx;
+		if (dxLine > minDx)
+			minDx = dxLine;
+		y += m_btnDy;
+	}
 
 	// position "IP address" divider line
 	y += DIVIDER_Y_SPACING;
@@ -976,29 +991,31 @@ void CMainFrame::DoLayout()
 	y += m_btnDy;
 
 	// position "Update" divider line
-	y += DIVIDER_Y_SPACING;
-	dxLine = SizeDividerLineText(TXT_DIV_UPDATE, y, clientDx, m_txtUpdateRect);
-	if (dxLine > minDx)
-		minDx = dxLine;
-	y += m_txtUpdateRect.Height();
+	if (IsLoggedIn()) {
+		y += DIVIDER_Y_SPACING;
+		dxLine = SizeDividerLineText(TXT_DIV_UPDATE, y, clientDx, m_txtUpdateRect);
+		if (dxLine > minDx)
+			minDx = dxLine;
+		y += m_txtUpdateRect.Height();
 
-	// position "Last updated: " text and "Update now" button
-	y += DIVIDER_Y_SPACING;
-	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	//buttonSizer.GetIdealSize(&m_buttonUpdate, btnDx, m_btnDy);
-	x = clientDx - RIGHT_MARGIN - btnDx;
-	m_buttonUpdate.MoveWindow(x, y, btnDx, m_btnDy);
-	y += m_btnDy;
-	dxLine += btnDx;
-	txt = LastUpdateTxt();
-	if (txt) {
-		textSizer.SetFont(m_defaultGuiFont);
-		s = textSizer.GetIdealSize2();
-		dxLine += s.cx + 16;
-		free(txt);
+		// position "Last updated: " text and "Update now" button
+		y += DIVIDER_Y_SPACING;
+		dxLine = LEFT_MARGIN + RIGHT_MARGIN;
+		//buttonSizer.GetIdealSize(&m_buttonUpdate, btnDx, m_btnDy);
+		x = clientDx - RIGHT_MARGIN - btnDx;
+		m_buttonUpdate.MoveWindow(x, y, btnDx, m_btnDy);
+		y += m_btnDy;
+		dxLine += btnDx;
+		txt = LastUpdateTxt();
+		if (txt) {
+			textSizer.SetFont(m_defaultGuiFont);
+			s = textSizer.GetIdealSize2();
+			dxLine += s.cx + 16;
+			free(txt);
+		}
+		if (dxLine > minDx)
+			minDx = dxLine;
 	}
-	if (dxLine > minDx)
-		minDx = dxLine;
 
 	// position status edit box
 	y += DIVIDER_LINE_Y_OFF;
@@ -1008,9 +1025,6 @@ void CMainFrame::DoLayout()
 	y += m_statusMsgEditRequestedDy;
 	y += EDIT_BOX_Y_OFF;
 
-	dxLine = x + s.cx + RIGHT_MARGIN;
-	if (dxLine > minDx)
-		minDx = dxLine;
 	int minDy = y + buttonDy + 8;
 	
 	// resize the window if the current size is smaller than
