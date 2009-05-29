@@ -181,6 +181,7 @@ public:
 	int					m_minWinDx, m_minWinDy;
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
+	bool				m_showStatusMsgEdit;
 
 	BEGIN_MSG_MAP(CMainFrame)
 		MSG_WM_CREATE(OnCreate)

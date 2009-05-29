@@ -400,18 +400,21 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 		dc.SelectFont(prevFont);
 
-		// draw line above edit text box
-		y += (m_btnDy - DIVIDER_Y_SPACING - 6);
-		y += DIVIDER_LINE_Y_OFF;
-		rc.top = y;
-		rc.bottom = y + 1;
-		dc.FillSolidRect(rc, colDivLine);
+		if (m_showStatusMsgEdit) {
+			// draw line above edit text box
+			y += (m_btnDy - DIVIDER_Y_SPACING - 6);
+			y += DIVIDER_LINE_Y_OFF;
+			rc.top = y;
+			rc.bottom = y + 1;
+			dc.FillSolidRect(rc, colDivLine);
 
-		y += m_statusMsgEditRequestedDy;
-		y += EDIT_BOX_Y_OFF;
-		rc.top = y;
-		rc.bottom = y + 1;
-		dc.FillSolidRect(rc, colDivLine);
+			// draw line below edit text box
+			y += m_statusMsgEditRequestedDy;
+			y += EDIT_BOX_Y_OFF;
+			rc.top = y;
+			rc.bottom = y + 1;
+			dc.FillSolidRect(rc, colDivLine);
+		}
 
 #if 0
 		// draw top bar text
@@ -531,12 +534,15 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	sizer.SetFont(m_statusEditFont);
 	int minDx = 80;
 
+	m_showStatusMsgEdit = false;
+
 	ti.Init(m_editFontName, EDIT_FONT_SIZE);
 
 #if 0
 	int dx;
 	ti.StartBoldStyle();
 	if (IsLoggedIn()) {
+		m_showStatusMsgEdit = true;
 		s = "Logged in as ";
 		s += g_pref_user_name;
 		s += ". ";
@@ -552,6 +558,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 
 	if (!strempty(g_pref_user_name)) {
 		if (streq(UNS_OK, g_pref_user_networks_state)) {
+			m_showStatusMsgEdit = true;
 			if (strempty(g_pref_hostname)) {
 				s = "Sending updates for default network. ";
 			} else {
@@ -571,6 +578,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	if (RealIpAddress(m_ipFromDns)) {
+		m_showStatusMsgEdit = true;
 		IP4_ADDRESS a = m_ipFromDns;
 		s.Format(_T("Your IP address is %u.%u.%u.%u"), (a >> 24) & 255, (a >> 16) & 255, (a >> 8) & 255, a & 255);
 		ti.AddTxt(s);
@@ -579,6 +587,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	if (m_minutesSinceLastUpdate >= 0) {
+		m_showStatusMsgEdit = true;
 		ti.AddPara();
 		ti.AddTxt("Last update: ");
 		TCHAR *timeTxt = FormatUpdateTime(m_minutesSinceLastUpdate);
@@ -600,11 +609,13 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	ti.StartBoldStyle();
 
 	if (!IsUsingOpenDns()) {
+		m_showStatusMsgEdit = true;
 		ti.AddTxt("You're not using OpenDNS service. Learn how to ");
 		ti.AddLink("setup OpenDNS.", LINK_SETUP_OPENDNS);
 		ti.AddPara();
 		ti.AddPara();
 	} else if (NoInternetConnectivity()) {
+		m_showStatusMsgEdit = true;
 		ti.AddTxt("Looks like there's no internet connectivity.");
 		ti.AddPara();
 		ti.AddPara();
@@ -612,17 +623,14 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 
 	if (IsLoggedIn()) {
 		if (!HasNetworks()) {
-#if 1
+			m_showStatusMsgEdit = true;
 			ti.AddTxt("You don't have any networks configured. ");
 			ti.AddLink("Configure a network", LINK_CONFIGURE_NETWORKS);
 			ti.AddTxt(" in your OpenDNS account.");
-#else
-			ti.AddTxt("You don't have any networks configured. Configure a network in your OpenDNS account. ");
-			ti.AddLink("Configure a network.", LINK_CONFIGURE_NETWORKS);
-#endif
 			ti.AddPara();
 			ti.AddPara();
 		} else if (streq(UNS_NO_DYNAMIC_IP_NETWORKS, g_pref_user_networks_state) || (SE_NO_DYNAMIC_IP_NETWORKS == m_simulatedError)) {
+			m_showStatusMsgEdit = true;
 			ti.AddTxt("None of your networks is configured for dynamic IP. ");
 			ti.AddLink("Configure a network", LINK_CONFIGURE_NETWORKS);
 			ti.AddTxt(" for dynamic IP in your OpenDNS account and ");
@@ -630,6 +638,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 			ti.AddPara();
 			ti.AddPara();
 		} else if (streq(UNS_NO_NETWORK_SELECTED, g_pref_user_networks_state) || (SE_NO_NETWORK_SELECTED == m_simulatedError)) {
+			m_showStatusMsgEdit = true;
 			ti.AddTxt("You need to select one of your networks for IP updates. ");
 			ti.AddLink("Select network.", LINK_SELECT_NETWORK);
 			ti.AddPara();
@@ -638,12 +647,14 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
+		m_showStatusMsgEdit = true;
 		ti.AddTxt(_T("Your IP address is taken by another user."));
 		ti.AddPara();
 		ti.AddPara();
 	}
 
 	if ((IpUpdateBadAuth == m_ipUpdateResult) || (SE_BAD_AUTH == m_simulatedError)) {
+		m_showStatusMsgEdit = true;
 		ti.AddTxt(_T("Your authorization token is invalid."));
 		ti.AddPara();
 		ti.AddPara();
@@ -651,6 +662,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 
 	bool ipMismatch = DnsVsHttpIpMismatch();
 	if (ipMismatch) {
+		m_showStatusMsgEdit = true;
 		ti.AddTxt(_T("Your OpenDNS filtering settings might not work due to DNS IP address ("));
 		ti.AddTxt(m_ipFromDnsStr);
 		ti.AddTxt(_T(") and HTTP IP address ("));
@@ -664,6 +676,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	ti.EndCol();
 
 	if (g_showDebug) {
+		m_showStatusMsgEdit = true;
 		if (UsingDevServers()) {
 			ti.AddTxt("Using dev api servers ");
 		} else {
@@ -678,12 +691,11 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddLink("Crash me", LINK_CRASH_ME);
 		ti.AddPara();
 	} else {
-#if 0
-	if (UsingDevServers()) {
-		ti.AddTxt("Using dev api servers.");
-		ti.AddPara();
-	}
-#endif
+		if (UsingDevServers()) {
+			m_showStatusMsgEdit = true;
+			ti.AddTxt("Using dev api servers.");
+			ti.AddPara();
+		}
 	}
 
 	ti.End();
@@ -879,6 +891,11 @@ void CMainFrame::DoLayout()
 		m_buttonUpdate.ShowWindow(SW_HIDE);
 	}
 
+	if (m_showStatusMsgEdit)
+		m_statusMsgEdit.ShowWindow(SW_SHOW);
+	else
+		m_statusMsgEdit.ShowWindow(SW_HIDE);
+
 	SizeButtons(btnDx, m_btnDy);
 
 	// position "Send IP updates" check-box in the bottom right corner
@@ -970,7 +987,6 @@ void CMainFrame::DoLayout()
 		textSizer.SetText(txt);
 		textSizer.SetFont(m_dividerTextFont);
 		s = textSizer.GetIdealSize2();
-		//y += s.cy;
 		free(txt);
 	}
 	y += m_btnDy;
@@ -987,7 +1003,6 @@ void CMainFrame::DoLayout()
 	textSizer.SetText(_T("Using OpenDNS: Yes"));
 	textSizer.SetFont(m_defaultGuiFont);
 	s = textSizer.GetIdealSize2();
-	//y += s.cy;
 	y += m_btnDy;
 
 	// position "Update" divider line
@@ -1018,12 +1033,14 @@ void CMainFrame::DoLayout()
 	}
 
 	// position status edit box
-	y += DIVIDER_LINE_Y_OFF;
+	if (m_showStatusMsgEdit) {
+		y += DIVIDER_LINE_Y_OFF;
 
-	y += EDIT_BOX_Y_OFF;
-	m_statusMsgEdit.MoveWindow(EDIT_MARGIN_X, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
-	y += m_statusMsgEditRequestedDy;
-	y += EDIT_BOX_Y_OFF;
+		y += EDIT_BOX_Y_OFF;
+		m_statusMsgEdit.MoveWindow(EDIT_MARGIN_X, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
+		y += m_statusMsgEditRequestedDy;
+		y += EDIT_BOX_Y_OFF;
+	}
 
 	int minDy = y + buttonDy + 8;
 	
