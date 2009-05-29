@@ -170,6 +170,7 @@ public:
 	static const COLORREF colWhite	 = RGB(0xff,0xff,0xff);
 	static const COLORREF colBlack	 = RGB(0x00, 0x00, 0x00);
 	static const COLORREF colRed	 = RGB(0xff, 0x00, 0x00);
+	static const COLORREF colRed2    = RGB(0xf7, 0x0c, 0x08);
 
 	HBRUSH				m_winBgColorBrush;
 
@@ -226,6 +227,7 @@ public:
 	bool IsLink(HWND hwnd);
 	bool IsStatic(HWND /*hwnd*/);
 	bool IsCheckBoxButton(HWND hwnd);
+	bool IsUsingOpenDns();
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
 	void BuildStatusEditRtf(RtfTextInfo& ti);
 	void UpdateStatusEdit(bool doLayout=true);

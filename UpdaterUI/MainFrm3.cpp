@@ -369,8 +369,15 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 		// Draw "Yes"/"No" (for 'Using OpenDNS?' part)
 		y = m_txtStatusRect.bottom + DIVIDER_Y_SPACING + 6;
-		dc.TextOutA(x, y, _T("Yes"));
-
+		if (IsUsingOpenDns()) {
+			dc.TextOutA(x, y, _T("Yes"));
+		} else {
+			HFONT fontPrev2 = dc.SelectFont(m_dividerTextFont); // reusing, it's about being bold
+			COLORREF colPrev = dc.SetTextColor(colRed2);
+			dc.TextOutA(x, y, _T("No"));
+			dc.SetTextColor(colPrev);
+			dc.SelectFont(fontPrev2);
+		}
 		// Draw last updated time (e.g. "5 minutes ago")
 		y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = LastUpdateTxt();
@@ -473,6 +480,13 @@ TCHAR* CMainFrame::IpAddress()
 	s.Format(_T("%u.%u.%u.%u"), (a >> 24) & 255, (a >> 16) & 255, (a >> 8) & 255, a & 255);
 	const TCHAR *res = s;
 	return tstrdup(res);
+}
+
+bool CMainFrame::IsUsingOpenDns()
+{
+	if (RealIpAddress(m_ipFromDns))
+		return true;
+	return false;
 }
 
 void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
