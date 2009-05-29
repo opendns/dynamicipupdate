@@ -39,8 +39,10 @@ enum UIState {
 };
 
 enum {
-	SupressOneNetworkMsgFlag = 0x1,
-	SuppressNoDynamicIpMsgFlag = 0x2
+	SupressOneNetworkMsgFlag   = 0x1,
+	SuppressNoDynamicIpMsgFlag = 0x2,
+	SupressNoNetworksMsgFlag   = 0x4,
+	SupressAll = SupressOneNetworkMsgFlag | SuppressNoDynamicIpMsgFlag | SupressNoNetworksMsgFlag
 };
 
 static bool g_showDebug = false;
@@ -229,9 +231,10 @@ public:
 	bool IsStatic(HWND /*hwnd*/);
 	bool IsCheckBoxButton(HWND hwnd);
 	bool IsUsingOpenDns();
-	bool HasNetworks();
+	bool NoNetworksConfigured();
 	bool IsLoggedIn();
 	bool NoInternetConnectivity();
+
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
 	void BuildStatusEditRtf(RtfTextInfo& ti);
 	void UpdateStatusEdit(bool doLayout=true);

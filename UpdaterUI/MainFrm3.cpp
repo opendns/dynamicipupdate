@@ -351,7 +351,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
 		DrawDivider(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
 		DrawDivider(dc2, TXT_DIV_STATUS, m_txtStatusRect);
-		if (IsLoggedIn())
+		if (IsLoggedIn() && !NoNetworksConfigured())
 			DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
 		HFONT prevFont = dc.SelectFont(m_textFont);
@@ -369,12 +369,16 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			DrawErrorText(&dc2, x, y, _T("Not logged in"));
 		}
 
+		// Draw network name
 		if (IsLoggedIn()) {
-			// Draw network name
 			y = m_txtNetworkRect.bottom + DIVIDER_Y_SPACING + 6;
-			txt = GetNetworkName();
-			dc.TextOut(x, y, txt);
-			free(txt);
+			if (NoNetworksConfigured()) {
+				DrawErrorText(&dc2, x, y, _T("No networks"));
+			} else {
+				txt = GetNetworkName();
+				dc.TextOut(x, y, txt);
+				free(txt);
+			}
 		}
 
 		// Draw IP address
@@ -390,8 +394,8 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		else
 			DrawErrorText(&dc2, x, y, _T("No"));
 
-		if (IsLoggedIn()) {
-			// Draw last updated time (e.g. "5 minutes ago")
+		// Draw last updated time (e.g. "5 minutes ago")
+		if (IsLoggedIn() && !NoNetworksConfigured()) {
 			y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
 			txt = LastUpdateTxt();
 			dc.TextOutA(x, y, txt);
@@ -509,13 +513,13 @@ bool CMainFrame::IsUsingOpenDns()
 }
 
 // return true if the user has 
-bool CMainFrame::HasNetworks()
+bool CMainFrame::NoNetworksConfigured()
 {
 	if (streq(UNS_NO_NETWORKS, g_pref_user_networks_state))
-		return false;
+		return true;
 	if (SE_NO_NETWORKS_CONFIGURED == m_simulatedError)
-		return false;
-	return true;
+		return true;
+	return false;
 }
 
 bool CMainFrame::NoInternetConnectivity()
@@ -622,11 +626,12 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	if (IsLoggedIn()) {
-		if (!HasNetworks()) {
+		if (NoNetworksConfigured()) {
 			m_showStatusMsgEdit = true;
-			ti.AddTxt("You don't have any networks configured. ");
-			ti.AddLink("Configure a network", LINK_CONFIGURE_NETWORKS);
-			ti.AddTxt(" in your OpenDNS account.");
+			ti.AddTxt("You don't have any networks. ");
+			ti.AddLink("Add a network", LINK_CONFIGURE_NETWORKS);
+			ti.AddTxt(" in your OpenDNS account and ");
+			ti.AddLink("refresh network list.", LINK_SELECT_NETWORK);
 			ti.AddPara();
 			ti.AddPara();
 		} else if (streq(UNS_NO_DYNAMIC_IP_NETWORKS, g_pref_user_networks_state) || (SE_NO_DYNAMIC_IP_NETWORKS == m_simulatedError)) {
@@ -801,7 +806,7 @@ void CMainFrame::ChangeAccount()
 		// nothing has changed
 		return;
 	}
-	StartDownloadNetworks(g_pref_token, SupressOneNetworkMsgFlag | SuppressNoDynamicIpMsgFlag);
+	StartDownloadNetworks(g_pref_token, SupressAll );
 	UpdateStatusEdit();
 }
 
@@ -884,17 +889,25 @@ void CMainFrame::DoLayout()
 	if (IsLoggedIn()) {
 		m_buttonChangeAccount.SetWindowText(_T("Change account"));
 		m_buttonChangeConfigureNetwork.ShowWindow(SW_SHOW);
-		m_buttonUpdate.ShowWindow(SW_SHOW);
 	} else {
 		m_buttonChangeAccount.SetWindowText(_T("Log in"));
 		m_buttonChangeConfigureNetwork.ShowWindow(SW_HIDE);
-		m_buttonUpdate.ShowWindow(SW_HIDE);
 	}
 
 	if (m_showStatusMsgEdit)
 		m_statusMsgEdit.ShowWindow(SW_SHOW);
 	else
 		m_statusMsgEdit.ShowWindow(SW_HIDE);
+
+	if (NoNetworksConfigured())
+		m_buttonChangeConfigureNetwork.SetWindowText(_T("Refresh network list"));
+	else
+		m_buttonChangeConfigureNetwork.SetWindowText(_T("Change network"));
+
+	if (IsLoggedIn() && !NoNetworksConfigured())
+		m_buttonUpdate.ShowWindow(SW_SHOW);
+	else
+		m_buttonUpdate.ShowWindow(SW_HIDE);
 
 	SizeButtons(btnDx, m_btnDy);
 
@@ -1006,7 +1019,7 @@ void CMainFrame::DoLayout()
 	y += m_btnDy;
 
 	// position "Update" divider line
-	if (IsLoggedIn()) {
+	if (IsLoggedIn() && !NoNetworksConfigured()) {
 		y += DIVIDER_Y_SPACING;
 		dxLine = SizeDividerLineText(TXT_DIV_UPDATE, y, clientDx, m_txtUpdateRect);
 		if (dxLine > minDx)
@@ -1035,7 +1048,6 @@ void CMainFrame::DoLayout()
 	// position status edit box
 	if (m_showStatusMsgEdit) {
 		y += DIVIDER_LINE_Y_OFF;
-
 		y += EDIT_BOX_Y_OFF;
 		m_statusMsgEdit.MoveWindow(EDIT_MARGIN_X, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
 		y += m_statusMsgEditRequestedDy;
@@ -1198,8 +1210,9 @@ LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lPar
 	JsonEl *json = NULL;
 	NetworkInfo *selectedNetwork = NULL;
 	int supressFlags = (int)lParam;
-	BOOL supressOneNetworkMsg = IsBitSet(supressFlags,SupressOneNetworkMsgFlag);
+	BOOL supressOneNetworkMsg = IsBitSet(supressFlags, SupressOneNetworkMsgFlag);
 	BOOL suppressNoDynamicIpMsg = IsBitSet(supressFlags, SuppressNoDynamicIpMsgFlag);
+	BOOL supressNoNetworks = IsBitSet(supressFlags, SupressNoNetworksMsgFlag);
 
 	HttpResult *ctx = (HttpResult*)wParam;
 	assert(ctx);
@@ -1295,7 +1308,8 @@ NoDynamicNetworks:
 	goto Exit;
 
 NoNetworks:
-	//MessageBox(_T("You don't have any networks configured. You need to configure a network in your OpenDNS account"), MAIN_FRAME_TITLE);
+	if (!supressNoNetworks)
+		MessageBox(_T("You don't have any networks configured. You need to configure a network in your OpenDNS account"), MAIN_FRAME_TITLE);
 	SetPrefVal(&g_pref_user_networks_state, UNS_NO_NETWORKS);
 	SetPrefVal(&g_pref_hostname, NULL);
 	goto Exit;
