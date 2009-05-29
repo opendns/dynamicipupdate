@@ -31,7 +31,7 @@ typedef struct Prefs {
 	M(unique_id, NULL, false) \
 	M(token, NULL, true) \
 	M(hostname, NULL, false) \
-	M(user_networks_state, UNS_OK, false) \
+	M(user_networks_state, NULL, false) \
 	M(send_updates, "1", false)
 
 // g_pref_hostname - NULL means invalid, empty string means default

@@ -226,6 +226,7 @@ void CMainFrame::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, C
 	BOOL checked = b.GetCheck();
 	SetPrefValBool(&g_pref_send_updates, checked);
 	PreferencesSave();
+	UpdateStatusEdit();
 }
 
 // sent by rich edit control so that we can know its desired height
@@ -398,9 +399,14 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		// Draw last updated time (e.g. "5 minutes ago")
 		if (IsLoggedIn() && !NoNetworksConfigured()) {
 			y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
-			txt = LastUpdateTxt();
-			dc.TextOutA(x, y, txt);
-			free(txt);
+			BOOL sendUpdates = GetPrefValBool(g_pref_send_updates);
+			if (sendUpdates) {
+				txt = LastUpdateTxt();
+				dc.TextOutA(x, y, txt);
+				free(txt);
+			} else {
+				DrawErrorText(&dc2, x, y, _T("Updates disabled"));
+			}
 		}
 
 		dc.SelectFont(prevFont);
@@ -1454,7 +1460,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	}
 
 	m_updaterThread = new UpdaterThread(this);
-	if (strempty(g_pref_hostname))
+	if (strempty(g_pref_user_networks_state))
 		ChangeNetwork(SupressAll);
 
 	CMessageLoop* pLoop = _Module.GetMessageLoop();

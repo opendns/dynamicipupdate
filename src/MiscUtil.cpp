@@ -498,8 +498,6 @@ bool CanSendIPUpdates()
 		return false;
 	if (strempty(g_pref_token))
 		return false;
-	if (strempty(g_pref_hostname))
-		return false;
 	if (!streq(UNS_OK, g_pref_user_networks_state))
 		return false;
 	return true;
