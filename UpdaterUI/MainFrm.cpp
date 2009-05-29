@@ -427,7 +427,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
-		ti.AddTxt(_T("Your IP address is taken by another Dynamic IP user."));
+		ti.AddTxt(_T("Your IP address is taken by another user."));
 		ti.AddPara();
 		ti.AddPara();
 	}

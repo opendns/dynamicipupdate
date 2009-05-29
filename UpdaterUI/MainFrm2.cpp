@@ -321,29 +321,29 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		x = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN;
 
 		// Draw account
-		y = m_txtAccountRect.bottom + Y_SPACING * 2 + 6;
+		y = m_txtAccountRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = AccountName();
 		dc.TextOut(x, y, txt);
 		free(txt);
 
 		// Draw network name
-		y = m_txtNetworkRect.bottom + Y_SPACING * 2 + 6;
+		y = m_txtNetworkRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = GetNetworkName();
 		dc.TextOut(x, y, txt);
 		free(txt);
 
 		// Draw IP address
-		y = m_txtIpAddressRect.bottom + Y_SPACING * 2;
+		y = m_txtIpAddressRect.bottom + DIVIDER_Y_SPACING;
 		txt = IpAddress();
 		dc.TextOut(x, y, txt);
 		free(txt);
 
 		// Draw "Using OpenDNS:" "Yes"/"No"
-		y = m_txtStatusRect.bottom + Y_SPACING * 2;
+		y = m_txtStatusRect.bottom + DIVIDER_Y_SPACING;
 		dc.TextOutA(x, y, _T("Using OpenDNS: Yes"));
 
 		// Draw "Last update: "
-		y = m_txtUpdateRect.bottom + Y_SPACING * 2 + 6;
+		y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = LastUpdateTxt();
 		dc.TextOutA(x, y, txt);
 		free(txt);
@@ -566,7 +566,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
-		ti.AddTxt(_T("Your IP address is taken by another Dynamic IP user."));
+		ti.AddTxt(_T("Your IP address is taken by another user."));
 		ti.AddPara();
 		ti.AddPara();
 	}
@@ -841,7 +841,7 @@ void CMainFrame::DoLayout()
 	y += m_txtAccountRect.Height();
 
 	// position account name text and "Change account" button
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
 	//buttonSizer.GetIdealSize(&m_buttonChangeAccount, btnDx, btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
@@ -852,14 +852,14 @@ void CMainFrame::DoLayout()
 		minDx = dxLine;
 
 	// position "Network to update" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_NETWORK_TO_UPDATE, y, clientDx, m_txtNetworkRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtNetworkRect.Height();
 
 	// position network name and "Change network"/"Configure network" button
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
 	//buttonSizer.GetIdealSize(&m_buttonChangeConfigureNetwork, btnDx, btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
@@ -872,14 +872,14 @@ void CMainFrame::DoLayout()
 	//m_buttonChangeConfigureNetwork.ShowWindow(SW_HIDE);
 
 	// position "IP address" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_IP_ADDRESS, y, clientDx, m_txtIpAddressRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtIpAddressRect.Height();
 
 	// position IP address text
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	txt = IpAddress();
 	if (txt) {
 		textSizer.SetText(txt);
@@ -890,28 +890,28 @@ void CMainFrame::DoLayout()
 	}
 
 	// position "Status" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_STATUS, y, clientDx, m_txtStatusRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtStatusRect.Height();
 
 	// position "Using OpenDNS: " + "Yes"/"No" line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	textSizer.SetText(_T("Using OpenDNS: Yes"));
 	textSizer.SetFont(m_defaultGuiFont);
 	s = textSizer.GetIdealSize2();
 	y += s.cy;
 
 	// position "Update" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_UPDATE, y, clientDx, m_txtUpdateRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtUpdateRect.Height();
 
 	// position "Last updated: " text and "Update now" button
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
 	//buttonSizer.GetIdealSize(&m_buttonUpdate, btnDx, btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
@@ -929,7 +929,7 @@ void CMainFrame::DoLayout()
 		minDx = dxLine;
 
 	// position status edit box
-	y += Y_SPACING * 4;
+	y += DIVIDER_Y_SPACING * 2;
 	m_statusMsgEdit.MoveWindow(LEFT_MARGIN, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
 	y += (m_statusMsgEditRequestedDy + Y_SPACING);
 

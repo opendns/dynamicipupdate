@@ -116,9 +116,6 @@ public:
 
 	TCHAR *			m_editFontName;
 
-	//static const COLORREF colWinBg    = RGB(0xf9, 0xf9, 0xf9);
-	//static const COLORREF colWinBg    = RGB(0xd6, 0xdf, 0xf7);
-	static const COLORREF colWinBg      = RGB(0xf7, 0xfb, 0xff);
 	static const COLORREF colDividerBg  = RGB(0xc6, 0xdf, 0xff);
 	static const COLORREF colDividerTxt = RGB(0x52, 0x61, 0xb5);
 	static const COLORREF colWhite	    = RGB(0xff,0xff,0xff);
@@ -126,6 +123,9 @@ public:
 	static const COLORREF colRed	    = RGB(0xff, 0x00, 0x00);
 
 	HBRUSH				m_winBgColorBrush;
+
+	static const int DIVIDER_Y_SPACING = 8;
+	static const COLORREF colWinBg      = RGB(0xf7, 0xfb, 0xff);
 
 	static const int TOP_BAR_DY = 32;
 	static const int LEFT_MARGIN = 8;

@@ -10,8 +10,8 @@
 #define TXT_DIV_ACCOUNT _T("OpenDNS account")
 #define TXT_DIV_NETWORK_TO_UPDATE _T("Network to update")
 #define TXT_DIV_IP_ADDRESS _T("IP address")
-#define TXT_DIV_STATUS _T("Status")
-#define TXT_DIV_UPDATE _T("Update")
+#define TXT_DIV_STATUS _T("Using OpenDNS?")
+#define TXT_DIV_UPDATE _T("Last updated")
 
 static TCHAR *TBufAppend(TCHAR *start, TCHAR *end, TCHAR *toAppend)
 {
@@ -122,8 +122,6 @@ CMainFrame::CMainFrame()
 	m_minStatusEditDx = 320 - 16;
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
-	colWinBg = ::GetSysColor(COLOR_APPWORKSPACE);
-	colWinBg = RGB(0xef, 0xeb, 0xde);
 	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 }
 
@@ -256,25 +254,30 @@ bool CMainFrame::IsStatic(HWND /*hwnd*/)
 	return false;
 }
 
-static void DrawEtchedLine(CDCHandle *dc, int y, int x1, int x2, int x3, int x4)
+static void DrawDividerLine(CDCHandle *dc, int y, int x1, int x2, int x3, int x4)
 {
-	//COLORREF colTop    = RGB(0x84, 0x82, 0x84);
-	//COLORREF colBottom = RGB(0xff, 0xff, 0xff);
-
 	RECT r = {x1, y, x2, y+1};
-	dc->DrawEdge(&r, EDGE_ETCHED, BF_TOP);
 
-	r.left = x3;
-	r.right = x4;
-	dc->DrawEdge(&r, EDGE_ETCHED, BF_TOP);
+	if (lineType == ETCHED_LINE)
+	{
+		dc->DrawEdge(&r, EDGE_ETCHED, BF_TOP);
+		r.left = x3;
+		r.right = x4;
+		dc->DrawEdge(&r, EDGE_ETCHED, BF_TOP);
+	} else if (lineType == SOLID_LINE)
+	{
+		dc->FillSolidRect(&r, colDivLine);
+		r.left = x3;
+		r.right = x4;
+		dc->FillSolidRect(&r, colDivLine);
+	} else
+		assert(0);
 }
 
 void CMainFrame::DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect)
 {
 	CRect      rc;
 	GetClientRect(rc);
-
-	//dc.FillSolidRect(rect, colBlack);
 
 	HFONT prevFont = dc.SelectFont(m_dividerTextFont);
 	dc.SetBkMode(TRANSPARENT);
@@ -285,12 +288,14 @@ void CMainFrame::DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect)
 
 	SIZE textSize;
 	dc.GetTextExtent(txt, -1, &textSize);
-	int lineY = rect.top + RectDy(rect) / 2;
+
+	int lineY = rect.top + RectDy(rect) / 2 + DIV_LINE_OFF_Y;
 	int x1 = LEFT_MARGIN;
 	int x2 = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN + 10;
 	int x3 = x2 + 4 + textSize.cx + 2;
 	int x4 = rc.right - RIGHT_MARGIN;
-	DrawEtchedLine(&dc, lineY, x1, x2, x3 ,x4);
+	DrawDividerLine(&dc, lineY, x1, x2, x3 ,x4);
+
 	dc.SelectFont(prevFont);
 }
 
@@ -345,39 +350,47 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		x = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN;
 
 		// Draw account
-		y = m_txtAccountRect.bottom + Y_SPACING * 2 + 6;
+		y = m_txtAccountRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = AccountName();
 		dc.TextOut(x, y, txt);
 		free(txt);
 
 		// Draw network name
-		y = m_txtNetworkRect.bottom + Y_SPACING * 2 + 6;
+		y = m_txtNetworkRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = GetNetworkName();
 		dc.TextOut(x, y, txt);
 		free(txt);
 
 		// Draw IP address
-		y = m_txtIpAddressRect.bottom + Y_SPACING * 2;
+		y = m_txtIpAddressRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = IpAddress();
 		dc.TextOut(x, y, txt);
 		free(txt);
 
-		// Draw "Using OpenDNS:" "Yes"/"No"
-		y = m_txtStatusRect.bottom + Y_SPACING * 2;
-		dc.TextOutA(x, y, _T("Using OpenDNS: Yes"));
+		// Draw "Yes"/"No" (for 'Using OpenDNS?' part)
+		y = m_txtStatusRect.bottom + DIVIDER_Y_SPACING + 6;
+		dc.TextOutA(x, y, _T("Yes"));
 
-		// Draw "Last update: "
-		y = m_txtUpdateRect.bottom + Y_SPACING * 2 + 6;
+		// Draw last updated time (e.g. "5 minutes ago")
+		y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
 		txt = LastUpdateTxt();
 		dc.TextOutA(x, y, txt);
 		free(txt);
 
 		dc.SelectFont(prevFont);
 
-		y += 24;
+		// draw line above edit text box
+		y += (m_btnDy - DIVIDER_Y_SPACING - 6);
+		y += DIVIDER_LINE_Y_OFF;
 		rc.top = y;
 		rc.bottom = y + 1;
-		dc.FillSolidRect(rc, colBlack);
+		dc.FillSolidRect(rc, colDivLine);
+
+		y += m_statusMsgEditRequestedDy;
+		y += EDIT_BOX_Y_OFF;
+		rc.top = y;
+		rc.bottom = y + 1;
+		dc.FillSolidRect(rc, colDivLine);
 
 #if 0
 		// draw top bar text
@@ -439,7 +452,7 @@ TCHAR *CMainFrame::LastUpdateTxt()
 	if (m_minutesSinceLastUpdate < 0)
 		return NULL;
 
-	CString s(_T("Last update: "));
+	CString s;
 	TCHAR *timeTxt = FormatUpdateTime(m_minutesSinceLastUpdate);
 	if (timeTxt) {
 		s += timeTxt;
@@ -472,7 +485,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 
 	IP4_ADDRESS myNewIp = m_ipFromDns;
 
-	ti.Init(m_editFontName, EDIT_CTRL_FONT_SIZE);
+	ti.Init(m_editFontName, EDIT_FONT_SIZE);
 
 #if 0
 	ti.StartBoldStyle();
@@ -590,7 +603,7 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
-		ti.AddTxt(_T("Your IP address is taken by another Dynamic IP user."));
+		ti.AddTxt(_T("Your IP address is taken by another user."));
 		ti.AddPara();
 		ti.AddPara();
 	}
@@ -804,7 +817,7 @@ void CMainFrame::SizeButtons(int& dxOut, int& dyOut)
 void CMainFrame::DoLayout()
 {
 	int x, y;
-	int btnDx, btnDy;
+	int btnDx;
 	int minDx = m_minStatusEditDx + LEFT_MARGIN + RIGHT_MARGIN;
 	int dxLine;
 	SIZE s;
@@ -818,7 +831,7 @@ void CMainFrame::DoLayout()
 	int clientDx = RectDx(clientRect);
 	int clientDy = RectDy(clientRect);
 
-	SizeButtons(btnDx, btnDy);
+	SizeButtons(btnDx, m_btnDy);
 
 	// position "Send IP updates" check-box in the bottom right corner
 	CUICheckBoxButtonSizer sendIpUpdatsSizer(m_buttonSendIpUpdates);
@@ -858,89 +871,91 @@ void CMainFrame::DoLayout()
 #endif
 
 	// Position "OpenDNS account" divider line
-	y = 4;
+	y = Y_START;
 	dxLine = SizeDividerLineText(TXT_DIV_ACCOUNT, y, clientDx, m_txtAccountRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtAccountRect.Height();
 
 	// position account name text and "Change account" button
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	//buttonSizer.GetIdealSize(&m_buttonChangeAccount, btnDx, btnDy);
+	//buttonSizer.GetIdealSize(&m_buttonChangeAccount, btnDx, m_btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
-	m_buttonChangeAccount.MoveWindow(x, y, btnDx, btnDy);
+	m_buttonChangeAccount.MoveWindow(x, y, btnDx, m_btnDy);
 	dxLine += btnDx;
-	y += btnDy;
+	y += m_btnDy;
 	if (dxLine > minDx)
 		minDx = dxLine;
 
 	// position "Network to update" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_NETWORK_TO_UPDATE, y, clientDx, m_txtNetworkRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtNetworkRect.Height();
 
 	// position network name and "Change network"/"Configure network" button
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	//buttonSizer.GetIdealSize(&m_buttonChangeConfigureNetwork, btnDx, btnDy);
+	//buttonSizer.GetIdealSize(&m_buttonChangeConfigureNetwork, btnDx, m_btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
-	m_buttonChangeConfigureNetwork.MoveWindow(x, y, btnDx, btnDy);
+	m_buttonChangeConfigureNetwork.MoveWindow(x, y, btnDx, m_btnDy);
 	dxLine += btnDx;
 	if (dxLine > minDx)
 		minDx = dxLine;
-	y += btnDy;
+	y += m_btnDy;
 
 	//m_buttonChangeConfigureNetwork.ShowWindow(SW_HIDE);
 
 	// position "IP address" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_IP_ADDRESS, y, clientDx, m_txtIpAddressRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtIpAddressRect.Height();
 
 	// position IP address text
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	txt = IpAddress();
 	if (txt) {
 		textSizer.SetText(txt);
 		textSizer.SetFont(m_dividerTextFont);
 		s = textSizer.GetIdealSize2();
-		y += s.cy;
+		//y += s.cy;
 		free(txt);
 	}
+	y += m_btnDy;
 
 	// position "Status" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_STATUS, y, clientDx, m_txtStatusRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtStatusRect.Height();
 
 	// position "Using OpenDNS: " + "Yes"/"No" line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	textSizer.SetText(_T("Using OpenDNS: Yes"));
 	textSizer.SetFont(m_defaultGuiFont);
 	s = textSizer.GetIdealSize2();
-	y += s.cy;
+	//y += s.cy;
+	y += m_btnDy;
 
 	// position "Update" divider line
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = SizeDividerLineText(TXT_DIV_UPDATE, y, clientDx, m_txtUpdateRect);
 	if (dxLine > minDx)
 		minDx = dxLine;
 	y += m_txtUpdateRect.Height();
 
 	// position "Last updated: " text and "Update now" button
-	y += Y_SPACING * 2;
+	y += DIVIDER_Y_SPACING;
 	dxLine = LEFT_MARGIN + RIGHT_MARGIN;
-	//buttonSizer.GetIdealSize(&m_buttonUpdate, btnDx, btnDy);
+	//buttonSizer.GetIdealSize(&m_buttonUpdate, btnDx, m_btnDy);
 	x = clientDx - RIGHT_MARGIN - btnDx;
-	m_buttonUpdate.MoveWindow(x, y, btnDx, btnDy);
-	y += btnDy;
+	m_buttonUpdate.MoveWindow(x, y, btnDx, m_btnDy);
+	y += m_btnDy;
 	dxLine += btnDx;
 	txt = LastUpdateTxt();
 	if (txt) {
@@ -953,9 +968,12 @@ void CMainFrame::DoLayout()
 		minDx = dxLine;
 
 	// position status edit box
-	y += Y_SPACING * 4;
-	m_statusMsgEdit.MoveWindow(LEFT_MARGIN, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
-	y += (m_statusMsgEditRequestedDy + Y_SPACING);
+	y += DIVIDER_LINE_Y_OFF;
+
+	y += EDIT_BOX_Y_OFF;
+	m_statusMsgEdit.MoveWindow(EDIT_MARGIN_X, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
+	y += m_statusMsgEditRequestedDy;
+	y += EDIT_BOX_Y_OFF;
 
 	dxLine = x + s.cx + RIGHT_MARGIN;
 	if (dxLine > minDx)
@@ -1084,7 +1102,7 @@ void CMainFrame::OnSize(UINT nType, CSize /*size*/)
 	BOOL ok = GetClientRect(&clientRect);
 	if (!ok) return;
 	int clientDx = RectDx(clientRect);
-	m_statusMsgEditDx = clientDx - LEFT_MARGIN - RIGHT_MARGIN;
+	m_statusMsgEditDx = clientDx - EDIT_MARGIN_X * 2;
 	m_statusMsgEdit.RequestResize();
 	PostMessage(WMAPP_DO_LAYOUT);
 }
@@ -1262,12 +1280,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_defaultFont.Attach(logFontDefault.CreateFontIndirect());
 
 	CLogFont logFontEditFont(AtlGetDefaultGuiFont());
-	//_tcscpy_s(logFontEditFont.lfFaceName, dimof(logFontEditFont.lfFaceName), "Comic Sans MS");
+	if (EDIT_FONT_NAME)
+		_tcscpy_s(logFontEditFont.lfFaceName, dimof(logFontEditFont.lfFaceName), EDIT_FONT_NAME);
 	logFontEditFont.SetBold();
-	logFontEditFont.SetHeight(EDIT_CTRL_FONT_SIZE, dc);
+	logFontEditFont.SetHeight(EDIT_FONT_SIZE, dc);
 	m_statusEditFont.Attach(logFontEditFont.CreateFontIndirect());
 	m_editFontName = tstrdup(logFontEditFont.lfFaceName);
 	ReleaseDC(dc);
+
 #endif
 
 	CLogFont lf(m_defaultFont);

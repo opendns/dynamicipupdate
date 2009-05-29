@@ -50,7 +50,6 @@ static bool g_showDebug = false;
 #define SETUP_OPENDNS_URL _T("https://www.opendns.com/start/")
 
 #define DEFAULT_FONT_SIZE 12
-#define EDIT_CTRL_FONT_SIZE 10
 
 #define TOP_BAR_TXT _T("OpenDNS Updater")
 
@@ -75,6 +74,52 @@ static void CrashMe()
 	char *p = (char*)0;
 	*p = 0;
 }
+
+enum DividerLineType {
+	ETCHED_LINE = 1,
+	SOLID_LINE = 2
+};
+
+static const int TOP_BAR_DY = 32;
+static const int LEFT_MARGIN = 8;
+static const int RIGHT_MARGIN = LEFT_MARGIN;
+static const int DIVIDER_TEXT_LEFT_MARGIN = 6;
+static const int DIVIDER_TEXT_RIGHT_MARGIN = 6;
+static const int Y_SPACING = 4;
+
+#define VARIANT 2
+
+#if VARIANT == 1
+	static const COLORREF colWinBg = RGB(0xef, 0xeb, 0xde);
+	static const COLORREF colDivLine = RGB();
+	static const int Y_START = 4;
+	static const int DIVIDER_Y_SPACING = 8;
+	static const int DIV_LINE_OFF_Y = 0;
+	static const int DIVIDER_TEXT_TOP_MARGIN = 4;
+	static const int DIVIDER_TEXT_BOTTOM_MARGIN = 4;
+	static const DividerLineType lineType = ETCHED_LINE;
+	static const int DIVIDER_LINE_Y_OFF = 16;
+	static const int EDIT_BOX_Y_OFF = 10;
+
+	static const int EDIT_MARGIN_X = LEFT_MARGIN;
+	static const TCHAR *EDIT_FONT_NAME = 0;
+	static const int EDIT_FONT_SIZE = 10;
+#else
+	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
+	static const COLORREF colDivLine = RGB(0xde, 0xdb, 0xde);
+	static const int Y_START = 6;
+	static const int DIVIDER_Y_SPACING = 0;
+	static const int DIVIDER_TEXT_TOP_MARGIN = 6;
+	static const int DIVIDER_TEXT_BOTTOM_MARGIN = 0;
+	static const int DIV_LINE_OFF_Y = 4;
+	static const DividerLineType lineType = SOLID_LINE;
+	static const int DIVIDER_LINE_Y_OFF = 22;
+	static const int EDIT_BOX_Y_OFF = 13;
+
+	static const int EDIT_MARGIN_X = LEFT_MARGIN + 4;
+	static const TCHAR *EDIT_FONT_NAME = "Arial";
+	static const int EDIT_FONT_SIZE = 8;
+#endif
 
 class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
 		public CMessageFilter, public CIdleHandler, public UpdaterThreadObserver
@@ -113,28 +158,20 @@ public:
 	int				m_topBarY;
 	int				m_topBarX;
 
+	int				m_btnDy;
+
 	int				m_minutesSinceLastUpdate;
 
 	TCHAR *			m_editFontName;
 
 	//static const COLORREF colWinBg = RGB(0xf9, 0xf9, 0xf9);
-	//static const COLORREF colWinBg = RGB(0xd6, 0xdf, 0xf7);
 	//static const COLORREF colWinBg = RGB(0xff, 0xff, 0xff);
+	//static const COLORREF colWinBg = RGB(0xd6, 0xdf, 0xf7);
 	static const COLORREF colWhite	 = RGB(0xff,0xff,0xff);
 	static const COLORREF colBlack	 = RGB(0x00, 0x00, 0x00);
 	static const COLORREF colRed	 = RGB(0xff, 0x00, 0x00);
 
 	HBRUSH				m_winBgColorBrush;
-	COLORREF			colWinBg;
-
-	static const int TOP_BAR_DY = 32;
-	static const int LEFT_MARGIN = 8;
-	static const int RIGHT_MARGIN = LEFT_MARGIN;
-	static const int DIVIDER_TEXT_LEFT_MARGIN = 6;
-	static const int DIVIDER_TEXT_RIGHT_MARGIN = 6;
-	static const int DIVIDER_TEXT_TOP_MARGIN = 4;
-	static const int DIVIDER_TEXT_BOTTOM_MARGIN = 4;
-	static const int Y_SPACING = 4;
 
 	IP4_ADDRESS			m_ipFromDns;
 	CString				m_ipFromDnsStr;

@@ -88,7 +88,8 @@ public:
 
 		// define color table
 		text += "{\\colortbl;";
-		AddCol(255,0,0).AddCol(0,0,0).AddCol(255,255,255);
+		//AddCol(255,0,0).AddCol(0,0,0).AddCol(255,255,255);
+		AddCol(0xf7,0x0c,0x08).AddCol(0,0,0).AddCol(255,255,255);
 		text += "}";
 		StartFontSize(fontSize * 2);
 	}
