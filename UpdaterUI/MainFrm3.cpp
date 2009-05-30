@@ -646,9 +646,9 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	if (IsLoggedIn()) {
 		if (NoNetworksConfigured()) {
 			m_showStatusMsgEdit = true;
-			ti.AddTxt("You don't have any networks. First ");
+			ti.AddTxt("You don't have any networks. First, ");
 			ti.AddLink("add a network", LINK_CONFIGURE_NETWORKS);
-			ti.AddTxt(" in your OpenDNS account and ");
+			ti.AddTxt(" in your OpenDNS account. Then ");
 			ti.AddLink("refresh network list.", LINK_SELECT_NETWORK);
 			ti.AddPara();
 			ti.AddPara();
