@@ -237,6 +237,7 @@ public:
 	bool IsLoggedIn();
 	bool NoInternetConnectivity();
 	bool NetworkNotSelected();
+	bool NoDynamicNetworks();
 
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
 	void BuildStatusEditRtf(RtfTextInfo& ti);

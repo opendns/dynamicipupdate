@@ -380,6 +380,8 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 				DrawErrorText(&dc2, x, y, _T("No networks"));
 			} else if (NetworkNotSelected()) {
 				DrawErrorText(&dc2, x, y, _T("Network not selected"));
+			} else if (NoDynamicNetworks()) {
+				DrawErrorText(&dc2, x, y, _T("No dynamic network"));
 			} else {
 				txt = GetNetworkName();
 				dc.TextOut(x, y, txt);
@@ -533,6 +535,16 @@ bool CMainFrame::NoNetworksConfigured()
 	return false;
 }
 
+
+bool CMainFrame::NoDynamicNetworks()
+{
+	if (streq(UNS_NO_DYNAMIC_IP_NETWORKS, g_pref_user_networks_state))
+		return true;
+	if (SE_NO_DYNAMIC_IP_NETWORKS == m_simulatedError)
+		return true;
+	return false;
+}
+
 bool CMainFrame::NoInternetConnectivity()
 {
 	if (IP_DNS_RESOLVE_ERROR == m_ipFromDns)
@@ -654,12 +666,12 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 			ti.AddLink("refresh network list.", LINK_SELECT_NETWORK);
 			ti.AddPara();
 			ti.AddPara();
-		} else if (streq(UNS_NO_DYNAMIC_IP_NETWORKS, g_pref_user_networks_state) || (SE_NO_DYNAMIC_IP_NETWORKS == m_simulatedError)) {
+		} else if (NoDynamicNetworks()) {
 			m_showStatusMsgEdit = true;
-			ti.AddTxt("None of your networks is configured for dynamic IP. ");
-			ti.AddLink("Configure a network", LINK_CONFIGURE_NETWORKS);
-			ti.AddTxt(" for dynamic IP in your OpenDNS account and ");
-			ti.AddLink("choose a network", LINK_SELECT_NETWORK);
+			ti.AddTxt("None of your networks is configured for dynamic IP. First, ");
+			ti.AddLink("configure a network", LINK_CONFIGURE_NETWORKS);
+			ti.AddTxt(" for dynamic IP in your OpenDNS account. Then ");
+			ti.AddLink("select a network", LINK_SELECT_NETWORK);
 			ti.AddPara();
 			ti.AddPara();
 		}
@@ -944,7 +956,7 @@ void CMainFrame::DoLayout()
 
 	if (NoNetworksConfigured())
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Refresh network list"));
-	else if (NetworkNotSelected())
+	else if (NetworkNotSelected() || NoDynamicNetworks())
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Select network"));
 	else
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Change network"));
