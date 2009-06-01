@@ -1083,6 +1083,8 @@ void CMainFrame::DoLayout()
 		m_statusMsgEdit.MoveWindow(EDIT_MARGIN_X, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
 		y += m_statusMsgEditRequestedDy;
 		y += EDIT_BOX_Y_OFF;
+	} else {
+		y += 18;
 	}
 
 	int minDy = y + buttonDy + 8;
