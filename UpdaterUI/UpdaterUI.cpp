@@ -368,26 +368,10 @@ void SendCrashDumps()
 	FindClose(h);
 }
 
-static void DoUpgradeCheck(bool simulateUpgrade)
+static void DoUpgradeCheck()
 {
-	TCHAR *url2 = NULL;
-	const TCHAR *version = PROGRAM_VERSION;
-	if (simulateUpgrade)
-		version = PROGRAM_VERSION_SIMULATE_UPGRADE;
-	char *url = GetUpdateUrl(version, UpdateCheckVersionCheck);
-	if (!url)
-		return;
-	url2 = StrToTStr(url);
-	if (!url2)
-		goto Exit;
-
-	int ret = ::MessageBox(NULL, _T("New version of OpenDNS Updater is available. Download new version?"), MAIN_FRAME_TITLE, MB_YESNO);
-	if (ret == IDOK) {
-		LaunchUrl(url2);
-	}
-Exit:
-	free(url2);
-	free(url);
+	// TODO: implement me
+	::MessageBox(NULL, _T("/simupgradecheck not implemented!"), MAIN_FRAME_TITLE, MB_YESNO);
 }
 
 static void FindSimulatedError(TCHAR *cmdLine)
@@ -478,7 +462,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	GenUidIfNotExists();
 
 	if (SPECIAL_CMD_SIM_UPGRADE_CHECK == specialCmd) {
-		DoUpgradeCheck(true);
+		DoUpgradeCheck();
 		goto Exit;
 	}
 

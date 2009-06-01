@@ -154,6 +154,7 @@ public:
 	RtfTextInfo		m_rti;
 
 	CRichEditCtrl	m_statusMsgEdit;
+	bool			m_showStatusMsgEdit;
 	int				m_statusMsgEditRequestedDy;
 	int				m_statusMsgEditDx;
 	int				m_minStatusEditDx;
@@ -165,6 +166,7 @@ public:
 	int				m_minutesSinceLastUpdate;
 
 	TCHAR *			m_editFontName;
+	TCHAR *			m_newVersionDownloadUrl;
 
 	//static const COLORREF colWinBg = RGB(0xf9, 0xf9, 0xf9);
 	//static const COLORREF colWinBg = RGB(0xff, 0xff, 0xff);
@@ -183,7 +185,6 @@ public:
 	int					m_minWinDx, m_minWinDy;
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
-	bool				m_showStatusMsgEdit;
 
 	BEGIN_MSG_MAP(CMainFrame)
 		MSG_WM_CREATE(OnCreate)

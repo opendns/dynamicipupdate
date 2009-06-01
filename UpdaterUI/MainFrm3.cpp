@@ -124,12 +124,14 @@ CMainFrame::CMainFrame()
 	m_minutesSinceLastUpdate = 0;
 	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 	m_updaterThread = NULL;
+	m_newVersionDownloadUrl = NULL;
 }
 
 CMainFrame::~CMainFrame()
 {
 	free(m_ipFromHttp);
 	free(m_editFontName);
+	free(m_newVersionDownloadUrl);
 	DeleteObject(m_winBgColorBrush);
 }
 
@@ -698,6 +700,14 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddPara();
 	}
 
+	if (m_newVersionDownloadUrl != NULL) {
+		m_showStatusMsgEdit = true;
+		ti.AddTxt(_T("New version is available. "));
+		ti.AddLink(_T("Download"), LINK_DOWNLOAD_NEW_VERSION);
+		ti.AddTxt(_T(" new version"));
+		ti.AddPara(); ti.AddPara();
+	}
+
 	ti.EndStyle();
 	ti.EndCol();
 
@@ -813,6 +823,10 @@ LRESULT CMainFrame::OnLinkStatusEdit(LPNMHDR pnmh)
 		UpdateStatusEdit();
 	} else if (LINK_CRASH_ME == linkId) {
 		CrashMe();
+	} else if (LINK_DOWNLOAD_NEW_VERSION == linkId) {
+		LaunchUrl(m_newVersionDownloadUrl);
+		free(m_newVersionDownloadUrl);
+		m_newVersionDownloadUrl = NULL;
 	} else
 		assert(0);
 	SetFocus();
@@ -1186,12 +1200,8 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 
 LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
 {
-	TCHAR *url = (TCHAR*)wParam;
-	int ret = ::MessageBox(NULL, _T("New version of OpenDNS Updater client is available. Download new version?"), MAIN_FRAME_TITLE, MB_YESNO);
-	if (ret == IDOK) {
-		LaunchUrl(url);
-	}
-	free(url);
+	m_newVersionDownloadUrl = (TCHAR*)wParam;
+	SwitchToVisibleState();
 	return 0;
 }
 
