@@ -11,7 +11,8 @@ enum IpUpdateResult {
 	IpUpdateOk,
 	IpUpdateNotYours,
 	IpUpdateBadAuth,
-	IpUpdateNotAvailable
+	IpUpdateNotAvailable,
+	IpUpdateNoHost
 };
 
 char* SendIpUpdate();

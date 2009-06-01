@@ -48,6 +48,8 @@ IpUpdateResult IpUpdateResultFromString(const char *s)
 		return IpUpdateNotYours;
 	if (StrStartsWithI(s, "badauth"))
 		return IpUpdateBadAuth;
+	if (StrStartsWithI(s, "nohost"))
+		return IpUpdateNoHost;
 	assert(0);
 	return IpUpdateOk;
 }

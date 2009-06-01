@@ -1200,6 +1200,11 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 	if (IpUpdateNotAvailable == ipUpdateResult)
 		return;
 
+	// TODO: this might happen if a user made a network non-dynamic behind our back
+	// not sure what to do in this case - re-download networks?
+	if (IpUpdateNoHost == ipUpdateResult)
+		return;
+
 	if ((IpUpdateOk == ipUpdateResult) || (IpUpdateNotYours == ipUpdateResult)) {
 		const char *ip = StrFindChar(ipUpdateRes, ' ');
 		if (ip)
