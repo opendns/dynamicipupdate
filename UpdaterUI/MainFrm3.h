@@ -93,6 +93,7 @@ static const int Y_SPACING = 4;
 
 #if VARIANT == 1
 	static const COLORREF colWinBg = RGB(0xef, 0xeb, 0xde);
+	static const COLORREF colEditBg = colWinBg;
 	static const COLORREF colDivLine = RGB();
 	static const int Y_START = 4;
 	static const int DIVIDER_Y_SPACING = 8;
@@ -108,6 +109,17 @@ static const int Y_SPACING = 4;
 	static const int EDIT_FONT_SIZE = 10;
 #else
 	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
+
+	static const COLORREF colEditBg    = colWinBg;
+	static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
+
+	//static const COLORREF colEditBg    = RGB(0xff, 0xff, 0xe7);
+	//static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
+
+	//static const COLORREF colEditBg    = RGB(0xff, 0xdb, 0x18);
+	//static const COLORREF colEditBg    = RGB(0xff, 0xfb, 0xbd);
+	//static const COLORREF colEditFrame = RGB(0xef, 0xc3, 0x00);
+
 	static const COLORREF colDivLine = RGB(0xde, 0xdb, 0xde);
 	static const int Y_START = 6;
 	static const int DIVIDER_Y_SPACING = 0;

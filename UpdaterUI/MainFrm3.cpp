@@ -431,6 +431,16 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			rc.top = y;
 			rc.bottom = y + 1;
 			dc.FillSolidRect(rc, colDivLine);
+
+			// draw frame around edit box
+			/*RECT editRect;
+			m_statusMsgEdit.GetWindowRect(&editRect);
+			editRect.top -= 2;
+			editRect.bottom += 2;
+			editRect.left -= 2;
+			editRect.right += 2;
+			ScreenToClient(&editRect);
+			dc.FillSolidRect(&editRect, colEditFrame);*/
 		}
 
 #if 0
@@ -1543,7 +1553,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_statusMsgEdit.SetReadOnly(TRUE);
 	m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK | ENM_SELCHANGE);
 	//m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK);
-	m_statusMsgEdit.SetBackgroundColor(colWinBg);
+	m_statusMsgEdit.SetBackgroundColor(colEditBg);
 	m_statusMsgEdit.SetDlgCtrlID(IDC_EDIT_STATUS);
 
 	if (strempty(g_pref_user_name) ||
