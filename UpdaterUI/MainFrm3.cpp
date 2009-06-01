@@ -355,7 +355,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			DrawDivider(dc2, TXT_DIV_NETWORK_TO_UPDATE, m_txtNetworkRect);
 		DrawDivider(dc2, TXT_DIV_IP_ADDRESS, m_txtIpAddressRect);
 		DrawDivider(dc2, TXT_DIV_STATUS, m_txtStatusRect);
-		if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured())
+		if (ShowLastUpdated())
 			DrawDivider(dc2, TXT_DIV_UPDATE, m_txtUpdateRect);
 
 		HFONT prevFont = dc.SelectFont(m_textFont);
@@ -403,7 +403,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			DrawErrorText(&dc2, x, y, _T("No"));
 
 		// Draw last updated time (e.g. "5 minutes ago")
-		if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured()) {
+		if (ShowLastUpdated()) {
 			y = m_txtUpdateRect.bottom + DIVIDER_Y_SPACING + 6;
 			BOOL sendUpdates = GetPrefValBool(g_pref_send_updates);
 			if (sendUpdates) {
@@ -543,6 +543,11 @@ bool CMainFrame::NoDynamicNetworks()
 	if (SE_NO_DYNAMIC_IP_NETWORKS == m_simulatedError)
 		return true;
 	return false;
+}
+
+bool CMainFrame::ShowLastUpdated()
+{
+	return IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured() && !NoDynamicNetworks();
 }
 
 bool CMainFrame::NoInternetConnectivity()
@@ -961,7 +966,7 @@ void CMainFrame::DoLayout()
 	else
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Change network"));
 
-	if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured())
+	if (ShowLastUpdated())
 		m_buttonUpdate.ShowWindow(SW_SHOW);
 	else
 		m_buttonUpdate.ShowWindow(SW_HIDE);
@@ -1076,7 +1081,7 @@ void CMainFrame::DoLayout()
 	y += m_btnDy;
 
 	// position "Update" divider line
-	if (IsLoggedIn() && !NetworkNotSelected() && !NoNetworksConfigured()) {
+	if (ShowLastUpdated()) {
 		y += DIVIDER_Y_SPACING;
 		dxLine = SizeDividerLineText(TXT_DIV_UPDATE, y, clientDx, m_txtUpdateRect);
 		if (dxLine > minDx)

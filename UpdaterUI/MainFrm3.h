@@ -238,6 +238,7 @@ public:
 	bool NoInternetConnectivity();
 	bool NetworkNotSelected();
 	bool NoDynamicNetworks();
+	bool ShowLastUpdated();
 
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
 	void BuildStatusEditRtf(RtfTextInfo& ti);
