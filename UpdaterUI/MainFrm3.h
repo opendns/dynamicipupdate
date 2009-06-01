@@ -61,6 +61,7 @@ enum {
 	IDC_BUTTON_CHANGE_NETWORK,
 	IDC_BUTTON_SEND_IP_UPDATE,
 	IDC_LINK_ABOUT,
+	IDC_LINK_LEARN_SETUP_OPENDNS,
 	IDC_EDIT_STATUS,
 };
 
@@ -158,6 +159,7 @@ public:
 	CRect			m_txtUpdateRect;
 
 	CLinkCtrl		m_linkAbout;
+	CLinkCtrl		m_linkLearnSetup;
 	CButton			m_buttonSendIpUpdates;
 	CButton			m_buttonChangeAccount;
 	CButton			m_buttonChangeConfigureNetwork;
@@ -218,6 +220,7 @@ public:
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_REQUESTRESIZE, OnRequestResize)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_SELCHANGE, OnSelChange)
 		NOTIFY_HANDLER_EX(IDC_LINK_ABOUT, NM_CLICK, OnLinkAbout)
+		NOTIFY_HANDLER_EX(IDC_LINK_LEARN_SETUP_OPENDNS, NM_CLICK, OnLinkLearnSetupOpenDns)
 
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
 		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
@@ -263,9 +266,12 @@ public:
 	void ChangeNetwork(int supressFlags);
 	LRESULT OnRequestResize(LPNMHDR pnmh);
 	LRESULT OnSelChange(LPNMHDR /*pnmh*/);
-	LRESULT OnLinkStatusEdit(LPNMHDR pnmh);
 	void ChangeAccount();
+
+	LRESULT OnLinkStatusEdit(LPNMHDR pnmh);
 	LRESULT OnLinkAbout(LPNMHDR /*pnmh*/);
+	LRESULT OnLinkLearnSetupOpenDns(LPNMHDR /*pnmh*/);
+
 	void DrawErrorText(CDCHandle *dc, int x, int y, const TCHAR *txt);
 	void DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect);
 	void OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);

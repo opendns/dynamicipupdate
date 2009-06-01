@@ -243,6 +243,8 @@ bool CMainFrame::IsLink(HWND hwnd)
 {
 	if (hwnd == m_linkAbout.m_hWnd)
 		return true;
+	if (hwnd == m_linkLearnSetup.m_hWnd)
+		return true;
 	return false;
 }
 
@@ -400,7 +402,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		if (IsUsingOpenDns())
 			dc.TextOutA(x, y, _T("Yes"));
 		else
-			DrawErrorText(&dc2, x, y, _T("No"));
+			DrawErrorText(&dc2, x, y, _T("No. Learn how to"));
 
 		// Draw last updated time (e.g. "5 minutes ago")
 		if (ShowLastUpdated()) {
@@ -660,11 +662,13 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	ti.StartBoldStyle();
 
 	if (!IsUsingOpenDns()) {
+#if 0 // TODO: remove me, this is covered by a link in Uisng OpenDNS section
 		m_showStatusMsgEdit = true;
 		ti.AddTxt("You're not using OpenDNS service. Learn how to ");
 		ti.AddLink("setup OpenDNS.", LINK_SETUP_OPENDNS);
 		ti.AddPara();
 		ti.AddPara();
+#endif
 	} else if (NoInternetConnectivity()) {
 		m_showStatusMsgEdit = true;
 		ti.AddTxt("Looks like there's no internet connectivity.");
@@ -1085,9 +1089,26 @@ void CMainFrame::DoLayout()
 
 	// position "Using OpenDNS: " + "Yes"/"No" line
 	y += DIVIDER_Y_SPACING;
-	textSizer.SetText(_T("Using OpenDNS: Yes"));
 	textSizer.SetFont(m_defaultGuiFont);
-	s = textSizer.GetIdealSize2();
+	if (IsUsingOpenDns()) {
+		textSizer.SetText(_T("Yes"));
+		m_linkLearnSetup.ShowWindow(SW_HIDE);
+	} else {
+		textSizer.SetText(_T("No. Learn how to setup OpenDNS.  "));
+		s = textSizer.GetIdealSize2();
+		minDx = max(minDx, s.cx);
+		textSizer.SetText(_T("No. Learn how to "));
+		s = textSizer.GetIdealSize2();
+		int linkX = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN + s.cx;
+		int linkY = m_txtStatusRect.bottom + DIVIDER_Y_SPACING + 6;
+
+		linkSizer.SetWindow(m_linkLearnSetup);
+		linkSizer.SetFont(m_dividerTextFont);
+		s = linkSizer.GetIdealSize2();
+		m_linkLearnSetup.MoveWindow(linkX, linkY, s.cx, s.cy);
+		m_linkLearnSetup.ShowWindow(SW_SHOW);
+	}
+
 	y += m_btnDy;
 
 	// position "Update" divider line
@@ -1197,6 +1218,12 @@ LRESULT CMainFrame::OnLinkAbout(LPNMHDR /*pnmh*/)
 		return 0;
 	}
 	LaunchUrl(ABOUT_URL);
+	return 0;
+}
+
+LRESULT CMainFrame::OnLinkLearnSetupOpenDns(LPNMHDR /*pnmh*/)
+{
+	LaunchUrl(SETUP_OPENDNS_URL);
 	return 0;
 }
 
@@ -1523,6 +1550,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_linkAbout.Create(m_hWnd, r, _T("<a>About this program</a>"), WS_CHILD | WS_VISIBLE);
 	m_linkAbout.SetFont(m_defaultGuiFont);
 	m_linkAbout.SetDlgCtrlID(IDC_LINK_ABOUT);
+
+	m_linkLearnSetup.Create(m_hWnd, r, _T("<a>setup OpenDNS.</a>"), WS_CHILD | WS_VISIBLE);
+	m_linkLearnSetup.SetFont(m_dividerTextFont);
+	m_linkLearnSetup.SetDlgCtrlID(IDC_LINK_LEARN_SETUP_OPENDNS);
 
 	m_buttonSendIpUpdates.Create(m_hWnd, r, _T("Send background IP updates"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX);
 	m_buttonSendIpUpdates.SetFont(m_buttonsFont);
