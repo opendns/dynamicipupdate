@@ -930,10 +930,7 @@ void CMainFrame::DoLayout()
 
 	if (NoNetworksConfigured())
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Refresh network list"));
-	else
-		m_buttonChangeConfigureNetwork.SetWindowText(_T("Change network"));
-
-	if (NetworkNotSelected())
+	else if (NetworkNotSelected())
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Select network"));
 	else
 		m_buttonChangeConfigureNetwork.SetWindowText(_T("Change network"));
