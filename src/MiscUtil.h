@@ -99,6 +99,7 @@ CString CrashDumpUrl(const TCHAR *version);
 CString ApiParamsSignIn(const char* userName, const char* password);
 CString ApiParamsNetworksGet(const char *token);
 CString ApiParamsUpdateIp(const char *ip, const char *network);
+CString ApiParamsNetworkDynamicSet(const char *token, const char *networkId, bool makeDynamic);
 
 char* LastErrorAsStr(DWORD err=-1);
 char* WinHttpErrorAsStr(DWORD error);

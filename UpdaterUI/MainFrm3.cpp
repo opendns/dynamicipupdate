@@ -1263,6 +1263,46 @@ static BOOL IsBitSet(int flags, int bit)
 	return false;
 }
 
+NetworkInfo *CMainFrame::MakeFirstNetworkDynamic(NetworkInfo *ni)
+{
+	JsonEl *json = NULL;
+	HttpResult *httpRes = NULL;
+	char *jsonTxt = NULL;
+	NetworkInfo *dynamicNetwork = FindFirstDynamic(ni);
+	assert(!dynamicNetwork);
+	if (dynamicNetwork)
+		return dynamicNetwork;
+	char *networkId = ni->internalId;
+	CString params = ApiParamsNetworkDynamicSet(g_pref_token, networkId, true);
+	const char *paramsTxt = TStrToStr(params);
+	const char *apiHost = GetApiHost();
+	bool apiHostIsHttps = IsApiHostHttps();
+	httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);		
+	free((void*)paramsTxt);
+	if (!httpRes || !httpRes->IsValid())
+		goto Error;
+
+	DWORD dataSize;
+	jsonTxt = (char *)httpRes->data.getData(&dataSize);
+	if (!jsonTxt)
+		goto Error;
+
+	json = ParseJsonToDoc(jsonTxt);
+	if (!json)
+		goto Error;
+	WebApiStatus status = GetApiStatus(json);
+	if (WebApiStatusSuccess != status)
+		goto Error;
+
+Exit:
+	JsonElFree(json);
+	delete httpRes;
+	return ni;
+Error:
+	ni = NULL;
+	goto Exit;
+}
+
 LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam)
 {
 	NetworkInfo *ni = NULL;
@@ -1338,6 +1378,7 @@ LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lPar
 		goto Exit;
 	}
 
+NetworkSelected:
 	PrefSetHostname(selectedNetwork->label);
 	SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 
@@ -1361,6 +1402,9 @@ NoNetworkSelected:
 	goto Exit;
 
 NoDynamicNetworks:
+	selectedNetwork = MakeFirstNetworkDynamic(ni);
+	if (selectedNetwork != NULL)
+		goto NetworkSelected;
 	if (!suppressNoDynamicIpMsg)
 		MessageBox(_T("You don't have any networks enabled for Dynamic IP Update. Enable Dynamic IP Updates in your OpenDNS account"), MAIN_FRAME_TITLE); 
 	SetPrefVal(&g_pref_user_networks_state, UNS_NO_DYNAMIC_IP_NETWORKS);

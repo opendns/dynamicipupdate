@@ -267,9 +267,12 @@ public:
 	LRESULT OnUpdateStatus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
 	void UpdateLastUpdateText();
 	void OnSize(UINT nType, CSize /*size*/);
+
 	void StartDownloadNetworks(char *token, int supressFlags = 0);
 	LRESULT OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/);
+	NetworkInfo *MakeFirstNetworkDynamic(NetworkInfo *ni);
 	NetworkInfo *SelectNetwork(NetworkInfo *ni);
+
 	bool GetLastIpUpdateTime();
 	bool DnsVsHttpIpMismatch();
 	void SizeButtons(int& dxOut, int& dyOut);

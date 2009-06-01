@@ -264,6 +264,22 @@ CString ApiParamsNetworksGet(const char *token)
 	return url;
 }
 
+CString ApiParamsNetworkDynamicSet(const char *token, const char *networkId, bool makeDynamic)
+{
+	CString url;
+	AddUrlParam(url, "api_key", API_KEY);
+	AddUrlParam(url, "method", "network_dynamic_set");
+	char *tokenEncoded = StrUrlEncode(token);
+	AddUrlParam(url, "token", tokenEncoded);
+	free(tokenEncoded);
+	AddUrlParam(url, "network_id", networkId);
+	if (makeDynamic)
+		AddUrlParam(url, "setting", "on");
+	else
+		AddUrlParam(url, "setting", "off");
+	return url;
+}
+
 char* LastErrorAsStr(DWORD err)
 {
 	char *msgBuf = NULL;
