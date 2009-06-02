@@ -139,7 +139,7 @@ static const int Y_SPACING = 4;
 	static const int EDIT_BOX_Y_OFF = 13;
 
 	static const int EDIT_MARGIN_X = LEFT_MARGIN + 4;
-	static const TCHAR *EDIT_FONT_NAME = "Arial";
+	static const TCHAR *EDIT_FONT_NAME = _T("Arial");
 	static const int EDIT_FONT_SIZE = 8;
 #endif
 

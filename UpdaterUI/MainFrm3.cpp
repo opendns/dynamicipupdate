@@ -309,7 +309,7 @@ void CMainFrame::DrawErrorText(CDCHandle *dc, int x, int y, const TCHAR *txt)
 {
 	HFONT fontPrev = dc->SelectFont(m_dividerTextFont); // reusing, it's about being bold
 	COLORREF colPrev = dc->SetTextColor(colRed2);
-	dc->TextOutA(x, y, txt);
+	dc->TextOut(x, y, txt);
 	dc->SetTextColor(colPrev);
 	dc->SelectFont(fontPrev);
 }
@@ -400,7 +400,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		// Draw "Yes"/"No" (for 'Using OpenDNS?' part)
 		y = m_txtStatusRect.bottom + DIVIDER_Y_SPACING + 6;
 		if (IsUsingOpenDns())
-			dc.TextOutA(x, y, _T("Yes"));
+			dc.TextOut(x, y, _T("Yes"));
 		else
 			DrawErrorText(&dc2, x, y, _T("No. Learn how to"));
 
@@ -410,7 +410,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			BOOL sendUpdates = GetPrefValBool(g_pref_send_updates);
 			if (sendUpdates) {
 				txt = LastUpdateTxt();
-				dc.TextOutA(x, y, txt);
+				dc.TextOut(x, y, txt);
 				free(txt);
 			} else {
 				DrawErrorText(&dc2, x, y, _T("Updates disabled"));
