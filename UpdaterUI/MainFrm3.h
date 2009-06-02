@@ -118,9 +118,11 @@ static const int Y_SPACING = 4;
 #if NICER_ERROR_MSG
 	static const COLORREF colEditBg    = RGB(0xff, 0xff, 0xe7);
 	static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
+	static const int DIVIDER_LINE_Y_OFF = 12;
 #else
 	static const COLORREF colEditBg    = colWinBg;
 	static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
+	static const int DIVIDER_LINE_Y_OFF = 22;
 #endif
 
 	//static const COLORREF colEditBg    = RGB(0xff, 0xdb, 0x18);
@@ -134,7 +136,6 @@ static const int Y_SPACING = 4;
 	static const int DIVIDER_TEXT_BOTTOM_MARGIN = 0;
 	static const int DIV_LINE_OFF_Y = 4;
 	static const DividerLineType lineType = SOLID_LINE;
-	static const int DIVIDER_LINE_Y_OFF = 22;
 	static const int EDIT_BOX_Y_OFF = 13;
 
 	static const int EDIT_MARGIN_X = LEFT_MARGIN + 4;
