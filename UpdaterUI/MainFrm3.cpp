@@ -420,6 +420,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		dc.SelectFont(prevFont);
 
 		if (m_showStatusMsgEdit) {
+#if !NICER_ERROR_MSG
 			// draw line above edit text box
 			y += (m_btnDy - DIVIDER_Y_SPACING - 6);
 			y += DIVIDER_LINE_Y_OFF;
@@ -434,16 +435,25 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			rc.top = y;
 			rc.bottom = y + 1;
 			dc.FillSolidRect(rc, colDivLine);
+#endif
 
 			// draw frame around edit box
-			/*RECT editRect;
+#if NICER_ERROR_MSG
+			RECT editRect;
 			m_editErrorMsg.GetWindowRect(&editRect);
-			editRect.top -= 2;
-			editRect.bottom += 2;
-			editRect.left -= 2;
-			editRect.right += 2;
+			editRect.top -= 6;
+			editRect.bottom += 6;
+			editRect.left -= 4;
+			editRect.right += 4;
 			ScreenToClient(&editRect);
-			dc.FillSolidRect(&editRect, colEditFrame);*/
+			dc.FillSolidRect(&editRect, colEditFrame);
+
+			editRect.top += 1;
+			editRect.bottom -= 1;
+			editRect.left += 1;
+			editRect.right -= 1;
+			dc.FillSolidRect(&editRect, colEditBg);
+#endif
 		}
 
 #if 0

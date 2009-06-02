@@ -94,10 +94,12 @@ static const int Y_SPACING = 4;
 
 #define VARIANT 2
 
+#define NICER_ERROR_MSG 1
+
 #if VARIANT == 1
 	static const COLORREF colWinBg = RGB(0xef, 0xeb, 0xde);
 	static const COLORREF colEditBg = colWinBg;
-	static const COLORREF colDivLine = RGB();
+	static const COLORREF colDivLine = RGB(0xde, 0xdb, 0xde);
 	static const int Y_START = 4;
 	static const int DIVIDER_Y_SPACING = 8;
 	static const int DIV_LINE_OFF_Y = 0;
@@ -113,11 +115,13 @@ static const int Y_SPACING = 4;
 #else
 	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
 
+#if NICER_ERROR_MSG
+	static const COLORREF colEditBg    = RGB(0xff, 0xff, 0xe7);
+	static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
+#else
 	static const COLORREF colEditBg    = colWinBg;
 	static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
-
-	//static const COLORREF colEditBg    = RGB(0xff, 0xff, 0xe7);
-	//static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
+#endif
 
 	//static const COLORREF colEditBg    = RGB(0xff, 0xdb, 0x18);
 	//static const COLORREF colEditBg    = RGB(0xff, 0xfb, 0xbd);
