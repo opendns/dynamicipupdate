@@ -96,9 +96,9 @@ public:
 
 	RtfTextInfo		m_rti;
 
-	CRichEditCtrl	m_statusMsgEdit;
-	int				m_statusMsgEditRequestedDy;
-	int				m_statusMsgEditDx;
+	CRichEditCtrl	m_editErrorMsg;
+	int				m_editErrorMsgRequestedDy;
+	int				m_editErrorMsgDx;
 	int				m_minStatusEditDx;
 	int				m_topBarY;
 	int				m_topBarX;

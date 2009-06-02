@@ -114,7 +114,7 @@ CMainFrame::CMainFrame()
 	m_ipFromHttp = NULL;
 	m_ipUpdateResult = IpUpdateOk;
 	m_simulatedError = SE_NO_ERROR;
-	m_statusMsgEditRequestedDy = 0;
+	m_editErrorMsgRequestedDy = 0;
 	m_editFontName = NULL;
 	m_minWinDx = 320;
 	// this is absolute minimum height of the window's client area
@@ -235,7 +235,7 @@ void CMainFrame::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, C
 LRESULT CMainFrame::OnRequestResize(LPNMHDR pnmh)
 {
 	REQRESIZE* r = (REQRESIZE*)pnmh;
-	m_statusMsgEditRequestedDy =  RectDy(r->rc);
+	m_editErrorMsgRequestedDy =  RectDy(r->rc);
 	return 0;
 }
 
@@ -428,7 +428,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			dc.FillSolidRect(rc, colDivLine);
 
 			// draw line below edit text box
-			y += m_statusMsgEditRequestedDy;
+			y += m_editErrorMsgRequestedDy;
 			y += EDIT_BOX_Y_OFF;
 			rc.top = y;
 			rc.bottom = y + 1;
@@ -436,7 +436,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 			// draw frame around edit box
 			/*RECT editRect;
-			m_statusMsgEdit.GetWindowRect(&editRect);
+			m_editErrorMsg.GetWindowRect(&editRect);
 			editRect.top -= 2;
 			editRect.bottom += 2;
 			editRect.left -= 2;
@@ -707,7 +707,8 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
 		m_showStatusMsgEdit = true;
-		ti.AddTxt(_T("Your IP address is taken by another user."));
+		ti.AddTxt(_T("Your IP address is taken by another user. "));
+		ti.AddLink(_T("Learn more."), LINK_LEARN_MORE_IP_TAKEN);
 		ti.AddPara();
 		ti.AddPara();
 	}
@@ -726,7 +727,8 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddTxt(m_ipFromDnsStr);
 		ti.AddTxt(_T(") and HTTP IP address ("));
 		ti.AddTxt(m_ipFromHttp);
-		ti.AddTxt(_T(") mismatch."));
+		ti.AddTxt(_T(") mismatch. "));
+		ti.AddLink(_T("Learn more."), LINK_LEARN_MORE_IP_MISMATCH);
 		ti.AddPara();
 		ti.AddPara();
 	}
@@ -778,14 +780,14 @@ void CMainFrame::UpdateStatusEdit(bool doLayout)
 	// Don't know why I have to do this, but SetWindowText() with unicode
 	// doesn't work (rtf codes are not being recognized)
 	const char *sUtf = WstrToUtf8(s);
-	m_statusMsgEdit.SetTextEx((LPCTSTR)sUtf, ST_DEFAULT, CP_UTF8);
+	m_editErrorMsg.SetTextEx((LPCTSTR)sUtf, ST_DEFAULT, CP_UTF8);
 #else
-	m_statusMsgEdit.SetWindowText(s);
+	m_editErrorMsg.SetWindowText(s);
 #endif
 	SetRtfLinks(&m_rti);
 
 #if 0
-	m_statusMsgEdit.SetSelAll();
+	m_editErrorMsg.SetSelAll();
 	PARAFORMAT2 paraFormat;
 	memset(&paraFormat, 0, sizeof(paraFormat));
 	paraFormat.cbSize = sizeof(PARAFORMAT2);
@@ -793,12 +795,12 @@ void CMainFrame::UpdateStatusEdit(bool doLayout)
 	paraFormat.bLineSpacingRule = 5;
 	// spacing is dyLineSpacing/20 lines (i.e. 20 - single spacing, 40 - double spacing etc.)
 	paraFormat.dyLineSpacing = 20;
-	HWND hwndEdit = m_statusMsgEdit;
+	HWND hwndEdit = m_editErrorMsg;
 	::SendMessage(hwndEdit, EM_SETPARAFORMAT, 0, (LPARAM)&paraFormat);
 #endif
 
-	m_statusMsgEdit.SetSelNone();
-	m_statusMsgEdit.RequestResize();
+	m_editErrorMsg.SetSelNone();
+	m_editErrorMsg.RequestResize();
 	if (doLayout)
 		PostMessage(WMAPP_DO_LAYOUT);
 }
@@ -809,12 +811,12 @@ void CMainFrame::SetRtfLinks(RtfTextInfo *rti)
 	while (link) {
 		LONG start = link->start;
 		LONG end = link->end;
-		m_statusMsgEdit.SetSel(start, end);
+		m_editErrorMsg.SetSel(start, end);
 		CHARFORMAT2 cf;
 		cf.cbSize = sizeof(cf);
 		cf.dwMask = CFM_LINK;
 		cf.dwEffects = CFE_LINK;
-		m_statusMsgEdit.SetCharFormat(cf, SCF_SELECTION);
+		m_editErrorMsg.SetCharFormat(cf, SCF_SELECTION);
 		link = link->next;
 	}
 }
@@ -858,6 +860,10 @@ LRESULT CMainFrame::OnLinkStatusEdit(LPNMHDR pnmh)
 		LaunchUrl(m_newVersionDownloadUrl);
 		free(m_newVersionDownloadUrl);
 		m_newVersionDownloadUrl = NULL;
+	} else if (LINK_LEARN_MORE_IP_MISMATCH == linkId) {
+		LaunchUrl(LEARN_MORE_IP_MISMATCH_URL);
+	} else if (LINK_LEARN_MORE_IP_TAKEN == linkId) {
+		LaunchUrl(LEARN_MORE_IP_ADDRESS_TAKEN_URL);
 	} else
 		assert(0);
 	SetFocus();
@@ -963,9 +969,9 @@ void CMainFrame::DoLayout()
 	}
 
 	if (m_showStatusMsgEdit)
-		m_statusMsgEdit.ShowWindow(SW_SHOW);
+		m_editErrorMsg.ShowWindow(SW_SHOW);
 	else
-		m_statusMsgEdit.ShowWindow(SW_HIDE);
+		m_editErrorMsg.ShowWindow(SW_HIDE);
 
 	BOOL sendUpdates = GetPrefValBool(g_pref_send_updates);
 	if (sendUpdates)
@@ -1142,8 +1148,8 @@ void CMainFrame::DoLayout()
 	if (m_showStatusMsgEdit) {
 		y += DIVIDER_LINE_Y_OFF;
 		y += EDIT_BOX_Y_OFF;
-		m_statusMsgEdit.MoveWindow(EDIT_MARGIN_X, y, m_statusMsgEditDx, m_statusMsgEditRequestedDy);
-		y += m_statusMsgEditRequestedDy;
+		m_editErrorMsg.MoveWindow(EDIT_MARGIN_X, y, m_editErrorMsgDx, m_editErrorMsgRequestedDy);
+		y += m_editErrorMsgRequestedDy;
 		y += EDIT_BOX_Y_OFF;
 	} else {
 		y += 18;
@@ -1280,8 +1286,8 @@ void CMainFrame::OnSize(UINT nType, CSize /*size*/)
 	BOOL ok = GetClientRect(&clientRect);
 	if (!ok) return;
 	int clientDx = RectDx(clientRect);
-	m_statusMsgEditDx = clientDx - EDIT_MARGIN_X * 2;
-	m_statusMsgEdit.RequestResize();
+	m_editErrorMsgDx = clientDx - EDIT_MARGIN_X * 2;
+	m_editErrorMsg.RequestResize();
 	PostMessage(WMAPP_DO_LAYOUT);
 }
 
@@ -1580,12 +1586,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_buttonUpdate.SetDlgCtrlID(IDC_BUTTON_SEND_IP_UPDATE);
 	//m_buttonChangeAccount.ShowWindow(SW_HIDE);
 
-	m_statusMsgEdit.Create(m_hWnd, r, _T(""), WS_CHILD | WS_VISIBLE | ES_MULTILINE);
-	m_statusMsgEdit.SetReadOnly(TRUE);
-	m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK | ENM_SELCHANGE);
-	//m_statusMsgEdit.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK);
-	m_statusMsgEdit.SetBackgroundColor(colEditBg);
-	m_statusMsgEdit.SetDlgCtrlID(IDC_EDIT_STATUS);
+	m_editErrorMsg.Create(m_hWnd, r, _T(""), WS_CHILD | WS_VISIBLE | ES_MULTILINE);
+	m_editErrorMsg.SetReadOnly(TRUE);
+	m_editErrorMsg.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK | ENM_SELCHANGE);
+	//m_editErrorMsg.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK);
+	m_editErrorMsg.SetBackgroundColor(colEditBg);
+	m_editErrorMsg.SetDlgCtrlID(IDC_EDIT_STATUS);
 
 	if (strempty(g_pref_user_name) ||
 		strempty(g_pref_token))

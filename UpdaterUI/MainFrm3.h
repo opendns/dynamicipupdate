@@ -49,6 +49,8 @@ static bool g_showDebug = false;
 
 // TODO: this url needs to change
 #define ABOUT_URL _T("http://www.opendns.com")
+#define LEARN_MORE_IP_ADDRESS_TAKEN_URL _T("http://www.opendns.com")
+#define LEARN_MORE_IP_MISMATCH_URL _T("http://www.opendns.com")
 #define SETUP_OPENDNS_URL _T("https://www.opendns.com/start/")
 
 #define DEFAULT_FONT_SIZE 12
@@ -167,10 +169,10 @@ public:
 
 	RtfTextInfo		m_rti;
 
-	CRichEditCtrl	m_statusMsgEdit;
+	CRichEditCtrl	m_editErrorMsg;
 	bool			m_showStatusMsgEdit;
-	int				m_statusMsgEditRequestedDy;
-	int				m_statusMsgEditDx;
+	int				m_editErrorMsgRequestedDy;
+	int				m_editErrorMsgDx;
 	int				m_minStatusEditDx;
 	int				m_topBarY;
 	int				m_topBarX;
