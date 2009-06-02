@@ -203,7 +203,7 @@ static bool VerifyUserNamePassword(char *userName, char *pwd)
 	httpResult = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
 	free((void*)paramsTxt);
 
-	if (!httpResult || httpResult->IsValid())
+	if (!httpResult || !httpResult->IsValid())
 		goto Error;
 
 	jsonTxt = (char*)httpResult->data.getData(NULL);
