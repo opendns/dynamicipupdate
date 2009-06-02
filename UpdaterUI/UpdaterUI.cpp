@@ -113,6 +113,7 @@ static void VerifyHostname(char *hostName)
 	char *jsonTxt = NULL;
 	JsonEl *json = NULL;
 	NetworkInfo *ni = NULL;
+	NetworkInfo *dynamicNetwork = NULL;
 
 	CString params = ApiParamsNetworksGet(g_pref_token);
 	const char *paramsTxt = TStrToStr(params);
@@ -151,7 +152,7 @@ static void VerifyHostname(char *hostName)
 		goto Exit;
 	}
 
-	NetworkInfo *dynamicNetwork = FindFirstDynamic(ni);
+	dynamicNetwork = FindFirstDynamic(ni);
 	assert(dynamicNetwork);
 	if (!dynamicNetwork)
 		goto Exit;
@@ -172,6 +173,12 @@ Exit:
 	return;
 
 NoDynamicNetworks:
+	dynamicNetwork = MakeFirstNetworkDynamic(ni);
+	if (dynamicNetwork != NULL) {
+		PrefSetHostname(dynamicNetwork->label);
+		SetPrefVal(&g_pref_user_networks_state, UNS_OK);
+		goto Exit;
+	}
 	SetPrefVal(&g_pref_user_networks_state, UNS_NO_DYNAMIC_IP_NETWORKS);
 	SetPrefVal(&g_pref_hostname, NULL);
 	goto Exit;

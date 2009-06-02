@@ -294,7 +294,6 @@ public:
 
 	void StartDownloadNetworks(char *token, int supressFlags = 0);
 	LRESULT OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/);
-	NetworkInfo *MakeFirstNetworkDynamic(NetworkInfo *ni);
 	NetworkInfo *SelectNetwork(NetworkInfo *ni);
 
 	bool GetLastIpUpdateTime();
@@ -305,6 +304,8 @@ public:
 
 	int OnCreate(LPCREATESTRUCT /* lpCreateStruct */);
 };
+
+NetworkInfo *MakeFirstNetworkDynamic(NetworkInfo *ni);
 
 #endif
 

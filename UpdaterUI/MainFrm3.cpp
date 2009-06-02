@@ -1316,7 +1316,7 @@ static BOOL IsBitSet(int flags, int bit)
 	return false;
 }
 
-NetworkInfo *CMainFrame::MakeFirstNetworkDynamic(NetworkInfo *ni)
+NetworkInfo *MakeFirstNetworkDynamic(NetworkInfo *ni)
 {
 	JsonEl *json = NULL;
 	HttpResult *httpRes = NULL;
@@ -1330,7 +1330,7 @@ NetworkInfo *CMainFrame::MakeFirstNetworkDynamic(NetworkInfo *ni)
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
 	bool apiHostIsHttps = IsApiHostHttps();
-	httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);		
+	httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
 	free((void*)paramsTxt);
 	if (!httpRes || !httpRes->IsValid())
 		goto Error;
