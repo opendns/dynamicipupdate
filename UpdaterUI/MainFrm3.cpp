@@ -429,7 +429,8 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 			// draw line below edit text box
 			y += m_editErrorMsgRequestedDy;
-			y += EDIT_BOX_Y_OFF;
+			y += DIVIDER_LINE_Y_OFF;
+			y += 4;
 			rc.top = y;
 			rc.bottom = y + 1;
 			dc.FillSolidRect(rc, colDivLine);
@@ -671,74 +672,67 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 #endif
 	} else if (NoInternetConnectivity()) {
 		m_showStatusMsgEdit = true;
+		ti.AddParasIfNeeded();
 		ti.AddTxt("Looks like there's no internet connectivity.");
-		ti.AddPara();
-		ti.AddPara();
 	}
 
 	if (IsLoggedIn()) {
 		if (NoNetworksConfigured()) {
 			m_showStatusMsgEdit = true;
+			ti.AddParasIfNeeded();
 			ti.AddTxt("You don't have any networks. First, ");
 			ti.AddLink("add a network", LINK_CONFIGURE_NETWORKS);
 			ti.AddTxt(" in your OpenDNS account. Then ");
 			ti.AddLink("refresh network list.", LINK_SELECT_NETWORK);
-			ti.AddPara();
-			ti.AddPara();
 		} else if (NoDynamicNetworks()) {
 			m_showStatusMsgEdit = true;
+			ti.AddParasIfNeeded();
 			ti.AddTxt("None of your networks is configured for dynamic IP. First, ");
 			ti.AddLink("configure a network", LINK_CONFIGURE_NETWORKS);
 			ti.AddTxt(" for dynamic IP in your OpenDNS account. Then ");
 			ti.AddLink("select a network", LINK_SELECT_NETWORK);
-			ti.AddPara();
-			ti.AddPara();
 		}
 #if 0 // TODO: remove this
 		else if (NetworkNotSelected()) {
 			m_showStatusMsgEdit = true;
+			ti.AddParasIfNeeded();
 			ti.AddTxt("You need to select one of your networks for IP updates. ");
 			ti.AddLink("Select network.", LINK_SELECT_NETWORK);
-			ti.AddPara();
-			ti.AddPara();
 		}
 #endif
 	}
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
 		m_showStatusMsgEdit = true;
+		ti.AddParasIfNeeded();
 		ti.AddTxt(_T("Your IP address is taken by another user. "));
 		ti.AddLink(_T("Learn more."), LINK_LEARN_MORE_IP_TAKEN);
-		ti.AddPara();
-		ti.AddPara();
 	}
 
 	if ((IpUpdateBadAuth == m_ipUpdateResult) || (SE_BAD_AUTH == m_simulatedError)) {
 		m_showStatusMsgEdit = true;
+		ti.AddParasIfNeeded();
 		ti.AddTxt(_T("Your authorization token is invalid."));
-		ti.AddPara();
-		ti.AddPara();
 	}
 
 	bool ipMismatch = DnsVsHttpIpMismatch();
 	if (ipMismatch) {
 		m_showStatusMsgEdit = true;
+		ti.AddParasIfNeeded();
 		ti.AddTxt(_T("Your OpenDNS filtering settings might not work due to DNS IP address ("));
 		ti.AddTxt(m_ipFromDnsStr);
 		ti.AddTxt(_T(") and HTTP IP address ("));
 		ti.AddTxt(m_ipFromHttp);
 		ti.AddTxt(_T(") mismatch. "));
 		ti.AddLink(_T("Learn more."), LINK_LEARN_MORE_IP_MISMATCH);
-		ti.AddPara();
-		ti.AddPara();
 	}
 
 	if (m_newVersionDownloadUrl != NULL) {
 		m_showStatusMsgEdit = true;
+		ti.AddParasIfNeeded();
 		ti.AddTxt(_T("New version is available. "));
 		ti.AddLink(_T("Download"), LINK_DOWNLOAD_NEW_VERSION);
 		ti.AddTxt(_T(" new version"));
-		ti.AddPara(); ti.AddPara();
 	}
 
 	ti.EndStyle();
@@ -747,8 +741,10 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	if (g_showDebug) {
 		m_showStatusMsgEdit = true;
 		if (UsingDevServers()) {
+			ti.AddParasIfNeeded();
 			ti.AddTxt("Using dev api servers ");
 		} else {
+			ti.AddParasIfNeeded();
 			ti.AddTxt("Using production api servers ");
 		}
 		ti.AddLink("(toggle)", LINK_TOGGLE_DEV_PRODUCTION);
@@ -758,12 +754,10 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddLink("Send IP update", LINK_SEND_IP_UPDATE);
 		ti.AddTxt(" ");
 		ti.AddLink("Crash me", LINK_CRASH_ME);
-		ti.AddPara();
 	} else {
 		if (UsingDevServers()) {
 			m_showStatusMsgEdit = true;
 			ti.AddTxt("Using dev api servers.");
-			ti.AddPara();
 		}
 	}
 
@@ -1150,6 +1144,7 @@ void CMainFrame::DoLayout()
 		y += EDIT_BOX_Y_OFF;
 		m_editErrorMsg.MoveWindow(EDIT_MARGIN_X, y, m_editErrorMsgDx, m_editErrorMsgRequestedDy);
 		y += m_editErrorMsgRequestedDy;
+		y += DIVIDER_LINE_Y_OFF;
 		y += EDIT_BOX_Y_OFF;
 	} else {
 		y += 18;

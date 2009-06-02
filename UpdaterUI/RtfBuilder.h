@@ -41,8 +41,11 @@ static inline void RtfLinkInfoFreeList(RtfLinkInfo *head)
 
 class RtfTextInfo
 {
-	int m_currPos;
-	int m_styleNesting;
+	int		m_currPos;
+	int		m_styleNesting;
+	bool	m_empty;
+	int		m_paraCount;
+
 public:
 	CString text;
 	RtfLinkInfo *firstLink;
@@ -57,6 +60,8 @@ public:
 		firstLink = NULL;
 		m_currPos = 0;
 		m_styleNesting = 0;
+		m_empty = true;
+		m_paraCount = 0;
 	}
 
 	void FreeLinks() {
@@ -79,6 +84,8 @@ public:
 	void Init(const TCHAR *defaultFontName, int fontSize) {
 		m_currPos = 0;
 		m_styleNesting = 0;
+		m_empty = true;
+		m_paraCount = 0;
 		FreeLinks();
 
 		text = _T("{\\rtf1");
@@ -150,18 +157,31 @@ public:
 	void AddTxt(const char *s) {
 		text += s;
 		m_currPos += strlen(s);
+		m_empty = false;
+		m_paraCount = 0;
 	}
 
 #ifdef UNICODE
 	void AddTxt(const TCHAR *s) {
 		text += s;
 		m_currPos += tstrlen(s);
+		m_empty = false;
+		m_paraCount = 0;
 	}
 #endif
 
 	void AddPara() {
 		text += "\\par ";
 		m_currPos += 1;
+		m_paraCount += 1;
+	}
+
+	void AddParasIfNeeded() {
+		if (m_empty)
+			return;
+		while (m_paraCount < 2) {
+			AddPara();
+		}
 	}
 
 #ifdef UNICODE
@@ -173,6 +193,8 @@ public:
 		RtfLinkInfo *rli = new RtfLinkInfo(id, linkStart, linkEnd);
 		rli->next = firstLink;
 		firstLink = rli;
+		m_empty = false;
+		m_paraCount = 0;
 	}
 #endif
 
@@ -184,6 +206,8 @@ public:
 		RtfLinkInfo *rli = new RtfLinkInfo(id, linkStart, linkEnd);
 		rli->next = firstLink;
 		firstLink = rli;
+		m_empty = false;
+		m_paraCount = 0;
 	}
 
 	bool FindLinkRange(RtfLinkId id, LONG& start, LONG& end)
