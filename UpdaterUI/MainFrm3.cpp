@@ -13,54 +13,6 @@
 #define TXT_DIV_STATUS _T("Using OpenDNS?")
 #define TXT_DIV_UPDATE _T("Last updated")
 
-static TCHAR *TBufAppend(TCHAR *start, TCHAR *end, TCHAR *toAppend)
-{
-	if (start >= end)
-		return start;
-
-	size_t len = tstrlen(toAppend);
-	size_t maxLen = end - start - 1;
-	if (len > maxLen)
-		len = maxLen;
-	memmove(start, toAppend, len * sizeof(TCHAR));
-	start += len;
-	start[0] = 0;
-	return start;
-}
-
-static TCHAR *FormatNum(TCHAR *cur, TCHAR *end, int num, TCHAR *prefix)
-{
-	TCHAR numBuf[16];
-	_itot(num, numBuf, 10);
-	cur = TBufAppend(cur, end, numBuf);
-	cur = TBufAppend(cur, end, _T(" "));
-	cur = TBufAppend(cur, end, prefix);
-	if (1 != num)
-		cur = TBufAppend(cur, end, _T("s"));
-	return cur;
-}
-
-static TCHAR *FormatUpdateTime(int minutes)
-{
-	TCHAR buf[256];
-
-	int hours = minutes / 60;
-	minutes = minutes - (hours * 60);
-	assert(minutes < 60);
-	assert(minutes >= 0);
-
-	buf[0] = 0;
-	TCHAR *cur = &(buf[0]);
-	TCHAR *end = cur + dimof(buf) - 1;
-
-	if (hours > 0) {
-		cur = FormatNum(cur, end, hours, _T("hr"));
-		cur = FormatNum(cur, end, hours, _T(" "));
-	}
-	cur = FormatNum(cur, end, minutes, _T("minute"));
-	return tstrdup(buf);
-}
-
 static bool HasDynamicNetworkWithLabel(NetworkInfo *head, const char *label)
 {
 	while (head) {

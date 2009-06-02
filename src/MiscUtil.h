@@ -126,6 +126,7 @@ HANDLE GetExplorerOwnerToken(TCHAR **userNameOut, TCHAR **userDomainOut);
 bool IsLeftAltPressed();
 bool IsLeftCtrlPressed();
 bool IsLeftAltAndCtrlPressed();
+TCHAR *FormatUpdateTime(int minutes);
 
 static inline int RectDx(const RECT r)
 {
