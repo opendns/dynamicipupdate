@@ -49,7 +49,7 @@ static TCHAR *FormatUpdateTime(int minutes)
 
 	if (hours > 0) {
 		cur = FormatNum(cur, end, hours, _T("hr"));
-		cur = FormatNum(cur, end, hours, _T(" "));
+		cur = TBufAppend(cur, end, _T(" "));
 	}
 	cur = FormatNum(cur, end, minutes, _T("minute"));
 	return tstrdup(buf);

@@ -536,6 +536,8 @@ bool CMainFrame::IsLoggedIn()
 		return false;
 	if (strempty(g_pref_user_name))
 		return false;
+	if (strempty(g_pref_token))
+		return false;
 	return true;
 }
 
@@ -1606,7 +1608,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	}
 
 	m_updaterThread = new UpdaterThread(this);
-	if (strempty(g_pref_user_networks_state))
+	if (IsLoggedIn() && strempty(g_pref_user_networks_state))
 		ChangeNetwork(SupressAll);
 
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
