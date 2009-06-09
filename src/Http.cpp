@@ -231,7 +231,7 @@ HttpResult* HttpGet(const WCHAR *url)
 	int hostLen = urlPart - url;
 	if (0 == hostLen)
 		return NULL;
-	WCHAR host = WStrDupN(url, hostLen);
+	WCHAR* host = WStrDupN(url, hostLen);
 	if (!host)
 		return NULL;
 	HttpResult *res = HttpGet((const WCHAR*)host, urlPart, https);

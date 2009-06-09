@@ -334,6 +334,17 @@ const char *StrFindChar(const char *txt, char c)
     return txt;
 }
 
+const char *StrFindLastChar(const char *txt, char c)
+{
+	const char *last = NULL;
+    while (*txt) {
+        if (c == *txt)
+			last = txt;
+        ++txt;
+    }
+    return last;
+}
+
 int str_contains(const char *str, char c)
 {
     const char *pos = StrFindChar(str, c);
@@ -539,6 +550,7 @@ BOOL PathStripLastComponentInPlace(TCHAR *s)
 	return false;
 }
 
+/* Return the last character in a zero-terminated string or 0 if empty string */
 TCHAR LastTChar(TCHAR *s)
 {
 	if (!s || !*s)

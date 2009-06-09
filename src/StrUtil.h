@@ -38,10 +38,13 @@ TCHAR* StrToTStr(const char *s);
 WCHAR *StrToWstrSimple(const char *str);
 char *WstrToUtf8(const WCHAR *s);
 void StrSetCopy(char **s, const char *newVal);
+
+const char *StrFindChar(const char *txt, char c);
+const char *StrFindLastChar(const char *txt, char c);
 int TStrFind(TCHAR *s, TCHAR *sub);
 const WCHAR* WStrFindChar(const WCHAR *s, WCHAR c);
+
 bool TStrEndsWithI(TCHAR *s, TCHAR *sub);
-const char *StrFindChar(const char *txt, char c);
 bool TStrContains(TCHAR *s, TCHAR *sub);
 void TStrRemoveAnchorTags(TCHAR *s);
 char *StrUrlEncode(const char *str);

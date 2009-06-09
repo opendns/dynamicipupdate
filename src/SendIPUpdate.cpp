@@ -78,8 +78,35 @@ char* SendIpUpdate()
 
 TCHAR *DownloadUpdateIfNotDownloaded(const char *url)
 {
-	CString downloadFile = AppDataDir();
+	const TCHAR *filePathStr = NULL;
+	const char *fileName = StrFindLastChar(url, '/');
+	if (!fileName)
+		return NULL;
+	CString filePath = AppDataDir();
+	filePath += PATH_SEP_STR;
+	filePath += fileName;
 
+	filePathStr = filePath;
+	if (FileOrDirExists(filePathStr))
+		return tstrdup(filePathStr);
+
+	HttpResult *httpResult = HttpGet(url);
+	if (!httpResult || !httpResult->IsValid())
+		goto Error;
+
+	DWORD size;
+	void *s = httpResult->data.getData(&size);
+	if (!s)
+		goto Error;
+
+	BOOL ok = FileWriteAll(filePathStr, (const char*)s, size);
+	if (!ok)
+		goto Error;
+
+	return tstrdup(filePathStr);
+Error:
+	free((void*)filePathStr);
+	return NULL;
 }
 
 // sends auto-update check. Returns url of the new version to download
