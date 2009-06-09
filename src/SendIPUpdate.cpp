@@ -76,6 +76,12 @@ char* SendIpUpdate()
 }
 #endif
 
+TCHAR *DownloadUpdateIfNotDownloaded(const char *url)
+{
+	CString downloadFile = AppDataDir();
+
+}
+
 // sends auto-update check. Returns url of the new version to download
 // if an update is available or NULL if update is not available
 // (or there was an error getting the upgrade info)

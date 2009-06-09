@@ -212,6 +212,43 @@ HttpResult* HttpGetWithBasicAuth(const char *host, const char *url, const char *
 	return res;
 }
 
+HttpResult* HttpGet(const WCHAR *url)
+{
+	bool https = false;
+	if (WStrStartsWithI(url, L"https://")) {
+		https = true;
+		url += 8; // skip https://
+	} else if (WStrStartsWithI(url, L"http://")) {
+		url += 7; // skip http://
+	} else {
+		// url must start with http:// or https://
+		return NULL;
+	}
+
+	const WCHAR *urlPart = WStrFindChar(url, L'/');
+	if (!urlPart)
+		return NULL;
+	int hostLen = urlPart - url;
+	if (0 == hostLen)
+		return NULL;
+	WCHAR host = WStrDupN(url, hostLen);
+	if (!host)
+		return NULL;
+	HttpResult *res = HttpGet((const WCHAR*)host, urlPart, https);
+	free(host);
+	return res;
+}
+
+HttpResult* HttpGet(const char *url)
+{
+	WCHAR *url2 = StrToWstrSimple(url);
+	HttpResult *res = NULL;
+	if (url2)
+		res = HttpGet(url2);
+	free(url2);
+	return res;
+}
+
 HttpResult* HttpGet(const char *host, const char *url, bool https)
 {
 	WCHAR *host2 = StrToWstrSimple(host);
