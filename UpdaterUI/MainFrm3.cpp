@@ -76,14 +76,14 @@ CMainFrame::CMainFrame()
 	m_minutesSinceLastUpdate = 0;
 	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 	m_updaterThread = NULL;
-	m_newVersionDownloadUrl = NULL;
+	m_newVersionSetupFilepath = NULL;
 }
 
 CMainFrame::~CMainFrame()
 {
 	free(m_ipFromHttp);
 	free(m_editFontName);
-	free(m_newVersionDownloadUrl);
+	free(m_newVersionSetupFilepath);
 	DeleteObject(m_winBgColorBrush);
 }
 
@@ -691,11 +691,11 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddLink(_T("Learn more."), LINK_LEARN_MORE_IP_MISMATCH);
 	}
 
-	if (m_newVersionDownloadUrl != NULL) {
+	if (m_newVersionSetupFilepath != NULL) {
 		m_showStatusMsgEdit = true;
 		ti.AddParasIfNeeded();
 		ti.AddTxt(_T("New version is available. "));
-		ti.AddLink(_T("Download"), LINK_DOWNLOAD_NEW_VERSION);
+		ti.AddLink(_T("Install"), LINK_INSTALL_NEW_VERSION);
 		ti.AddTxt(_T(" new version"));
 	}
 
@@ -814,10 +814,10 @@ LRESULT CMainFrame::OnLinkStatusEdit(LPNMHDR pnmh)
 		UpdateStatusEdit();
 	} else if (LINK_CRASH_ME == linkId) {
 		CrashMe();
-	} else if (LINK_DOWNLOAD_NEW_VERSION == linkId) {
-		LaunchUrl(m_newVersionDownloadUrl);
-		free(m_newVersionDownloadUrl);
-		m_newVersionDownloadUrl = NULL;
+	} else if (LINK_INSTALL_NEW_VERSION == linkId) {
+		LaunchUrl(m_newVersionSetupFilepath);
+		free(m_newVersionSetupFilepath);
+		m_newVersionSetupFilepath = NULL;
 	} else if (LINK_LEARN_MORE_IP_MISMATCH == linkId) {
 		LaunchUrl(LEARN_MORE_IP_MISMATCH_URL);
 	} else if (LINK_LEARN_MORE_IP_TAKEN == linkId) {
@@ -1224,17 +1224,14 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 
 LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
 {
-	m_newVersionDownloadUrl = (TCHAR*)wParam;
+	m_newVersionSetupFilepath = (TCHAR*)wParam;
 	SwitchToVisibleState();
 	return 0;
 }
 
-void CMainFrame::OnNewVersionAvailable(char *updateUrl)
+void CMainFrame::OnNewVersionAvailable(TCHAR *setupFilePath)
 {
-	TCHAR *url = StrToTStr(updateUrl);
-	if (!url)
-		return;
-	PostMessage(WMAPP_NEW_VERSION, (WPARAM)url);
+	PostMessage(WMAPP_NEW_VERSION, (WPARAM)setupFilePath);
 }
 
 void CMainFrame::OnSize(UINT nType, CSize /*size*/)

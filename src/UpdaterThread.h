@@ -24,7 +24,7 @@ class UpdaterThreadObserver
 public:
 	virtual void OnIpCheckResult(IP4_ADDRESS myNewIP) = 0;
 	virtual void OnIpUpdateResult(char *ipUpdateResult) = 0;
-	virtual void OnNewVersionAvailable(char *updateUrl) = 0;
+	virtual void OnNewVersionAvailable(TCHAR *setupFilePath) = 0;
 };
 
 // special values for IP4_ADDRESS
@@ -177,8 +177,11 @@ public:
 		char *url = GetUpdateUrl(version, UpdateCheckVersionCheck);
 		if (!url)
 			return;
-		m_updaterObserver->OnNewVersionAvailable(url);
+
+		TCHAR *filePath = DownloadUpdateIfNotDownloaded(url);
 		free(url);
+		if (filePath)
+			m_updaterObserver->OnNewVersionAvailable(filePath);
 	}
 
 #if 0

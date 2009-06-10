@@ -187,7 +187,7 @@ public:
 	int				m_minutesSinceLastUpdate;
 
 	TCHAR *			m_editFontName;
-	TCHAR *			m_newVersionDownloadUrl;
+	TCHAR *			m_newVersionSetupFilepath;
 
 	//static const COLORREF colWinBg = RGB(0xf9, 0xf9, 0xf9);
 	//static const COLORREF colWinBg = RGB(0xff, 0xff, 0xff);
@@ -244,7 +244,7 @@ public:
 
 	virtual void OnIpCheckResult(IP4_ADDRESS myIp);
 	virtual void OnIpUpdateResult(char *ipUpdateRes);
-	virtual void OnNewVersionAvailable(char *updateUrl);
+	virtual void OnNewVersionAvailable(TCHAR *setupFilePath);
 
 	LRESULT OnNewVersion(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
 

@@ -82,6 +82,7 @@ TCHAR *DownloadUpdateIfNotDownloaded(const char *url)
 	const char *fileName = StrFindLastChar(url, '/');
 	if (!fileName)
 		return NULL;
+	++fileName;
 	CString filePath = AppDataDir();
 	filePath += PATH_SEP_STR;
 	filePath += fileName;
