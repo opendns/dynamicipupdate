@@ -16,6 +16,8 @@
 #include "SimpleLog.h"
 #include "SendIPUpdate.h"
 
+extern bool g_simulate_upgrade;
+
 static const ULONGLONG THREE_HRS_IN_MS =  3*60*60*1000;
 static const ULONGLONG ONE_DAY_IN_MS   = 24*60*60*1000;
 
@@ -242,7 +244,7 @@ public:
 				SendPeriodicUpdate();
 
 			if (ShouldCheckForSoftwareUpgrade())
-				CheckForSoftwareUpgrade();
+				CheckForSoftwareUpgrade(g_simulate_upgrade);
 
 			// int k = StackHungry();
 			WaitForSingleObject(m_event, ONE_MINUTE_IN_MS);

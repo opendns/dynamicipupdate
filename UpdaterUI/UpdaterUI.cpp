@@ -19,6 +19,7 @@
 extern int run_unit_tests();
 
 int simulatedError = SE_NO_ERROR;
+bool g_simulate_upgrade = false;
 
 CAppModule _Module;
 
@@ -377,12 +378,6 @@ void SendCrashDumps()
 	FindClose(h);
 }
 
-static void DoUpgradeCheck()
-{
-	// TODO: implement me
-	::MessageBox(NULL, _T("/simupgradecheck not implemented!"), MAIN_FRAME_TITLE, MB_YESNO);
-}
-
 static void FindSimulatedError(TCHAR *cmdLine)
 {
 	int pos = TStrFind(cmdLine, _T("/simerr"));
@@ -431,8 +426,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 		specialCmd = SPECIAL_CMD_UNINSTALL;
 
 	if (TStrContains(cmdLine, _T("/simupgradecheck")))
-		specialCmd = SPECIAL_CMD_SIM_UPGRADE_CHECK;
-
+		g_simulate_upgrade = true;
+	
 	if (TStrContains(cmdLine, CMD_ARG_SEND_CRASHDUMP))
 		specialCmd = SPECIAL_CMD_SEND_CRASHDUMPS;
 
@@ -479,11 +474,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	}
 
 	GenUidIfNotExists();
-
-	if (SPECIAL_CMD_SIM_UPGRADE_CHECK == specialCmd) {
-		DoUpgradeCheck();
-		goto Exit;
-	}
 
 	if (SPECIAL_CMD_INSTALL == specialCmd) {
 		DoInstallStep();
