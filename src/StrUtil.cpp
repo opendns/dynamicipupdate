@@ -85,6 +85,17 @@ char *strdupn(const char *s, size_t len)
 	return res;
 }
 
+WCHAR *WStrDupN(const WCHAR *s, size_t len)
+{
+	size_t slen = wcslen(s);
+	if (slen < len)
+		len = slen;
+	WCHAR *res = (WCHAR*)malloc((len+1)*sizeof(WCHAR));
+	memmove(res, s, len*sizeof(WCHAR));
+	res[len] = 0;
+	return res;
+}
+
 static void TStrAppend(TCHAR **s, const TCHAR *s2)
 {
 	assert(s);
@@ -196,7 +207,7 @@ WCHAR *TStrToWStr(const TCHAR *s)
 }
 
 /* return true if 'str' starts with 'txt', NOT case-sensitive */
-int  StrStartsWithI(const char *str, const char *txt)
+int StrStartsWithI(const char *str, const char *txt)
 {
     if (!str && !txt)
         return TRUE;
@@ -204,6 +215,18 @@ int  StrStartsWithI(const char *str, const char *txt)
         return FALSE;
 
     if (0 == _strnicmp(str, txt, strlen(txt)))
+        return TRUE;
+    return FALSE;
+}
+
+int WStrStartsWithI(const WCHAR *str, const WCHAR *txt)
+{
+    if (!str && !txt)
+        return TRUE;
+    if (!str || !txt)
+        return FALSE;
+
+    if (0 == _wcsnicmp(str, txt, wcslen(txt)))
         return TRUE;
     return FALSE;
 }
@@ -309,6 +332,17 @@ const char *StrFindChar(const char *txt, char c)
         ++txt;
     }
     return txt;
+}
+
+const char *StrFindLastChar(const char *txt, char c)
+{
+	const char *last = NULL;
+    while (*txt) {
+        if (c == *txt)
+			last = txt;
+        ++txt;
+    }
+    return last;
 }
 
 int str_contains(const char *str, char c)
@@ -427,6 +461,19 @@ int TStrFind(TCHAR *s, TCHAR *sub)
 	return -1;
 }
 
+const WCHAR* WStrFindChar(const WCHAR *s, WCHAR c)
+{
+	if (!s)
+		return NULL;
+	while (*s) {
+		WCHAR c2 = *s;
+		if (c == c2)
+			return s;
+		s++;
+	}
+	return NULL;
+}
+
 bool TStrEndsWithI(TCHAR *s, TCHAR *sub)
 {
 	if (!s || !sub)
@@ -503,6 +550,7 @@ BOOL PathStripLastComponentInPlace(TCHAR *s)
 	return false;
 }
 
+/* Return the last character in a zero-terminated string or 0 if empty string */
 TCHAR LastTChar(TCHAR *s)
 {
 	if (!s || !*s)

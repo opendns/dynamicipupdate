@@ -21,9 +21,11 @@ bool tstreq(const TCHAR *s1, const TCHAR *s2);
 bool tstrieq(const TCHAR *s1, const TCHAR *s2);
 char *StrDupSafe(const char *s);
 char *strdupn(const char *s, size_t len);
+WCHAR *WStrDupN(const WCHAR *s, size_t len);
 TCHAR *tstrdup(const TCHAR *s);
 TCHAR *TStrCat(const TCHAR *s1, const TCHAR *s2 = NULL, const TCHAR *s3 = NULL, const TCHAR *s4 = NULL);
 int  StrStartsWithI(const char *str, const char *txt);
+int  WStrStartsWithI(const WCHAR *str, const WCHAR *txt);
 char *StrHexEncode(const char *s);
 char *StrHexDecode(const char *s);
 void strobf(unsigned char *s);
@@ -36,9 +38,13 @@ TCHAR* StrToTStr(const char *s);
 WCHAR *StrToWstrSimple(const char *str);
 char *WstrToUtf8(const WCHAR *s);
 void StrSetCopy(char **s, const char *newVal);
-int TStrFind(TCHAR *s, TCHAR *sub);
-bool TStrEndsWithI(TCHAR *s, TCHAR *sub);
+
 const char *StrFindChar(const char *txt, char c);
+const char *StrFindLastChar(const char *txt, char c);
+int TStrFind(TCHAR *s, TCHAR *sub);
+const WCHAR* WStrFindChar(const WCHAR *s, WCHAR c);
+
+bool TStrEndsWithI(TCHAR *s, TCHAR *sub);
 bool TStrContains(TCHAR *s, TCHAR *sub);
 void TStrRemoveAnchorTags(TCHAR *s);
 char *StrUrlEncode(const char *str);

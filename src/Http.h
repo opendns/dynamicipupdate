@@ -26,6 +26,9 @@ public:
 	}
 };
 
+HttpResult* HttpGet(const WCHAR *url);
+HttpResult* HttpGet(const char *url);
+
 HttpResult* HttpGet(const WCHAR *host, const WCHAR *url, bool https);
 HttpResult* HttpGet(const char *host, const char *url, bool https);
 

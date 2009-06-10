@@ -33,7 +33,9 @@ static void AddToAutoStart()
 		assert(0);
 		return;
 	}
-	WriteRegStr(HKEY_CURRENT_USER, AUTO_START_KEY_PATH, AUTO_START_KEY_NAME, exePath);
+	TCHAR *s = TStrCat("\"", exePath, "\"", " /autostart");
+	WriteRegStr(HKEY_CURRENT_USER, AUTO_START_KEY_PATH, AUTO_START_KEY_NAME, s);
+	free(s);
 }
 
 static void RemoveFromAutoStart()
@@ -420,6 +422,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 		UseDevServers(true);
 	}
 
+	bool wasAutoStart = TStrContains(cmdLine, _T("/autostart"));
+
 	if (TStrContains(cmdLine, _T("/install")))
 		specialCmd = SPECIAL_CMD_INSTALL;
 
@@ -466,6 +470,14 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	}
 
 	PreferencesLoad();
+
+	// just exit if we auto-started and we won't send updates
+	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
+	if (!sendingUpdates || !CanSendIPUpdates()) {
+		if (wasAutoStart)
+			goto Exit;
+	}
+
 	GenUidIfNotExists();
 
 	if (SPECIAL_CMD_SIM_UPGRADE_CHECK == specialCmd) {
