@@ -10,6 +10,7 @@
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		7FCBDC8A0FE300E9008A54EC /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FCBDC890FE300E9008A54EC /* AppController.m */; };
 		7FCBDC8C0FE30329008A54EC /* menuicon.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7FCBDC8B0FE30329008A54EC /* menuicon.tif */; };
+		7FCBDCBE0FE307A9008A54EC /* opendns.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7FCBDCBD0FE307A9008A54EC /* opendns.icns */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -27,6 +28,7 @@
 		7FCBDC880FE300E9008A54EC /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		7FCBDC890FE300E9008A54EC /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		7FCBDC8B0FE30329008A54EC /* menuicon.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = menuicon.tif; sourceTree = "<group>"; };
+		7FCBDCBD0FE307A9008A54EC /* opendns.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = opendns.icns; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* OpenDNS Updater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OpenDNS Updater.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -102,6 +104,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7FCBDCBD0FE307A9008A54EC /* opendns.icns */,
 				7FCBDC8B0FE30329008A54EC /* menuicon.tif */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
@@ -165,6 +168,7 @@
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
 				7FCBDC8C0FE30329008A54EC /* menuicon.tif in Resources */,
+				7FCBDCBE0FE307A9008A54EC /* opendns.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
