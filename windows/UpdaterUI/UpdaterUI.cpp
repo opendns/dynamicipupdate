@@ -468,10 +468,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 
 	// just exit if we auto-started and we won't send updates
 	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
-	if (!sendingUpdates || !CanSendIPUpdates()) {
-		if (wasAutoStart)
+	if (wasAutoStart && !sendingUpdates)
 			goto Exit;
-	}
 
 	GenUidIfNotExists();
 
