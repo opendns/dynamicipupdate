@@ -2,6 +2,7 @@
 
 @interface AppController : NSObject {
 
+	IBOutlet NSWindow *				windowLogin;
 	IBOutlet NSMenu *				menu;
 
 	IBOutlet NSTextField *			editOpenDnsAccount;
@@ -10,10 +11,11 @@
 	IBOutlet NSProgressIndicator *	progressLogin;
 	IBOutlet NSTextField *			textLoginProgress;
 
+	IBOutlet NSButton *				buttonLogin;
+
 	NSStatusItem *					statusItem;
 	NSImage *						menuIcon;
 }
 
 - (IBAction)login:(id)sender;
-
 @end
