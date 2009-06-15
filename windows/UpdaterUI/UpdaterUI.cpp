@@ -54,7 +54,7 @@ static void SendErrorNotifMsg(int specialCmd)
 	::SendMessage(hwndExisting, g_errorNotifMsg, (WPARAM)specialCmd, 0);
 }
 
-int Run(LPTSTR /* cmdLine */, int /* nCmdShow */)
+int Run(bool show)
 {
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
@@ -66,7 +66,10 @@ int Run(LPTSTR /* cmdLine */, int /* nCmdShow */)
 		return 0;
 
 	wndMain.m_simulatedError = (SimulatedError)simulatedError;
-	wndMain.SwitchToVisibleState();
+	if (show)
+		wndMain.SwitchToVisibleState();
+	else
+		wndMain.SwitchToHiddenState();
 
 	int nRet = theLoop.Run();
 
@@ -395,7 +398,7 @@ static CString LogFileName(const TCHAR *dir)
 	return fileName;
 }
 
-int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cmdLine, int nCmdShow)
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cmdLine, int /* nCmdShow */)
 {
 	int nRet = 0;
 	int specialCmd = SPECIAL_CMD_NONE;
@@ -490,7 +493,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	}
 
 	AddToAutoStart();
-	nRet = Run(cmdLine, nCmdShow);
+	bool showWindow = true;
+	if (wasAutoStart)
+		showWindow = false;
+	nRet = Run(wasAutoStart);
 
 	PreferencesSave();
 Exit:
