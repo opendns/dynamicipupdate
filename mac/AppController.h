@@ -13,7 +13,7 @@
 
 	IBOutlet NSButton *				buttonLogin;
 
-	NSStatusItem *					statusItem;
+	NSStatusItem *					statusItem_;
 	NSImage *						menuIcon;
 }
 
