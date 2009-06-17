@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "AppController.h"
+#import "SBJSON.h"
 
 @interface AppController (Private)
 - (void)setButtonLoginStatus;
