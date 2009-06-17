@@ -4,6 +4,7 @@
 
 #import "AppController.h"
 #import "SBJSON.h"
+#import "GDataHTTPFetcher.h"
 
 @interface AppController (Private)
 - (void)setButtonLoginStatus;
@@ -60,13 +61,31 @@
 	[self setButtonLoginStatus];
 }
 
--(IBAction)login:(id)sender {
+- (void)myFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData
+{
+	[progressLogin stopAnimation: nil];
+}
+
+- (void)myFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error
+{
+	[progressLogin stopAnimation: nil];
+}
+
+- (IBAction)login:(id)sender {
 	if (![self isButtonLoginEnabled])
 		return;
 	[buttonLogin setEnabled: NO];
 	[progressLogin setHidden: NO];
 	[progressLogin startAnimation: nil];
 	[textLoginProgress setHidden: NO];
+	NSString *urlString = @"http://google.com/";
+	NSURL *url = [NSURL URLWithString:urlString];
+	NSURLRequest *request = [NSURLRequest requestWithURL:url];
+	GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
+	[fetcher beginFetchWithDelegate:self
+	               didFinishSelector:@selector(myFetcher:finishedWithData:)
+	                 didFailSelector:@selector(myFetcher:failedWithError:)];
+
 }
 
 @end
