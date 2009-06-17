@@ -9,36 +9,68 @@
 #include <netdb.h>
 
 @interface AppController (Private)
+- (NSString *)getMyIp;
+- (void)ipAddressChanged:(NSString *)newIpAddress;
+- (void)ipChangeThread;
 - (void)setButtonLoginStatus;
 - (BOOL)isButtonLoginEnabled;
 @end
 
+static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
+	if (!s1 && !s2)
+		return YES;
+	if (!s1 || !s2)
+		return NO;
+	return [s1 isEqualToString:s2];
+}
+
 @implementation AppController
 
-- (void)getMyIp {
+- (NSString *)getMyIp {
 	char **addrs;
 	struct hostent *he = gethostbyname("myip.opendns.com");
 	// TODO: notify the user that we don't support ipv6?
 	if (AF_INET != he->h_addrtype)
-		return;
+		return nil;
 	if (4 != he->h_length)
-		return;
+		return nil;
 	addrs = he->h_addr_list;
 	while (*addrs) {
 		unsigned char *a = (unsigned char*)*addrs++;
+		// TODO: could by more efficient by comparing old vs. new as bytes
+		// and only creating NSString when are different
 		NSString *addrTxt = [NSString stringWithFormat:@"%d.%d.%d.%d", a[0], a[1], a[2], a[3]];
+		return [addrTxt autorelease];
 	}
+	return nil;
+}
+
+- (void)ipAddressChanged:(NSString *)newIpAddress {
+	[currentIpAddress_ release];
+	currentIpAddress_ = [newIpAddress copy];
 }
 
 - (void)ipChangeThread {
 	NSAutoreleasePool* myAutoreleasePool = [[NSAutoreleasePool alloc] init];
-	
-	while (!exitIpChangeThread_) {
-		
-		
-	}
+	NSString *currIp = nil;
 
+	while (!exitIpChangeThread_) {
+		NSString *newIp = [self getMyIp];
+		if (!NSStringsEqual(newIp, currIp)) {
+			[currIp release];
+			currIp = [newIp copy];
+			[self performSelectorOnMainThread:@selector(ipAddressChanged:) withObject:currIp waitUntilDone:NO];
+		}
+		[NSThread sleepForTimeInterval:1.0];
+	}
+	[currIp release];
 	[myAutoreleasePool release];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
+	[NSThread detachNewThreadSelector:@selector(ipChangeThread)
+							 toTarget:(id)self
+						   withObject:(id)nil];
 }
 
 - (void)awakeFromNib {
@@ -56,7 +88,7 @@
 	[menuIcon_ release]; 
 
 	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
-	
+
 	NSString *account = [prefs objectForKey: @"account"];
 	NSString *token = [prefs objectForKey: @"token"];
 	if (!account || !token) {
@@ -65,10 +97,10 @@
 	}
 	[self setButtonLoginStatus];
 	
-	[self getMyIp];
+	exitIpChangeThread_ = NO;
 }
 
--(void)dealloc {
+- (void)dealloc {
 	[statusItem_ release];
 	[super dealloc];
 }
@@ -115,6 +147,10 @@
 	[fetcher beginFetchWithDelegate:self
 	               didFinishSelector:@selector(myFetcher:finishedWithData:)
 	                 didFailSelector:@selector(myFetcher:failedWithError:)];
+}
+
+- (void)applicationWillTerminate:(NSNotification*)aNotification {
+	exitIpChangeThread_ = YES;
 }
 
 @end

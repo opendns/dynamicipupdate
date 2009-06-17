@@ -20,6 +20,7 @@
 	NSStatusItem *					statusItem_;
 	NSImage *						menuIcon_;
 	
+	NSString *						currentIpAddress_;
 	BOOL							exitIpChangeThread_;
 }
 
