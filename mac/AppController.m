@@ -48,12 +48,12 @@
 	[statusItem_ setHighlightMode:YES];
 	[statusItem_ setEnabled:YES];
 	[statusItem_ setToolTip:@"OpenDNS Updater"];
-	[statusItem_ setMenu:menu]; 
+	[statusItem_ setMenu:menu_]; 
 	NSBundle *bundle = [NSBundle bundleForClass:[self class]]; 
 	NSString *path = [bundle pathForResource:@"menuicon" ofType:@"tif"]; 
-	menuIcon= [[NSImage alloc] initWithContentsOfFile:path]; 
-	[statusItem_ setImage:menuIcon]; 
-	[menuIcon release]; 
+	menuIcon_= [[NSImage alloc] initWithContentsOfFile:path]; 
+	[statusItem_ setImage:menuIcon_]; 
+	[menuIcon_ release]; 
 
 	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
 	
@@ -61,7 +61,7 @@
 	NSString *token = [prefs objectForKey: @"token"];
 	if (!account || !token) {
 		[NSApp activateIgnoringOtherApps:YES];
-		[windowLogin makeKeyAndOrderFront:self];
+		[windowLogin_ makeKeyAndOrderFront:self];
 	}
 	[self setButtonLoginStatus];
 	
@@ -74,8 +74,8 @@
 }
 
 - (BOOL)isButtonLoginEnabled {
-	NSString *account = [editOpenDnsAccount stringValue];
-	NSString *password = [editOpenDnsPassword stringValue];
+	NSString *account = [editOpenDnsAccount_ stringValue];
+	NSString *password = [editOpenDnsPassword_ stringValue];
 	if (!account || (0 == [account length]))
 		return NO;
 	if (!password || (0 == [password length]))
@@ -84,7 +84,7 @@
 }
 
 - (void)setButtonLoginStatus {
-	[buttonLogin setEnabled:[self isButtonLoginEnabled]];
+	[buttonLogin_ setEnabled:[self isButtonLoginEnabled]];
 }
 
 - (void)controlTextDidChange:(NSNotification*)aNotification {
@@ -93,21 +93,21 @@
 
 - (void)myFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData
 {
-	[progressLogin stopAnimation: nil];
+	[progressLogin_ stopAnimation: nil];
 }
 
 - (void)myFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error
 {
-	[progressLogin stopAnimation: nil];
+	[progressLogin_ stopAnimation: nil];
 }
 
 - (IBAction)login:(id)sender {
 	if (![self isButtonLoginEnabled])
 		return;
-	[buttonLogin setEnabled: NO];
-	[progressLogin setHidden: NO];
-	[progressLogin startAnimation: nil];
-	[textLoginProgress setHidden: NO];
+	[buttonLogin_ setEnabled: NO];
+	[progressLogin_ setHidden: NO];
+	[progressLogin_ startAnimation: nil];
+	[textLoginProgress_ setHidden: NO];
 	NSString *urlString = @"http://google.com/";
 	NSURL *url = [NSURL URLWithString:urlString];
 	NSURLRequest *request = [NSURLRequest requestWithURL:url];
@@ -115,7 +115,6 @@
 	[fetcher beginFetchWithDelegate:self
 	               didFinishSelector:@selector(myFetcher:finishedWithData:)
 	                 didFailSelector:@selector(myFetcher:failedWithError:)];
-
 }
 
 @end

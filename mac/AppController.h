@@ -6,19 +6,19 @@
 
 @interface AppController : NSObject {
 
-	IBOutlet NSWindow *				windowLogin;
-	IBOutlet NSMenu *				menu;
+	IBOutlet NSWindow *				windowLogin_;
+	IBOutlet NSMenu *				menu_;
 
-	IBOutlet NSTextField *			editOpenDnsAccount;
-	IBOutlet NSTextField *			editOpenDnsPassword;
+	IBOutlet NSTextField *			editOpenDnsAccount_;
+	IBOutlet NSTextField *			editOpenDnsPassword_;
 	
-	IBOutlet NSProgressIndicator *	progressLogin;
-	IBOutlet NSTextField *			textLoginProgress;
+	IBOutlet NSProgressIndicator *	progressLogin_;
+	IBOutlet NSTextField *			textLoginProgress_;
 
-	IBOutlet NSButton *				buttonLogin;
+	IBOutlet NSButton *				buttonLogin_;
 
 	NSStatusItem *					statusItem_;
-	NSImage *						menuIcon;
+	NSImage *						menuIcon_;
 	
 	BOOL							exitIpChangeThread_;
 }
