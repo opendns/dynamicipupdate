@@ -19,6 +19,8 @@
 
 	NSStatusItem *					statusItem_;
 	NSImage *						menuIcon;
+	
+	BOOL							exitIpChangeThread_;
 }
 
 - (IBAction)login:(id)sender;

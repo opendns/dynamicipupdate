@@ -6,12 +6,40 @@
 #import "SBJSON.h"
 #import "GDataHTTPFetcher.h"
 
+#include <netdb.h>
+
 @interface AppController (Private)
 - (void)setButtonLoginStatus;
 - (BOOL)isButtonLoginEnabled;
 @end
 
 @implementation AppController
+
+- (void)getMyIp {
+	char **addrs;
+	struct hostent *he = gethostbyname("myip.opendns.com");
+	// TODO: notify the user that we don't support ipv6?
+	if (AF_INET != he->h_addrtype)
+		return;
+	if (4 != he->h_length)
+		return;
+	addrs = he->h_addr_list;
+	while (*addrs) {
+		unsigned char *a = (unsigned char*)*addrs++;
+		NSString *addrTxt = [NSString stringWithFormat:@"%d.%d.%d.%d", a[0], a[1], a[2], a[3]];
+	}
+}
+
+- (void)ipChangeThread {
+	NSAutoreleasePool* myAutoreleasePool = [[NSAutoreleasePool alloc] init];
+	
+	while (!exitIpChangeThread_) {
+		
+		
+	}
+
+	[myAutoreleasePool release];
+}
 
 - (void)awakeFromNib {
 	statusItem_ = [[[NSStatusBar systemStatusBar] 
@@ -36,6 +64,8 @@
 		[windowLogin makeKeyAndOrderFront:self];
 	}
 	[self setButtonLoginStatus];
+	
+	[self getMyIp];
 }
 
 -(void)dealloc {

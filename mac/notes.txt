@@ -1,0 +1,18 @@
+DNSServiceResolve
+DNSServiceQueryRecord
+http://developer.apple.com/documentation/Networking/Conceptual/dns_discovery_api/Articles/resolving.html#//apple_ref/doc/uid/TP40002487
+
+#include <netdb.h>
+extern int h_errno;
+
+struct hostent *gethostbyname(const char *name);
+struct	hostent {
+	char	*h_name;	/* official name of host */
+	char	**h_aliases;	/* alias list */
+	int	h_addrtype;	/* host address type */
+	int	h_length;	/* length of address */
+	char	**h_addr_list;	/* list of addresses from name server */
+#if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+#define	h_addr	h_addr_list[0]	/* address, for backward compatiblity */
+#endif /* (!_POSIX_C_SOURCE || _DARWIN_C_SOURCE) */
+};
