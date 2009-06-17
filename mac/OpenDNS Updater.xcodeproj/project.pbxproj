@@ -14,6 +14,8 @@
 		7F8DA8E20FE86E9E008D1CB0 /* SBJsonBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F8DA8DA0FE86E9E008D1CB0 /* SBJsonBase.m */; };
 		7F8DA8E30FE86E9E008D1CB0 /* SBJsonParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F8DA8DC0FE86E9E008D1CB0 /* SBJsonParser.m */; };
 		7F8DA8E40FE86E9E008D1CB0 /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F8DA8DE0FE86E9E008D1CB0 /* SBJsonWriter.m */; };
+		7F8DA8FA0FE8760C008D1CB0 /* GDataHTTPFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F8DA8F70FE8760C008D1CB0 /* GDataHTTPFetcher.m */; };
+		7F8DA8FB0FE8760C008D1CB0 /* GDataHTTPFetcherLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F8DA8F90FE8760C008D1CB0 /* GDataHTTPFetcherLogging.m */; };
 		7FCBDC8A0FE300E9008A54EC /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FCBDC890FE300E9008A54EC /* AppController.m */; };
 		7FCBDC8C0FE30329008A54EC /* menuicon.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7FCBDC8B0FE30329008A54EC /* menuicon.tif */; };
 		7FCBDCBE0FE307A9008A54EC /* opendns.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7FCBDCBD0FE307A9008A54EC /* opendns.icns */; };
@@ -44,6 +46,11 @@
 		7F8DA8DC0FE86E9E008D1CB0 /* SBJsonParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonParser.m; path = json/SBJsonParser.m; sourceTree = "<group>"; };
 		7F8DA8DD0FE86E9E008D1CB0 /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBJsonWriter.h; path = json/SBJsonWriter.h; sourceTree = "<group>"; };
 		7F8DA8DE0FE86E9E008D1CB0 /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonWriter.m; path = json/SBJsonWriter.m; sourceTree = "<group>"; };
+		7F8DA8F40FE8760C008D1CB0 /* GDataDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GDataDefines.h; path = "gdata-objectivec/GDataDefines.h"; sourceTree = "<group>"; };
+		7F8DA8F60FE8760C008D1CB0 /* GDataHTTPFetcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDataHTTPFetcher.h; sourceTree = "<group>"; };
+		7F8DA8F70FE8760C008D1CB0 /* GDataHTTPFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataHTTPFetcher.m; sourceTree = "<group>"; };
+		7F8DA8F80FE8760C008D1CB0 /* GDataHTTPFetcherLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDataHTTPFetcherLogging.h; sourceTree = "<group>"; };
+		7F8DA8F90FE8760C008D1CB0 /* GDataHTTPFetcherLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataHTTPFetcherLogging.m; sourceTree = "<group>"; };
 		7FCBDC880FE300E9008A54EC /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		7FCBDC890FE300E9008A54EC /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		7FCBDC8B0FE30329008A54EC /* menuicon.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = menuicon.tif; sourceTree = "<group>"; };
@@ -102,6 +109,7 @@
 		29B97314FDCFA39411CA2CEA /* OpenDNS Updater */ = {
 			isa = PBXGroup;
 			children = (
+				7F8DA8F30FE875F6008D1CB0 /* gdata */,
 				7F8DA8D00FE86E8C008D1CB0 /* json */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -160,6 +168,27 @@
 				7F8DA8DE0FE86E9E008D1CB0 /* SBJsonWriter.m */,
 			);
 			name = json;
+			sourceTree = "<group>";
+		};
+		7F8DA8F30FE875F6008D1CB0 /* gdata */ = {
+			isa = PBXGroup;
+			children = (
+				7F8DA8F40FE8760C008D1CB0 /* GDataDefines.h */,
+				7F8DA8F50FE8760C008D1CB0 /* Networking */,
+			);
+			name = gdata;
+			sourceTree = "<group>";
+		};
+		7F8DA8F50FE8760C008D1CB0 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				7F8DA8F60FE8760C008D1CB0 /* GDataHTTPFetcher.h */,
+				7F8DA8F70FE8760C008D1CB0 /* GDataHTTPFetcher.m */,
+				7F8DA8F80FE8760C008D1CB0 /* GDataHTTPFetcherLogging.h */,
+				7F8DA8F90FE8760C008D1CB0 /* GDataHTTPFetcherLogging.m */,
+			);
+			name = Networking;
+			path = "gdata-objectivec/Networking";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -227,6 +256,8 @@
 				7F8DA8E20FE86E9E008D1CB0 /* SBJsonBase.m in Sources */,
 				7F8DA8E30FE86E9E008D1CB0 /* SBJsonParser.m in Sources */,
 				7F8DA8E40FE86E9E008D1CB0 /* SBJsonWriter.m in Sources */,
+				7F8DA8FA0FE8760C008D1CB0 /* GDataHTTPFetcher.m in Sources */,
+				7F8DA8FB0FE8760C008D1CB0 /* GDataHTTPFetcherLogging.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,6 +320,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "STRIP_GDATA_FETCH_LOGGING=1";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -302,6 +334,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = "STRIP_GDATA_FETCH_LOGGING=1";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
