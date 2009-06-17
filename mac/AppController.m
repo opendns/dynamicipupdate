@@ -8,12 +8,16 @@
 
 #include <netdb.h>
 
+#define ONE_MINUTE_INTERVAL 60.0
+
 @interface AppController (Private)
 - (NSString *)getMyIp;
 - (void)ipAddressChanged:(NSString *)newIpAddress;
 - (void)ipChangeThread;
 - (void)setButtonLoginStatus;
 - (BOOL)isButtonLoginEnabled;
+- (BOOL)shouldSendPeriodicUpdate;
+- (void)sendPeriodicUpdate;
 @end
 
 static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
@@ -50,6 +54,14 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	currentIpAddress_ = [newIpAddress copy];
 }
 
+- (BOOL)shouldSendPeriodicUpdate {
+	return NO;
+}
+
+- (void)sendPeriodicUpdate {
+	
+}
+
 - (void)ipChangeThread {
 	NSAutoreleasePool* myAutoreleasePool = [[NSAutoreleasePool alloc] init];
 	NSString *currIp = nil;
@@ -61,7 +73,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 			currIp = [newIp copy];
 			[self performSelectorOnMainThread:@selector(ipAddressChanged:) withObject:currIp waitUntilDone:NO];
 		}
-		[NSThread sleepForTimeInterval:1.0];
+
+		if ([self shouldSendPeriodicUpdate]) {
+			[self sendPeriodicUpdate];
+		}
+
+		[NSThread sleepForTimeInterval:ONE_MINUTE_INTERVAL];
 	}
 	[currIp release];
 	[myAutoreleasePool release];
