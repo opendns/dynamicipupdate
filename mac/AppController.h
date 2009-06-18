@@ -25,4 +25,6 @@
 }
 
 - (IBAction)login:(id)sender;
+- (IBAction)preferences:(id)sender;
+
 @end
