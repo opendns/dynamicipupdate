@@ -13,6 +13,9 @@
 
 #define ONE_MINUTE_INTERVAL 60.0
 
+NSString * PREF_ACCOUNT = @"account";
+NSString * PREF_TOKEN = @"token";
+
 @interface AppController (Private)
 - (NSString *)getMyIp;
 - (void)ipAddressChanged:(NSString *)newIpAddress;
@@ -113,8 +116,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
 
-	NSString *account = [prefs objectForKey: @"account"];
-	NSString *token = [prefs objectForKey: @"token"];
+	NSString *account = [prefs objectForKey: PREF_ACCOUNT];
+	NSString *token = [prefs objectForKey: PREF_TOKEN];
 	if (!account || !token) {
 		[NSApp activateIgnoringOtherApps:YES];
 		[windowLogin_ makeKeyAndOrderFront:self];
@@ -170,8 +173,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 		goto Error;
 
 	NSString *account = [editOpenDnsAccount_ stringValue];
-	[[NSUserDefaults standardUserDefaults] setObject:token forKey:@"token"];
-	[[NSUserDefaults standardUserDefaults] setObject:account forKey:@"username"];
+	[[NSUserDefaults standardUserDefaults] setObject:token forKey:PREF_TOKEN];
+	[[NSUserDefaults standardUserDefaults] setObject:account forKey:PREF_ACCOUNT];
 	[self downloadNetworksForAccount:account withToken:token];
 	return;
 Error:
@@ -229,6 +232,14 @@ Error:
 
 - (IBAction)loginWindowAbout:(id)sender {
 	// TODO: implement me
+}
+
+- (IBAction)selectNetworkCancel:(id)sender {
+
+}
+
+- (IBAction)selectNetworkSelect:(id)sender {
+	
 }
 
 @end

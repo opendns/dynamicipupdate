@@ -4,10 +4,13 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString * PREF_ACCOUNT;
+extern NSString * PREF_TOKEN;
+
 @interface AppController : NSObject {
 
+	// stuff related to login window
 	IBOutlet NSWindow *				windowLogin_;
-	IBOutlet NSMenu *				menu_;
 
 	IBOutlet NSTextField *			editOpenDnsAccount_;
 	IBOutlet NSTextField *			editOpenDnsPassword_;
@@ -18,9 +21,16 @@
 
 	IBOutlet NSButton *				buttonLogin_;
 
+	// stuff related to select network window
+	IBOutlet NSWindow *				windowSelectNetwork_;
+	IBOutlet NSTableView *			tableNetworksList_;
+
+	// menu-related stuff
+	IBOutlet NSMenu *				menu_;
 	NSStatusItem *					statusItem_;
 	NSImage *						menuIcon_;
-	
+
+	// program state
 	NSString *						currentIpAddress_;
 	BOOL							exitIpChangeThread_;
 }
@@ -29,5 +39,7 @@
 - (IBAction)preferences:(id)sender;
 - (IBAction)quit:(id)sender;
 - (IBAction)loginWindowAbout:(id)sender;
+- (IBAction)selectNetworkCancel:(id)sender;
+- (IBAction)selectNetworkSelect:(id)sender;
 
 @end
