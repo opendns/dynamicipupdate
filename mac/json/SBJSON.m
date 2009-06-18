@@ -182,11 +182,11 @@
 
 #pragma mark Properties - parsing
 
-- (NSUInteger)maxDepth {
+- (long)maxDepth {
     return jsonParser.maxDepth;
 }
 
-- (void)setMaxDepth:(NSUInteger)d {
+- (void)setMaxDepth:(long)d {
      jsonWriter.maxDepth = jsonParser.maxDepth = d;
 }
 

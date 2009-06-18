@@ -45,7 +45,8 @@
  JSON with linebreaks after each array value and dictionary key/value pair, indented two
  spaces per nesting level.
  */
-@property BOOL humanReadable;
+- (BOOL)humanReadable;
+- (void)setHumanReadable:(BOOL)aFlag;
 
 /**
  @brief Whether or not to sort the dictionary keys in the output.
@@ -53,7 +54,8 @@
  If this is set to YES, the dictionary keys in the JSON output will be in sorted order.
  (This is useful if you need to compare two structures, for example.) The default is NO.
  */
-@property BOOL sortKeys;
+- (BOOL)sortKeys;
+- (void)setSortKeys:(BOOL)aFlag;
 
 /**
  @brief Return JSON representation (or fragment) for the given object.

@@ -42,8 +42,21 @@
 
 @implementation SBJsonWriter
 
-@synthesize sortKeys;
-@synthesize humanReadable;
+- (BOOL)sortKeys {
+	return sortKeys;
+}
+
+- (void)setSortKeys:(BOOL)aFlag {
+	sortKeys = aFlag;
+}
+
+- (BOOL)humanReadable {
+	return humanReadable;
+}
+
+- (void)setHumanReadable:(BOOL)aFlag {
+	humanReadable = aFlag;
+}
 
 /**
  @deprecated This exists in order to provide fragment support in older APIs in one more version.
@@ -60,7 +73,6 @@
     return nil;
 }
 
-
 - (NSString*)stringWithObject:(id)value {
     
     if ([value isKindOfClass:[NSDictionary class]] || [value isKindOfClass:[NSArray class]]) {
@@ -71,7 +83,6 @@
     [self addErrorWithCode:EFRAGMENT description:@"Not valid type for JSON"];
     return nil;
 }
-
 
 - (NSString*)indent {
     return [@"\n" stringByPaddingToLength:1 + 2 * depth withString:@" " startingAtIndex:0];
@@ -115,8 +126,10 @@
     }
     [json appendString:@"["];
     
-    BOOL addComma = NO;    
-    for (id value in fragment) {
+    BOOL addComma = NO;
+	unsigned i, len = [fragment count];
+    for (i = 0; i < len; i++) {
+		id value = [fragment objectAtIndex:i];
         if (addComma)
             [json appendString:@","];
         else
@@ -147,10 +160,12 @@
     NSString *colon = [self humanReadable] ? @" : " : @":";
     BOOL addComma = NO;
     NSArray *keys = [fragment allKeys];
-    if (self.sortKeys)
+    if ([self sortKeys])
         keys = [keys sortedArrayUsingSelector:@selector(compare:)];
     
-    for (id value in keys) {
+	unsigned i, len = [keys count];
+    for (i = 0; i < len; i++) {
+		id value = [keys objectAtIndex:i];
         if (addComma)
             [json appendString:@","];
         else
@@ -197,8 +212,8 @@
         [json appendString:fragment];
         
     } else {
-        NSUInteger length = [fragment length];
-        for (NSUInteger i = 0; i < length; i++) {
+        unsigned length = [fragment length];
+        for (unsigned i = 0; i < length; i++) {
             unichar uc = [fragment characterAtIndex:i];
             switch (uc) {
                 case '"':   [json appendString:@"\\\""];       break;
@@ -223,6 +238,5 @@
     [json appendString:@"\""];
     return YES;
 }
-
 
 @end

@@ -170,4 +170,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	exitIpChangeThread_ = YES;
 }
 
+- (IBAction)preferences:(id)sender {
+	// TODO: implement me
+}
 @end
