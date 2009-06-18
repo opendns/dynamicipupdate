@@ -78,7 +78,9 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 			[self sendPeriodicUpdate];
 		}
 
-		[NSThread sleepForTimeInterval:ONE_MINUTE_INTERVAL];
+		NSDate *inOneMinute = [NSDate date];
+		[inOneMinute addTimeInterval:ONE_MINUTE_INTERVAL];
+		[NSThread sleepUntilDate:inOneMinute];
 	}
 	[currIp release];
 	[myAutoreleasePool release];

@@ -30,7 +30,6 @@
 #import "SBJsonBase.h"
 NSString * SBJSONErrorDomain = @"org.brautaset.JSON.ErrorDomain";
 
-
 @implementation SBJsonBase
 
 - (long)maxDepth {
