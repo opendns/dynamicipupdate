@@ -5,8 +5,11 @@
 #import "AppController.h"
 #import "SBJSON.h"
 #import "GDataHTTPFetcher.h"
+#import "ApiKey.h"
 
 #include <netdb.h>
+
+#define API_HOST @"https://api.opendns.com/v1/"
 
 #define ONE_MINUTE_INTERVAL 60.0
 
@@ -18,6 +21,7 @@
 - (BOOL)isButtonLoginEnabled;
 - (BOOL)shouldSendPeriodicUpdate;
 - (void)sendPeriodicUpdate;
+- (NSString*)apiSignInStringForAccount:(NSString*)userName withPassword:(NSString*)password;
 @end
 
 static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
@@ -145,11 +149,25 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (void)myFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData
 {
 	[progressLogin_ stopAnimation: nil];
+	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
+	SBJSON *parser = [[SBJSON alloc] init];
+	id json = [parser objectWithString:s];
+	[parser release];
+	if (![json isKindOfClass:[NSDictionary class]])
+		return;
 }
 
 - (void)myFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error
 {
 	[progressLogin_ stopAnimation: nil];
+}
+
+- (NSString*)apiSignInStringForAccount:(NSString*)account withPassword:(NSString*)password {
+	NSMutableString *url = [NSMutableString stringWithFormat: API_HOST];
+	NSString *accountEncoded = [account stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSString *passwordEncoded = [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	[url appendFormat:@"api_key=%@&method=account_signin&username=%@&password=%@", API_KEY, accountEncoded, passwordEncoded];
+	return url;
 }
 
 - (IBAction)login:(id)sender {
@@ -159,10 +177,13 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[progressLogin_ setHidden: NO];
 	[progressLogin_ startAnimation: nil];
 	[textLoginProgress_ setHidden: NO];
-	NSString *urlString = @"http://google.com/";
-	NSURL *url = [NSURL URLWithString:urlString];
+	NSString *account = [editOpenDnsAccount_ stringValue];
+	NSString *password = [editOpenDnsPassword_ stringValue];
+	NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
+	NSURL *url = [NSURL URLWithString:API_HOST];
 	NSURLRequest *request = [NSURLRequest requestWithURL:url];
 	GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
+	[fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
 	[fetcher beginFetchWithDelegate:self
 	               didFinishSelector:@selector(myFetcher:finishedWithData:)
 	                 didFailSelector:@selector(myFetcher:failedWithError:)];
