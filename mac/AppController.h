@@ -14,6 +14,7 @@
 	
 	IBOutlet NSProgressIndicator *	progressLogin_;
 	IBOutlet NSTextField *			textLoginProgress_;
+	IBOutlet NSTextField *			textLoginError_;
 
 	IBOutlet NSButton *				buttonLogin_;
 
@@ -26,5 +27,7 @@
 
 - (IBAction)login:(id)sender;
 - (IBAction)preferences:(id)sender;
+- (IBAction)quit:(id)sender;
+- (IBAction)loginWindowAbout:(id)sender;
 
 @end

@@ -22,6 +22,7 @@
 - (BOOL)shouldSendPeriodicUpdate;
 - (void)sendPeriodicUpdate;
 - (NSString*)apiSignInStringForAccount:(NSString*)userName withPassword:(NSString*)password;
+- (void)showLoginError;
 @end
 
 static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
@@ -146,28 +147,53 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[self setButtonLoginStatus];
 }
 
-- (void)myFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData
-{
-	[progressLogin_ stopAnimation: nil];
-	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
-	SBJSON *parser = [[SBJSON alloc] init];
-	id json = [parser objectWithString:s];
-	[parser release];
-	if (![json isKindOfClass:[NSDictionary class]])
-		return;
+- (void)downloadNetworksForAccount:(NSString *)account withToken:(NSString*)token {
+	// TODO: implement me, my good friend
 }
 
-- (void)myFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error
-{
+- (void)myFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
 	[progressLogin_ stopAnimation: nil];
+	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
+	SBJSON *parser = [[[SBJSON alloc] init] autorelease];
+	id json = [parser objectWithString:s];
+	if (![json isKindOfClass:[NSDictionary class]])
+		goto Error;
+
+	NSString *s2 = [json objectForKey:@"status"];
+	if (![s2 isEqualToString:@"success"])
+		goto Error;
+	NSDictionary *response = [json objectForKey:@"response"];
+	if (!response)
+		goto Error;
+	NSString *token = [response objectForKey:@"token"];
+	if (!token)
+		goto Error;
+
+	NSString *account = [editOpenDnsAccount_ stringValue];
+	[[NSUserDefaults standardUserDefaults] setObject:token forKey:@"token"];
+	[[NSUserDefaults standardUserDefaults] setObject:account forKey:@"username"];
+	[self downloadNetworksForAccount:account withToken:token];
+	return;
+Error:
+	[self showLoginError];	
+}
+
+- (void)myFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
+	[self showLoginError];
 }
 
 - (NSString*)apiSignInStringForAccount:(NSString*)account withPassword:(NSString*)password {
-	NSMutableString *url = [NSMutableString stringWithFormat: API_HOST];
 	NSString *accountEncoded = [account stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 	NSString *passwordEncoded = [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-	[url appendFormat:@"api_key=%@&method=account_signin&username=%@&password=%@", API_KEY, accountEncoded, passwordEncoded];
+	NSString *url = [NSString stringWithFormat:@"api_key=%@&method=account_signin&username=%@&password=%@", API_KEY, accountEncoded, passwordEncoded];
 	return url;
+}
+
+- (void)showLoginError {
+	[progressLogin_ stopAnimation: nil];
+	[progressLogin_ setHidden:YES];
+	[textLoginProgress_ setHidden:YES];
+	[textLoginError_ setHidden:NO];
 }
 
 - (IBAction)login:(id)sender {
@@ -196,4 +222,13 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (IBAction)preferences:(id)sender {
 	// TODO: implement me
 }
+
+- (IBAction)quit:(id)sender {
+	[NSApp terminate:self];
+}
+
+- (IBAction)loginWindowAbout:(id)sender {
+	// TODO: implement me
+}
+
 @end
