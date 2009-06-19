@@ -10,6 +10,11 @@ extern NSString * PREF_HOSTNAME;
 extern NSString * PREF_SEND_UPDATES;
 extern NSString * PREF_USER_NETWORKS_STATE;
 
+extern NSString * UNS_OK;
+extern NSString * UNS_NO_NETWORKS;
+extern NSString * UNS_NO_DYNAMIC_IP_NETWORKS;
+extern NSString * UNS_NO_NETWORK_SELECTED;
+
 @interface AppController : NSObject {
 
 	// stuff related to login window
@@ -42,10 +47,10 @@ extern NSString * PREF_USER_NETWORKS_STATE;
 }
 
 - (IBAction)login:(id)sender;
-- (IBAction)preferences:(id)sender;
 - (IBAction)quit:(id)sender;
 - (IBAction)loginWindowAbout:(id)sender;
 - (IBAction)selectNetworkCancel:(id)sender;
 - (IBAction)selectNetworkSelect:(id)sender;
+- (IBAction)showStatusWindow:(id)sender;
 
 @end

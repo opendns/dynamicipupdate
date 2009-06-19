@@ -19,6 +19,15 @@ NSString * PREF_HOSTNAME = @"hostname";
 NSString * PREF_SEND_UPDATES = @"sendUpdates";
 NSString * PREF_USER_NETWORKS_STATE = @"networksState";
 
+// selected a network or we're using a default network
+NSString * UNS_OK = @"unsok";
+// doesn't have any networks
+NSString * UNS_NO_NETWORKS = @"unsnonet";
+// has networks but none of them is configured for dynamic ips
+NSString * UNS_NO_DYNAMIC_IP_NETWORKS = @"unsnodynip";
+// has networks but didn't select any yet
+NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
+
 @interface AppController (Private)
 - (NSString *)getMyIp;
 - (void)ipAddressChanged:(NSString *)newIpAddress;
@@ -33,7 +42,6 @@ NSString * PREF_USER_NETWORKS_STATE = @"networksState";
 - (void)showLoginWindow;
 - (void)downloadNetworks:(NSString*)token;
 - (BOOL)networksConfigured;
-- (void)showStatusWindow;
 @end
 
 static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
@@ -137,10 +145,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	exitIpChangeThread_ = NO;
 
-	[self showStatusWindow];
-	return;
 	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
-
 	NSString *account = [prefs objectForKey: PREF_ACCOUNT];
 	NSString *token = [prefs objectForKey: PREF_TOKEN];
 	if (!account || !token) {
@@ -152,7 +157,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 		[self downloadNetworks:token];
 		return;
 	}
-	[self showStatusWindow];
+	[self showStatusWindow:nil];
 }
 
 - (BOOL)networksConfigured {
@@ -160,12 +165,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	return NO;
 }
 
-- (void)showStatusWindow {
+- (void)showStatusWindow:(id)sender {
 	[windowStatus_ makeKeyAndOrderFront:self];
 }
 
 - (void)showLoginWindow {
-	//[NSApp activateIgnoringOtherApps:YES];
+	[NSApp activateIgnoringOtherApps:YES];
 	[windowLogin_ makeKeyAndOrderFront:self];	
 }
 
@@ -284,10 +289,6 @@ Error:
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification {
 	exitIpChangeThread_ = YES;
-}
-
-- (IBAction)preferences:(id)sender {
-	// TODO: implement me
 }
 
 - (IBAction)quit:(id)sender {
