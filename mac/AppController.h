@@ -6,8 +6,9 @@
 
 extern NSString * PREF_ACCOUNT;
 extern NSString * PREF_TOKEN;
-extern NSString * PREF_NETWORK;
-
+extern NSString * PREF_HOSTNAME;
+extern NSString * PREF_SEND_UPDATES;
+extern NSString * PREF_USER_NETWORKS_STATE;
 
 @interface AppController : NSObject {
 
@@ -26,6 +27,9 @@ extern NSString * PREF_NETWORK;
 	// stuff related to select network window
 	IBOutlet NSWindow *				windowSelectNetwork_;
 	IBOutlet NSTableView *			tableNetworksList_;
+
+	// stuff related to status window
+	IBOutlet NSWindow *				windowStatus_;
 
 	// menu-related stuff
 	IBOutlet NSMenu *				menu_;

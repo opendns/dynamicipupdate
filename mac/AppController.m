@@ -15,7 +15,9 @@
 
 NSString * PREF_ACCOUNT = @"account";
 NSString * PREF_TOKEN = @"token";
-NSString * PREF_NETWORK = @"network";
+NSString * PREF_HOSTNAME = @"hostname";
+NSString * PREF_SEND_UPDATES = @"sendUpdates";
+NSString * PREF_USER_NETWORKS_STATE = @"networksState";
 
 @interface AppController (Private)
 - (NSString *)getMyIp;
@@ -29,6 +31,9 @@ NSString * PREF_NETWORK = @"network";
 - (NSString*)apiGetNetworksStringForToken:(NSString*)token;
 - (void)showLoginError;
 - (void)showLoginWindow;
+- (void)downloadNetworks:(NSString*)token;
+- (BOOL)networksConfigured;
+- (void)showStatusWindow;
 @end
 
 static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
@@ -132,6 +137,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	exitIpChangeThread_ = NO;
 
+	[self showStatusWindow];
+	return;
 	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
 
 	NSString *account = [prefs objectForKey: PREF_ACCOUNT];
@@ -140,11 +147,25 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 		[self showLoginWindow];
 		return;
 	}
-	[self setButtonLoginStatus];
+
+	if (![self networksConfigured]) {
+		[self downloadNetworks:token];
+		return;
+	}
+	[self showStatusWindow];
+}
+
+- (BOOL)networksConfigured {
+	// TODO: implement me
+	return NO;
+}
+
+- (void)showStatusWindow {
+	[windowStatus_ makeKeyAndOrderFront:self];
 }
 
 - (void)showLoginWindow {
-	[NSApp activateIgnoringOtherApps:YES];
+	//[NSApp activateIgnoringOtherApps:YES];
 	[windowLogin_ makeKeyAndOrderFront:self];	
 }
 
@@ -192,7 +213,7 @@ Error:
 	// TODO: implement me
 }
 
-- (void)downloadNetworksForAccount:(NSString *)account withToken:(NSString*)token {
+- (void)downloadNetworks:(NSString*)token {
 	NSString *apiString = [self apiGetNetworksStringForToken:token];
 	NSURL *url = [NSURL URLWithString:API_HOST];
 	NSURLRequest *request = [NSURLRequest requestWithURL:url];
@@ -225,7 +246,7 @@ Error:
 	NSString *account = [editOpenDnsAccount_ stringValue];
 	[[NSUserDefaults standardUserDefaults] setObject:token forKey:PREF_TOKEN];
 	[[NSUserDefaults standardUserDefaults] setObject:account forKey:PREF_ACCOUNT];
-	[self downloadNetworksForAccount:account withToken:token];
+	[self downloadNetworks:token];
 	return;
 Error:
 	[self showLoginError];	
