@@ -15,6 +15,7 @@
 
 NSString * PREF_ACCOUNT = @"account";
 NSString * PREF_TOKEN = @"token";
+NSString * PREF_NETWORK = @"network";
 
 @interface AppController (Private)
 - (NSString *)getMyIp;
@@ -25,7 +26,9 @@ NSString * PREF_TOKEN = @"token";
 - (BOOL)shouldSendPeriodicUpdate;
 - (void)sendPeriodicUpdate;
 - (NSString*)apiSignInStringForAccount:(NSString*)userName withPassword:(NSString*)password;
+- (NSString*)apiGetNetworksStringForToken:(NSString*)token;
 - (void)showLoginError;
+- (void)showLoginWindow;
 @end
 
 static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
@@ -37,6 +40,19 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 @implementation AppController
+
+- (NSString*)apiSignInStringForAccount:(NSString*)account withPassword:(NSString*)password {
+	NSString *accountEncoded = [account stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSString *passwordEncoded = [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSString *url = [NSString stringWithFormat:@"api_key=%@&method=account_signin&username=%@&password=%@", API_KEY, accountEncoded, passwordEncoded];
+	return url;
+}
+
+- (NSString*)apiGetNetworksStringForToken:(NSString*)token {
+	NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+	NSString *url = [NSString stringWithFormat:@"api_key=%@&method=networks_get&token=%@", API_KEY, tokenEncoded];
+	return url;
+}
 
 - (NSString *)getMyIp {
 	char **addrs;
@@ -114,17 +130,22 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[statusItem_ setImage:menuIcon_]; 
 	[menuIcon_ release]; 
 
+	exitIpChangeThread_ = NO;
+
 	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
 
 	NSString *account = [prefs objectForKey: PREF_ACCOUNT];
 	NSString *token = [prefs objectForKey: PREF_TOKEN];
 	if (!account || !token) {
-		[NSApp activateIgnoringOtherApps:YES];
-		[windowLogin_ makeKeyAndOrderFront:self];
+		[self showLoginWindow];
+		return;
 	}
 	[self setButtonLoginStatus];
-	
-	exitIpChangeThread_ = NO;
+}
+
+- (void)showLoginWindow {
+	[NSApp activateIgnoringOtherApps:YES];
+	[windowLogin_ makeKeyAndOrderFront:self];	
 }
 
 - (void)dealloc {
@@ -150,11 +171,40 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[self setButtonLoginStatus];
 }
 
-- (void)downloadNetworksForAccount:(NSString *)account withToken:(NSString*)token {
-	// TODO: implement me, my good friend
+- (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
+	SBJSON *parser = [[[SBJSON alloc] init] autorelease];
+	id json = [parser objectWithString:s];
+	if (![json isKindOfClass:[NSDictionary class]])
+		goto Error;
+	
+	NSString *s2 = [json objectForKey:@"status"];
+	if (![s2 isEqualToString:@"success"])
+		goto Error;
+	NSDictionary *response = [json objectForKey:@"response"];
+	if (!response)
+		goto Error;
+Error:
+	NSLog(@"Error");
 }
 
-- (void)myFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+- (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
+	// TODO: implement me
+}
+
+- (void)downloadNetworksForAccount:(NSString *)account withToken:(NSString*)token {
+	NSString *apiString = [self apiGetNetworksStringForToken:token];
+	NSURL *url = [NSURL URLWithString:API_HOST];
+	NSURLRequest *request = [NSURLRequest requestWithURL:url];
+	GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
+	[fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
+	[fetcher beginFetchWithDelegate:self
+				  didFinishSelector:@selector(getNetworksFetcher:finishedWithData:)
+					didFailSelector:@selector(getNetworksFetcher:failedWithError:)];
+	
+}
+
+- (void)loginFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
 	[progressLogin_ stopAnimation: nil];
 	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
 	SBJSON *parser = [[[SBJSON alloc] init] autorelease];
@@ -181,15 +231,8 @@ Error:
 	[self showLoginError];	
 }
 
-- (void)myFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
+- (void)loginFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
 	[self showLoginError];
-}
-
-- (NSString*)apiSignInStringForAccount:(NSString*)account withPassword:(NSString*)password {
-	NSString *accountEncoded = [account stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-	NSString *passwordEncoded = [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-	NSString *url = [NSString stringWithFormat:@"api_key=%@&method=account_signin&username=%@&password=%@", API_KEY, accountEncoded, passwordEncoded];
-	return url;
 }
 
 - (void)showLoginError {
@@ -214,8 +257,8 @@ Error:
 	GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
 	[fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
 	[fetcher beginFetchWithDelegate:self
-	               didFinishSelector:@selector(myFetcher:finishedWithData:)
-	                 didFailSelector:@selector(myFetcher:failedWithError:)];
+	               didFinishSelector:@selector(loginFetcher:finishedWithData:)
+	                 didFailSelector:@selector(loginFetcher:failedWithError:)];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification {

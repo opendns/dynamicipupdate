@@ -6,6 +6,8 @@
 
 extern NSString * PREF_ACCOUNT;
 extern NSString * PREF_TOKEN;
+extern NSString * PREF_NETWORK;
+
 
 @interface AppController : NSObject {
 
