@@ -8,7 +8,9 @@
 		<string key="IBDocument.HIToolboxVersion">353.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="506"/>
+			<integer value="515"/>
+			<integer value="371"/>
+			<integer value="525"/>
 			<integer value="57"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
@@ -84,7 +86,7 @@
 				<nil key="NSViewClass"/>
 				<string key="NSWindowContentMaxSize">{3.40282e+38, 3.40282e+38}</string>
 				<object class="NSView" key="NSWindowView" id="439893737">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -294,6 +296,7 @@
 						</object>
 					</object>
 					<string key="NSFrameSize">{482, 190}</string>
+					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMaxSize">{3.40282e+38, 3.40282e+38}</string>
@@ -307,7 +310,7 @@
 			<object class="NSWindowTemplate" id="321919400">
 				<int key="NSWindowStyleMask">11</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{196, 174}, {277, 336}}</string>
+				<string key="NSWindowRect">{{346, 366}, {277, 336}}</string>
 				<int key="NSWTFlags">1677721600</int>
 				<string key="NSWindowTitle">Select network</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -387,7 +390,7 @@
 										<object class="NSTableView" id="251558370">
 											<reference key="NSNextResponder" ref="626631159"/>
 											<int key="NSvFlags">256</int>
-											<string key="NSFrameSize">{220, 229}</string>
+											<string key="NSFrameSize">{235, 229}</string>
 											<reference key="NSSuperview" ref="626631159"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="_NSCornerView" key="NSCornerView">
@@ -435,9 +438,8 @@
 														</object>
 														<reference key="NSTextColor" ref="696357675"/>
 													</object>
-													<int key="NSResizingMask">3</int>
+													<int key="NSResizingMask">1</int>
 													<bool key="NSIsResizeable">YES</bool>
-													<bool key="NSIsEditable">YES</bool>
 													<reference key="NSTableView" ref="251558370"/>
 												</object>
 											</object>
@@ -461,7 +463,7 @@
 											<bool key="NSAllowsTypeSelect">YES</bool>
 										</object>
 									</object>
-									<string key="NSFrame">{{1, 1}, {220, 229}}</string>
+									<string key="NSFrame">{{1, 1}, {235, 229}}</string>
 									<reference key="NSSuperview" ref="543522648"/>
 									<reference key="NSNextKeyView" ref="251558370"/>
 									<reference key="NSDocView" ref="251558370"/>
@@ -470,7 +472,7 @@
 								</object>
 								<object class="NSScroller" id="270818115">
 									<reference key="NSNextResponder" ref="543522648"/>
-									<int key="NSvFlags">256</int>
+									<int key="NSvFlags">-2147483392</int>
 									<string key="NSFrame">{{221, 1}, {15, 229}}</string>
 									<reference key="NSSuperview" ref="543522648"/>
 									<reference key="NSTarget" ref="543522648"/>
@@ -491,7 +493,7 @@
 							<string key="NSFrame">{{20, 60}, {237, 231}}</string>
 							<reference key="NSSuperview" ref="820449914"/>
 							<reference key="NSNextKeyView" ref="626631159"/>
-							<int key="NSsFlags">18</int>
+							<int key="NSsFlags">530</int>
 							<reference key="NSVScroller" ref="270818115"/>
 							<reference key="NSHScroller" ref="970920428"/>
 							<reference key="NSContentView" ref="626631159"/>
@@ -507,7 +509,7 @@
 			<object class="NSWindowTemplate" id="749471619">
 				<int key="NSWindowStyleMask">15</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{196, 143}, {400, 367}}</string>
+				<string key="NSWindowRect">{{258, 349}, {400, 367}}</string>
 				<int key="NSWTFlags">1677721600</int>
 				<string key="NSWindowTitle">OpenDNS Updater</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -515,7 +517,7 @@
 				<string key="NSWindowContentMaxSize">{3.40282e+38, 3.40282e+38}</string>
 				<string key="NSWindowContentMinSize">{352, 367}</string>
 				<object class="NSView" key="NSWindowView" id="147154640">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -905,10 +907,14 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						</object>
 					</object>
 					<string key="NSFrameSize">{400, 367}</string>
+					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1280, 778}}</string>
 				<string key="NSMinSize">{352, 389}</string>
 				<string key="NSMaxSize">{3.40282e+38, 3.40282e+38}</string>
+			</object>
+			<object class="NSUserDefaultsController" id="898037451">
+				<bool key="NSSharedInstance">YES</bool>
 			</object>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
@@ -1092,30 +1098,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">tableNetworksList_</string>
-						<reference key="source" ref="195861952"/>
-						<reference key="destination" ref="251558370"/>
-					</object>
-					<int key="connectionID">520</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">selectNetworkCancel:</string>
-						<reference key="source" ref="195861952"/>
-						<reference key="destination" ref="984641566"/>
-					</object>
-					<int key="connectionID">523</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">selectNetworkSelect:</string>
-						<reference key="source" ref="195861952"/>
-						<reference key="destination" ref="914356713"/>
-					</object>
-					<int key="connectionID">524</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
 						<string key="label">windowStatus_</string>
 						<reference key="source" ref="195861952"/>
 						<reference key="destination" ref="749471619"/>
@@ -1129,6 +1111,38 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<reference key="destination" ref="609285721"/>
 					</object>
 					<int key="connectionID">553</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">tableNetworksList_</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="251558370"/>
+					</object>
+					<int key="connectionID">554</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectNetworkSelect:</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="914356713"/>
+					</object>
+					<int key="connectionID">555</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectNetworkCancel:</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="984641566"/>
+					</object>
+					<int key="connectionID">556</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectNetworkSelect:</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="251558370"/>
+					</object>
+					<int key="connectionID">562</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1675,6 +1689,11 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<reference key="object" ref="382794621"/>
 						<reference key="parent" ref="497914248"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">557</int>
+						<reference key="object" ref="898037451"/>
+						<reference key="parent" ref="1049"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1779,8 +1798,8 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<integer value="1" id="9"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
-					<string>{{67, 17}, {482, 190}}</string>
-					<string>{{67, 17}, {482, 190}}</string>
+					<string>{{155, 394}, {482, 190}}</string>
+					<string>{{155, 394}, {482, 190}}</string>
 					<boolean value="NO" id="6"/>
 					<string>{{33, 99}, {480, 360}}</string>
 					<string>{3.40282e+38, 3.40282e+38}</string>
@@ -1807,8 +1826,8 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{339, 44}, {277, 336}}</string>
-					<string>{{339, 44}, {277, 336}}</string>
+					<string>{{369, 349}, {277, 336}}</string>
+					<string>{{369, 349}, {277, 336}}</string>
 					<reference ref="6"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -1823,8 +1842,8 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{195, 332}, {400, 367}}</string>
-					<string>{{195, 332}, {400, 367}}</string>
+					<string>{{258, 349}, {400, 367}}</string>
+					<string>{{258, 349}, {400, 367}}</string>
 					<reference ref="6"/>
 					<boolean value="YES"/>
 					<string>{352, 367}</string>
@@ -1882,7 +1901,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">553</int>
+			<int key="maxID">562</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

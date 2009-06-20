@@ -44,6 +44,101 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (BOOL)networksConfigured;
 @end
 
+@interface NSDictionary (DynamicNetworks)
+
+- (BOOL)isNetworkDynamic:(NSDictionary*)network;
+- (unsigned)dynamicNetworksCount;
+- (NSDictionary*)findFirstDynamicNetwork;
+- (NSDictionary*)dynamicNetworkAtIndex:(unsigned)idx;
+
+@end
+
+@implementation NSDictionary (DynamicNetworks)
+
+- (BOOL)isNetworkDynamic:(NSDictionary*)network {
+	id isDynamic = [network objectForKey:@"dynamic"];
+	if (!isDynamic)
+		return NO;
+	BOOL val = [isDynamic boolValue];
+	return val;
+}
+
+- (unsigned)dynamicNetworksCount {
+	unsigned dynamicCount = 0;
+	NSArray *networks = [self allValues];
+	unsigned count = [networks count];
+	for (unsigned i = 0; i < count; i++) {
+		NSDictionary *network = [networks objectAtIndex:i];
+		if ([self isNetworkDynamic:network])
+			dynamicCount += 1;
+	}
+	return dynamicCount;
+}
+
+- (NSDictionary*)findFirstDynamicNetwork {
+	NSArray *networks = [self allValues];
+	unsigned count = [networks count];
+	for (unsigned i = 0; i < count; i++) {
+		NSDictionary *network = [networks objectAtIndex:i];
+		if ([self isNetworkDynamic:network])
+			return network;
+	}
+	return nil;
+}
+
+- (NSDictionary*)dynamicNetworkAtIndex:(unsigned)idx {
+	NSArray *networks = [self allValues];
+	unsigned count = [networks count];
+	int currIdx = 0;
+	for (unsigned i = 0; i < count; i++) {
+		NSDictionary *network = [networks objectAtIndex:i];
+		if ([self isNetworkDynamic:network]) {
+			if (idx == currIdx)
+				return network;
+			else
+				currIdx += 1;
+		}
+	}
+	return nil;
+}
+
+@end
+
+@interface NSTableDataSourceDynamicNetworks : NSObject {
+	NSDictionary *networks_;
+	unsigned dynamicCount_;
+}
+
+- (id)initWithNetworks:(NSDictionary*)networks;
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+- (int)numberOfRowsInTableView:(NSTableView *)aTableView;
+@end
+
+@implementation NSTableDataSourceDynamicNetworks
+
+- (id)initWithNetworks:(NSDictionary*)networks {
+	networks_ = [networks retain];
+	dynamicCount_ = [networks dynamicNetworksCount];
+	return self;
+}
+
+- (void)dealloc {
+	[networks_ release];
+	[super dealloc];
+}
+
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex {
+	NSDictionary * network = [networks_ dynamicNetworkAtIndex:(unsigned)rowIndex];
+	NSString *hostname = [network objectForKey:@"label"];
+	return hostname;
+}
+
+- (int)numberOfRowsInTableView:(NSTableView *)aTableView {
+	return (int)dynamicCount_;
+}
+
+@end
+
 static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	if (!s1 && !s2)
 		return YES;
@@ -130,6 +225,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)awakeFromNib {
+	[NSApp activateIgnoringOtherApps:YES];
+
 	statusItem_ = [[[NSStatusBar systemStatusBar] 
 				   statusItemWithLength:NSSquareStatusItemLength]
 				  retain];
@@ -166,12 +263,21 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)showStatusWindow:(id)sender {
+	[windowLogin_ orderOut:self];
+	[windowSelectNetwork_ orderOut:self];
 	[windowStatus_ makeKeyAndOrderFront:self];
 }
 
 - (void)showLoginWindow {
-	[NSApp activateIgnoringOtherApps:YES];
 	[windowLogin_ makeKeyAndOrderFront:self];	
+	[windowSelectNetwork_ orderOut:self];
+	[windowStatus_ orderOut:self];
+}
+
+- (void)showNetworksWindow {
+	[windowLogin_ orderOut:self];
+	[windowSelectNetwork_ makeKeyAndOrderFront:self];
+	[windowStatus_ orderOut:self];
 }
 
 - (void)dealloc {
@@ -198,6 +304,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
+
 	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
 	SBJSON *parser = [[[SBJSON alloc] init] autorelease];
 	id json = [parser objectWithString:s];
@@ -207,11 +315,44 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	NSString *s2 = [json objectForKey:@"status"];
 	if (![s2 isEqualToString:@"success"])
 		goto Error;
-	NSDictionary *response = [json objectForKey:@"response"];
-	if (!response)
-		goto Error;
+	NSDictionary *networks = [json objectForKey:@"response"];
+	if (!networks)
+		goto NoNetworks;
+
+	if (0 == [networks count])
+		goto NoNetworks;
+	
+	unsigned dynamicCount = [networks dynamicNetworksCount];
+	if (0 == dynamicCount)
+		goto NoDynamicNetworks;
+	NSDictionary *dynamicNetwork = [networks findFirstDynamicNetwork];
+	if (1 == dynamicCount) {
+		NSString *hostname = [dynamicNetwork objectForKey:@"label"];
+		[prefs setObject:hostname forKey:PREF_HOSTNAME];
+		[prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+		goto Exit;
+	}
+
+	NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:networks];
+	// TODO: need to free dataSource at some point
+	[tableNetworksList_ setDataSource:dataSource];
+	[tableNetworksList_ reloadData];
+	[self showNetworksWindow];
+	goto Exit;
 Error:
 	NSLog(@"Error");
+Exit:
+	return;
+
+NoNetworks:
+	[prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+	[prefs setObject:@"" forKey:PREF_HOSTNAME];
+	return;
+
+NoDynamicNetworks:
+	[prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+	[prefs setObject:@"" forKey:PREF_HOSTNAME];
+	return;
 }
 
 - (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
@@ -300,11 +441,16 @@ Error:
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {
-
+	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
+	[prefs setObject:UNS_NO_NETWORK_SELECTED forKey:PREF_USER_NETWORKS_STATE];
+	[prefs setObject:@"" forKey:PREF_HOSTNAME];
 }
 
 - (IBAction)selectNetworkSelect:(id)sender {
-	
+	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
+	[prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
+	// TODO: get the name of selected network
+	[prefs setObject:@"" forKey:PREF_HOSTNAME];
 }
 
 @end
