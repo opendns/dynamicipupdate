@@ -8,10 +8,10 @@
 		<string key="IBDocument.HIToolboxVersion">353.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="515"/>
-			<integer value="371"/>
 			<integer value="525"/>
+			<integer value="371"/>
 			<integer value="57"/>
+			<integer value="503"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -401,6 +401,7 @@
 											<object class="NSMutableArray" key="NSTableColumns">
 												<bool key="EncodedWithXMLCoder">YES</bool>
 												<object class="NSTableColumn" id="114040875">
+													<string key="NSIdentifier">1</string>
 													<double key="NSWidth">2.160000e+02</double>
 													<double key="NSMinWidth">4.000000e+01</double>
 													<double key="NSMaxWidth">1.000000e+03</double>
@@ -456,7 +457,7 @@
 												</object>
 											</object>
 											<double key="NSRowHeight">1.700000e+01</double>
-											<int key="NSTvFlags">-702545920</int>
+											<int key="NSTvFlags">102760448</int>
 											<int key="NSColumnAutoresizingStyle">4</int>
 											<int key="NSDraggingSourceMaskForLocal">15</int>
 											<int key="NSDraggingSourceMaskForNonLocal">0</int>
@@ -1122,14 +1123,6 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">selectNetworkSelect:</string>
-						<reference key="source" ref="195861952"/>
-						<reference key="destination" ref="914356713"/>
-					</object>
-					<int key="connectionID">555</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
 						<string key="label">selectNetworkCancel:</string>
 						<reference key="source" ref="195861952"/>
 						<reference key="destination" ref="984641566"/>
@@ -1137,12 +1130,20 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<int key="connectionID">556</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">selectNetworkSelect:</string>
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">buttonSelect_</string>
 						<reference key="source" ref="195861952"/>
-						<reference key="destination" ref="251558370"/>
+						<reference key="destination" ref="914356713"/>
 					</object>
-					<int key="connectionID">562</int>
+					<int key="connectionID">563</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectNetworkDoubleClick:</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="914356713"/>
+					</object>
+					<int key="connectionID">564</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1782,6 +1783,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<string>549.IBPluginDependency</string>
 					<string>550.IBPluginDependency</string>
 					<string>551.IBPluginDependency</string>
+					<string>557.IBPluginDependency</string>
 					<string>57.IBEditorWindowLastContentRect</string>
 					<string>57.IBPluginDependency</string>
 					<string>57.ImportedFromIB2</string>
@@ -1873,6 +1875,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>{{60, 61}, {261, 63}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
@@ -1901,7 +1904,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">562</int>
+			<int key="maxID">564</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1917,11 +1920,13 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<string>loginWindowAbout:</string>
 							<string>quit:</string>
 							<string>selectNetworkCancel:</string>
-							<string>selectNetworkSelect:</string>
+							<string>selectNetworkClick:</string>
+							<string>selectNetworkDoubleClick:</string>
 							<string>showStatusWindow:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1935,6 +1940,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<object class="NSMutableArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>buttonLogin_</string>
+							<string>buttonSelect_</string>
 							<string>editOpenDnsAccount_</string>
 							<string>editOpenDnsPassword_</string>
 							<string>menu_</string>
@@ -1948,6 +1954,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>NSButton</string>
 							<string>NSButton</string>
 							<string>NSTextField</string>
 							<string>NSTextField</string>

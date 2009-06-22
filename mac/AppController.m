@@ -50,8 +50,37 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (unsigned)dynamicNetworksCount;
 - (NSDictionary*)findFirstDynamicNetwork;
 - (NSDictionary*)dynamicNetworkAtIndex:(unsigned)idx;
-
 @end
+
+static BOOL isDynamicNetwork(NSDictionary *network) {
+	id isDynamic = [network objectForKey:@"dynamic"];
+	if (!isDynamic)
+		return NO;
+	BOOL val = [isDynamic boolValue];
+	return val;    
+}
+
+static BOOL isLabledDynamicNetwork(NSDictionary *network) {
+    if (!isDynamicNetwork(network))
+        return NO;
+    id label = [network objectForKey:@"label"];
+    if ([label isKindOfClass:[NSString class]])
+        return YES;
+    return NO;
+}
+
+static NSArray *labeledDynamicNetworks(NSDictionary *networksDict) {
+    NSArray *networks = [networksDict allValues];
+    NSMutableArray *res = [NSMutableArray arrayWithCapacity:8];
+	unsigned count = [networks count];
+	for (unsigned i = 0; i < count; i++) {
+		NSDictionary *network = [networks objectAtIndex:i];
+		if (isLabledDynamicNetwork(network)) {
+            [res addObject:network];
+        }
+	}
+	return res;    
+}
 
 @implementation NSDictionary (DynamicNetworks)
 
@@ -105,20 +134,18 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 @end
 
 @interface NSTableDataSourceDynamicNetworks : NSObject {
-	NSDictionary *networks_;
-	unsigned dynamicCount_;
+	NSArray *networks_;
 }
 
-- (id)initWithNetworks:(NSDictionary*)networks;
+- (id)initWithNetworks:(NSArray*)networks;
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView;
 @end
 
 @implementation NSTableDataSourceDynamicNetworks
 
-- (id)initWithNetworks:(NSDictionary*)networks {
+- (id)initWithNetworks:(NSArray*)networks {
 	networks_ = [networks retain];
-	dynamicCount_ = [networks dynamicNetworksCount];
 	return self;
 }
 
@@ -128,13 +155,13 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 }
 
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex {
-	NSDictionary * network = [networks_ dynamicNetworkAtIndex:(unsigned)rowIndex];
+	NSDictionary * network = [networks_ objectAtIndex:(unsigned)rowIndex];
 	NSString *hostname = [network objectForKey:@"label"];
 	return hostname;
 }
 
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView {
-	return (int)dynamicCount_;
+	return (int)[networks_ count];
 }
 
 @end
@@ -262,9 +289,13 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	return NO;
 }
 
+- (void)updateStatusWindow {
+}
+
 - (void)showStatusWindow:(id)sender {
 	[windowLogin_ orderOut:self];
 	[windowSelectNetwork_ orderOut:self];
+    [self updateStatusWindow];
 	[windowStatus_ makeKeyAndOrderFront:self];
 }
 
@@ -333,9 +364,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 		goto Exit;
 	}
 
-	NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:networks];
-	// TODO: need to free dataSource at some point
+    NSArray *dynamicNetworks = labeledDynamicNetworks(networks);
+	NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks];
 	[tableNetworksList_ setDataSource:dataSource];
+    [tableNetworksList_ setTarget:self];
+    [tableNetworksList_ setAction:@selector(selectNetworkClick:)];
+    [tableNetworksList_ setDoubleAction:@selector(selectNetworkDoubleClick:)];
 	[tableNetworksList_ reloadData];
 	[self showNetworksWindow];
 	goto Exit;
@@ -446,11 +480,19 @@ Error:
 	[prefs setObject:@"" forKey:PREF_HOSTNAME];
 }
 
-- (IBAction)selectNetworkSelect:(id)sender {
-	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
+- (IBAction)selectNetworkClick:(id)sender {
+    [buttonSelect_ setEnabled:YES];
+}
+
+- (IBAction)selectNetworkDoubleClick:(id)sender {
+    NSTableDataSourceDynamicNetworks *dataSource = [tableNetworksList_ dataSource];
+    int row = [tableNetworksList_ selectedRow];
+    NSTableColumn *tableColumn = [tableNetworksList_ tableColumnWithIdentifier:@"1"];
+    NSString *hostname = [dataSource tableView:sender objectValueForTableColumn:tableColumn row:row];
+	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	[prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
-	// TODO: get the name of selected network
-	[prefs setObject:@"" forKey:PREF_HOSTNAME];
+	[prefs setObject:hostname forKey:PREF_HOSTNAME];
+    [self showStatusWindow:self];
 }
 
 @end

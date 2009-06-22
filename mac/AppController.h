@@ -32,6 +32,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 	// stuff related to select network window
 	IBOutlet NSWindow *				windowSelectNetwork_;
 	IBOutlet NSTableView *			tableNetworksList_;
+    IBOutlet NSButton *             buttonSelect_;
 
 	// stuff related to status window
 	IBOutlet NSWindow *				windowStatus_;
@@ -50,7 +51,8 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)quit:(id)sender;
 - (IBAction)loginWindowAbout:(id)sender;
 - (IBAction)selectNetworkCancel:(id)sender;
-- (IBAction)selectNetworkSelect:(id)sender;
+- (IBAction)selectNetworkClick:(id)sender;
+- (IBAction)selectNetworkDoubleClick:(id)sender;
 - (IBAction)showStatusWindow:(id)sender;
 
 @end
