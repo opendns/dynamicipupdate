@@ -42,6 +42,7 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (void)showLoginWindow;
 - (void)downloadNetworks:(NSString*)token;
 - (BOOL)networksConfigured;
+- (BOOL)isLoggedIn;
 @end
 
 @interface NSDictionary (DynamicNetworks)
@@ -252,8 +253,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)awakeFromNib {
-	[NSApp activateIgnoringOtherApps:YES];
-
 	statusItem_ = [[[NSStatusBar systemStatusBar] 
 				   statusItemWithLength:NSSquareStatusItemLength]
 				  retain];
@@ -269,10 +268,9 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	exitIpChangeThread_ = NO;
 
-	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
-	NSString *account = [prefs objectForKey: PREF_ACCOUNT];
+	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	NSString *token = [prefs objectForKey: PREF_TOKEN];
-	if (!account || !token) {
+	if (![self isLoggedIn]) {
 		[self showLoginWindow];
 		return;
 	}
@@ -284,31 +282,74 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[self showStatusWindow:nil];
 }
 
+- (BOOL)isLoggedIn {
+	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+	NSString *account = [prefs objectForKey:PREF_ACCOUNT];
+    if (!account || (0 == [account length]))
+        return NO;
+	NSString *token = [prefs objectForKey:PREF_TOKEN];
+    if (!token || (0 == [token length]))
+        return NO;
+    return YES;
+}
+
+- (BOOL)isUsingOpenDns {
+    return NO;
+}
+
 - (BOOL)networksConfigured {
 	// TODO: implement me
 	return NO;
 }
 
 - (void)updateStatusWindow {
+	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+	NSString *account = [prefs objectForKey:PREF_ACCOUNT];
+    if ([self isLoggedIn]) {
+        [textAccount_ setTitleWithMnemonic:account];
+    } else {
+        // TODO: change 'Change account' to 'Login' ?
+        // TODO: or not allow showing this window if not logged in?
+        [textAccount_ setTitleWithMnemonic:@"Not logged in"];
+    }
+
+	NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
+    if (0 == [hostname length])
+        hostname = @"default";
+    [textHostname_ setTitleWithMnemonic:hostname];
+
+    [textIpAddress_ setTitleWithMnemonic:currentIpAddress_];
+
+    if ([self isUsingOpenDns]) {
+        [textUsingOpenDns_ setTitleWithMnemonic:@"Yes"];
+    } else {
+        // TODO: make it red
+        [textUsingOpenDns_ setTitleWithMnemonic:@"No"];
+    }
+
+    // TODO: show last updated time
 }
 
 - (void)showStatusWindow:(id)sender {
 	[windowLogin_ orderOut:self];
 	[windowSelectNetwork_ orderOut:self];
     [self updateStatusWindow];
+	[NSApp activateIgnoringOtherApps:YES];
 	[windowStatus_ makeKeyAndOrderFront:self];
 }
 
 - (void)showLoginWindow {
-	[windowLogin_ makeKeyAndOrderFront:self];	
 	[windowSelectNetwork_ orderOut:self];
 	[windowStatus_ orderOut:self];
+	[NSApp activateIgnoringOtherApps:YES];
+	[windowLogin_ makeKeyAndOrderFront:self];	
 }
 
 - (void)showNetworksWindow {
 	[windowLogin_ orderOut:self];
-	[windowSelectNetwork_ makeKeyAndOrderFront:self];
 	[windowStatus_ orderOut:self];
+	[NSApp activateIgnoringOtherApps:YES];
+	[windowSelectNetwork_ makeKeyAndOrderFront:self];
 }
 
 - (void)dealloc {
@@ -359,8 +400,11 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	NSDictionary *dynamicNetwork = [networks findFirstDynamicNetwork];
 	if (1 == dynamicCount) {
 		NSString *hostname = [dynamicNetwork objectForKey:@"label"];
+        if (!hostname || ![hostname isKindOfClass:[NSString class]])
+            hostname = @"";
 		[prefs setObject:hostname forKey:PREF_HOSTNAME];
 		[prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+        [self showStatusWindow:self];
 		goto Exit;
 	}
 

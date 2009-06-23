@@ -36,6 +36,11 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
 	// stuff related to status window
 	IBOutlet NSWindow *				windowStatus_;
+    IBOutlet NSTextField *          textAccount_;
+    IBOutlet NSTextField *          textHostname_;
+    IBOutlet NSTextField *          textIpAddress_;
+    IBOutlet NSTextField *          textUsingOpenDns_;
+    IBOutlet NSTextField *          textLastUpdated_;
 
 	// menu-related stuff
 	IBOutlet NSMenu *				menu_;
