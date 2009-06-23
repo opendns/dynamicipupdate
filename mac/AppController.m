@@ -193,6 +193,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (NSString *)getMyIp {
 	char **addrs;
 	struct hostent *he = gethostbyname("myip.opendns.com");
+    if (!he)
+        return nil;
 	// TODO: notify the user that we don't support ipv6?
 	if (AF_INET != he->h_addrtype)
 		return nil;
@@ -228,6 +230,11 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	while (!exitIpChangeThread_) {
 		NSString *newIp = [self getMyIp];
+        if (newIp) {
+            usingOpenDns_ = YES;
+        } else {
+            usingOpenDns_ = NO;
+        }
 		if (!NSStringsEqual(newIp, currIp)) {
 			[currIp release];
 			currIp = [newIp copy];
@@ -293,10 +300,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return YES;
 }
 
-- (BOOL)isUsingOpenDns {
-    return NO;
-}
-
 - (BOOL)networksConfigured {
 	// TODO: implement me
 	return NO;
@@ -320,10 +323,11 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
     [textIpAddress_ setTitleWithMnemonic:currentIpAddress_];
 
-    if ([self isUsingOpenDns]) {
+    if (usingOpenDns_) {
+        [textUsingOpenDns_ setTextColor:[NSColor blackColor]];
         [textUsingOpenDns_ setTitleWithMnemonic:@"Yes"];
     } else {
-        // TODO: make it red
+        [textUsingOpenDns_ setTextColor:[NSColor redColor]];
         [textUsingOpenDns_ setTitleWithMnemonic:@"No"];
     }
 

@@ -50,6 +50,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 	// program state
 	NSString *						currentIpAddress_;
 	BOOL							exitIpChangeThread_;
+    BOOL                            usingOpenDns_;
 }
 
 - (IBAction)login:(id)sender;
