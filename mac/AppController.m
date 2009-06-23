@@ -43,6 +43,7 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (void)downloadNetworks:(NSString*)token;
 - (BOOL)networksConfigured;
 - (BOOL)isLoggedIn;
+- (void)updateStatusWindow;
 @end
 
 @interface NSDictionary (DynamicNetworks)
@@ -214,6 +215,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (void)ipAddressChanged:(NSString *)newIpAddress {
 	[currentIpAddress_ release];
 	currentIpAddress_ = [newIpAddress copy];
+    if (newIpAddress) {
+        usingOpenDns_ = YES;
+    } else {
+        usingOpenDns_ = NO;
+    }
+    [self updateStatusWindow];
 }
 
 - (BOOL)shouldSendPeriodicUpdate {
@@ -230,11 +237,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	while (!exitIpChangeThread_) {
 		NSString *newIp = [self getMyIp];
-        if (newIp) {
-            usingOpenDns_ = YES;
-        } else {
-            usingOpenDns_ = NO;
-        }
 		if (!NSStringsEqual(newIp, currIp)) {
 			[currIp release];
 			currIp = [newIp copy];
@@ -321,7 +323,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         hostname = @"default";
     [textHostname_ setTitleWithMnemonic:hostname];
 
-    [textIpAddress_ setTitleWithMnemonic:currentIpAddress_];
+    if (currentIpAddress_)
+        [textIpAddress_ setTitleWithMnemonic:currentIpAddress_];
+    else {
+        // TODO: show a different text in red?
+        [textIpAddress_ setTitleWithMnemonic:@""];
+    }
 
     if (usingOpenDns_) {
         [textUsingOpenDns_ setTextColor:[NSColor blackColor]];
