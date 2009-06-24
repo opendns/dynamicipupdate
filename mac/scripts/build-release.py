@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import os.path
 import re
 import time
+import subprocess
+import stat 
 
 """
 Release build script designed to automate as much of the proces as possible
@@ -37,6 +40,8 @@ To build the new version:
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, ".."))
+RELEASE_BUILD_DIR = os.path.join(SRC_DIR, "build", "Release")
 INFO_PLIST_PATH = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "Info.plist"))
 WEBSITE_DESKTOP_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "website", "desktop"))
 APPENGINE_SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "appengine-opendnsupdate"))
@@ -69,6 +74,25 @@ def writefile(path, data):
     fo.write(data)
     fo.close()
 
+def get_file_size(filename):
+    st = os.stat(filename)
+    return st[stat.ST_SIZE]
+
+def run_cmd_throw(*args):
+    cmd = " ".join(args)
+    print("Running '%s'" % cmd)
+    cmdproc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    res = cmdproc.communicate()
+    errcode = cmdproc.returncode
+    if 0 != errcode:
+        print "Failed with error code %d" % errcode
+        print "Stdout:"
+        print res[0]
+        print "Stderr:"
+        print res[1]
+        raise Exception("'%s' failed with error code %d" % (cmd, errcode))
+    return (res[0], res[1])
+
 # a really ugly way to extract version from Info.plist
 def extract_version_from_plist(plist_path):
     plist = readfile(plist_path)
@@ -97,6 +121,9 @@ def zip_name(version):
     return "OpenDNS-Dynamic-IP-Mac-%s.zip" % version
 
 def zip_path(version):
+    return os.path.join(RELEASE_BUILD_DIR, zip_name(version))
+
+def zip_path_on_website(version):
     return os.path.join(WEBSITE_DESKTOP_DIR, zip_name(version))
 
 def relnotes_path(version):
@@ -118,6 +145,17 @@ def update_app_cast(path, version, length):
     writefile(path, appcast)
     print("Updates '%s', make sure to check it in" % path)
 
+def build_and_zip(version):
+    os.chdir(SRC_DIR)
+    print("Cleaning release target...")
+    xcodeproj = "OpenDNS Updater.xcodeproj"
+    run_cmd_throw("xcodebuild", "-project", xcodeproj, "-configuration", "Release", "clean");
+    print("Building release target...")
+    (out, err) = run_cmd_throw("xcodebuild", "-project", xcodeproj, "-configuration", "Release", "-target", "OpenDNS Updater")
+    ensure_dir_exists(RELEASE_BUILD_DIR)
+    os.chdir(RELEASE_BUILD_DIR)
+    (out, err) = run_cmd_throw("zip", "-9", "-r", zip_name(version), "OpenDNS Updater.app")
+
 def main():
     ensure_dir_exists(WEBSITE_DESKTOP_DIR)
     ensure_dir_exists(APPENGINE_SRC_DIR)
@@ -125,11 +163,14 @@ def main():
     ensure_file_exists(APP_CAST_PATH)
     version = extract_version_from_plist(INFO_PLIST_PATH)
     ensure_valid_version(version)
-    ensure_file_doesnt_exist(zip_path(version))
+    ensure_file_doesnt_exist(zip_path_on_website(version))
     ensure_file_exists(relnotes_path(version))
 
-    length = 1234
-    update_app_cast(APP_CAST_PATH, version, length)
+    build_and_zip(version)
+    ensure_file_exists(zip_path(version))
+
+    length = get_file_size(zip_path(version))
+    #update_app_cast(APP_CAST_PATH, version, length)
 
 if __name__ == "__main__":
     main()
