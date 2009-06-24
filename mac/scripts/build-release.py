@@ -103,7 +103,7 @@ def relnotes_path(version):
     return os.path.join(WEBSITE_DESKTOP_DIR, "mac-ipupdater-relnotes-%s.html" % version)
 
 # update sparkle:releaseNotesLink, sparkle:version and pubDate element
-def update_app_cast(path, version):
+def update_app_cast(path, version, length):
     appcast = readfile(path)
     newver = "sparkle:version=\"%s\"" % version
     appcast = re.sub("sparkle:version=\"[^\"]+\"", newver, appcast)
@@ -113,6 +113,8 @@ def update_app_cast(path, version):
     url = "http://www.opendns.com/desktop/mac-ipupdater-relnotes-%s.html" % version
     newrelnotes = "<sparkle:releaseNotesLink>%s</sparkle:releaseNotesLink>" % url
     appcast = re.sub('<sparkle:releaseNotesLink>.+</sparkle:releaseNotesLink>', newrelnotes, appcast)
+    newlen = 'length="%d"' % length
+    appcast = re.sub("length=\"[^\"]?\"", newlen, appcast)
     writefile(path, appcast)
     print("Updates '%s', make sure to check it in" % path)
 
@@ -125,7 +127,9 @@ def main():
     ensure_valid_version(version)
     ensure_file_doesnt_exist(zip_path(version))
     ensure_file_exists(relnotes_path(version))
-    update_app_cast(APP_CAST_PATH, version)
+
+    length = 1234
+    update_app_cast(APP_CAST_PATH, version, length)
 
 if __name__ == "__main__":
     main()
