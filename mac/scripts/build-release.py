@@ -7,6 +7,7 @@ import re
 import time
 import subprocess
 import stat 
+import shutil
 
 """
 Release build script designed to automate as much of the proces as possible
@@ -15,29 +16,19 @@ and minimize errors.
 Pushing an update to mac client is involved. Files that must be changed:
 
 * Info.plist
-* conf.php and mac-ipupdater-relnotes-$ver.html in 
-  svn+ssh://svn.office.opendns.com/var/lib/svn/projects/opendns-website/trunk/desktop/
-* IpUpdaterAppCast.xml in 
-  svn+ssh://svn.office.opendns.com/var/lib/svn/projects/appengine-opendnsupdate/trunk
+* conf.php and mac-ipupdater-relnotes-$ver.html 
+* IpUpdaterAppCast.xml
   (update pubDate, sparkle:version and sparkle:shortVersionString)
 
-To build the new version:
-* set the right version in Info.plist
-* check that this is a new version (*.zip with this name doesn't exist yet)
-* build a new *.zip file, uniquely named for this release (by embedding
-   version in the name)
-* checkin *.zip file
-* update release notes (manually)
-*  update appcast.xml (programmatically, this script does that)
-* update conf.php (manually)
-
-  # To push the new version:
-  # * push relase notes at http://www.opendns.com/desktop/mac-ipupdater-relnotes.html
-  # * push appcast.xml in opendnsudpate.appspot.com
-  # * push 
-
+Checklist for pushing a new release:
+* edit Info.plist to set new version
+* create mac-ipupdater-relnotes-$ver.html, check it in and deploy it
+* run this script
+* verify it made the right changes to IpUpdaterAppCast.xml
+* checkin and deploy the binary to the website
+* update conf.php to account for new version, check it in and deploy to website
+* checkin and deploy IpUpdaterCast.xml
 """
-
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, ".."))
@@ -169,8 +160,13 @@ def main():
     build_and_zip(version)
     ensure_file_exists(zip_path(version))
 
+    src = zip_path(version)
+    dst = zip_path_on_website(version)
+    shutil.copyfile(src, dst)
+    print("Don't forget to checkin and deploy '%s'" % dst)
     length = get_file_size(zip_path(version))
-    #update_app_cast(APP_CAST_PATH, version, length)
+    update_app_cast(APP_CAST_PATH, version, length)
+    print("Don't forget to checkin and deploy '%s'" % APP_CAST_PATH)
 
 if __name__ == "__main__":
     main()
