@@ -41,6 +41,9 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
     IBOutlet NSTextField *          textIpAddress_;
     IBOutlet NSTextField *          textUsingOpenDns_;
     IBOutlet NSTextField *          textLastUpdated_;
+    IBOutlet NSButton *             buttonChangeAccount_;
+    IBOutlet NSButton *             buttonChangeNetwork_;
+    IBOutlet NSButton *             buttonUpdateNow_;
 
 	// menu-related stuff
 	IBOutlet NSMenu *				menu_;
@@ -60,5 +63,8 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)selectNetworkClick:(id)sender;
 - (IBAction)selectNetworkDoubleClick:(id)sender;
 - (IBAction)showStatusWindow:(id)sender;
+- (IBAction)statusChangeAccount:(id)sender;
+- (IBAction)statusChangeNetwork:(id)sender;
+- (IBAction)statusUpdateNow:(id)sender;
 
 @end

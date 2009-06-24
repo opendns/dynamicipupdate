@@ -40,8 +40,8 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (NSString*)apiGetNetworksStringForToken:(NSString*)token;
 - (void)showLoginError;
 - (void)showLoginWindow;
-- (void)downloadNetworks:(NSString*)token;
-- (BOOL)networksConfigured;
+- (void)downloadNetworks:(NSString*)token suppressUI:(BOOL)suppressUI;
+- (BOOL)noNetworksConfigured;
 - (BOOL)isLoggedIn;
 - (void)updateStatusWindow;
 @end
@@ -284,8 +284,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 		return;
 	}
 
-	if (![self networksConfigured]) {
-		[self downloadNetworks:token];
+	if ([self noNetworksConfigured]) {
+		[self downloadNetworks:token suppressUI:YES];
 		return;
 	}
 	[self showStatusWindow:nil];
@@ -302,9 +302,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return YES;
 }
 
-- (BOOL)networksConfigured {
-	// TODO: implement me
-	return NO;
+- (BOOL)noNetworksConfigured {
+	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *networksState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
+    if ([networksState isEqualToString:UNS_NO_NETWORKS])
+        return YES;
+    return NO;
 }
 
 - (void)updateStatusWindow {
@@ -387,8 +390,10 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+    BOOL suppressUI = NO;
 	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
-
+    if (nil != [fetcher userData])
+        suppressUI = YES;
 	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
 	SBJSON *parser = [[[SBJSON alloc] init] autorelease];
 	id json = [parser objectWithString:s];
@@ -448,12 +453,16 @@ NoDynamicNetworks:
 	// TODO: implement me
 }
 
-- (void)downloadNetworks:(NSString*)token {
+- (void)downloadNetworks:(NSString*)token suppressUI:(BOOL)suppressUI{
 	NSString *apiString = [self apiGetNetworksStringForToken:token];
 	NSURL *url = [NSURL URLWithString:API_HOST];
 	NSURLRequest *request = [NSURLRequest requestWithURL:url];
 	GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
 	[fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
+    if (suppressUI) {
+        // it's only significant that it's there
+        [fetcher setUserData:[NSString stringWithString:@"suppress"]];
+    }
 	[fetcher beginFetchWithDelegate:self
 				  didFinishSelector:@selector(getNetworksFetcher:finishedWithData:)
 					didFailSelector:@selector(getNetworksFetcher:failedWithError:)];
@@ -481,7 +490,7 @@ NoDynamicNetworks:
 	NSString *account = [editOpenDnsAccount_ stringValue];
 	[[NSUserDefaults standardUserDefaults] setObject:token forKey:PREF_TOKEN];
 	[[NSUserDefaults standardUserDefaults] setObject:account forKey:PREF_ACCOUNT];
-	[self downloadNetworks:token];
+	[self downloadNetworks:token suppressUI:YES];
 	return;
 Error:
 	[self showLoginError];	
@@ -548,6 +557,20 @@ Error:
 	[prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
 	[prefs setObject:hostname forKey:PREF_HOSTNAME];
     [self showStatusWindow:self];
+}
+
+- (IBAction)statusChangeAccount:(id)sender {
+    
+}
+
+- (IBAction)statusChangeNetwork:(id)sender {
+	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
+    NSString *token = [prefs objectForKey:PREF_TOKEN];
+    [self downloadNetworks:token suppressUI:NO];
+}
+
+- (IBAction)statusUpdateNow:(id)sender {
+
 }
 
 @end

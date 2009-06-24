@@ -8,8 +8,8 @@
 		<string key="IBDocument.HIToolboxVersion">353.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="531"/>
 			<integer value="57"/>
+			<integer value="531"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -314,7 +314,7 @@
 				<nil key="NSViewClass"/>
 				<string key="NSWindowContentMaxSize">{3.40282e+38, 3.40282e+38}</string>
 				<object class="NSView" key="NSWindowView" id="820449914">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -323,7 +323,6 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{17, 299}, {112, 17}}</string>
 							<reference key="NSSuperview" ref="820449914"/>
-							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="916966583">
 								<int key="NSCellFlags">68288064</int>
@@ -340,7 +339,6 @@
 							<int key="NSvFlags">289</int>
 							<string key="NSFrame">{{167, 12}, {96, 32}}</string>
 							<reference key="NSSuperview" ref="820449914"/>
-							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="589441457">
 								<int key="NSCellFlags">67239424</int>
@@ -361,7 +359,6 @@
 							<int key="NSvFlags">289</int>
 							<string key="NSFrame">{{71, 12}, {96, 32}}</string>
 							<reference key="NSSuperview" ref="820449914"/>
-							<reference key="NSWindow"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="816676323">
 								<int key="NSCellFlags">67239424</int>
@@ -392,7 +389,6 @@
 											<int key="NSvFlags">256</int>
 											<string key="NSFrameSize">{235, 229}</string>
 											<reference key="NSSuperview" ref="626631159"/>
-											<reference key="NSWindow"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="_NSCornerView" key="NSCornerView">
 												<nil key="NSNextResponder"/>
@@ -467,7 +463,6 @@
 									</object>
 									<string key="NSFrame">{{1, 1}, {235, 229}}</string>
 									<reference key="NSSuperview" ref="543522648"/>
-									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="251558370"/>
 									<reference key="NSDocView" ref="251558370"/>
 									<reference key="NSBGColor" ref="67205704"/>
@@ -478,7 +473,6 @@
 									<int key="NSvFlags">-2147483392</int>
 									<string key="NSFrame">{{221, 1}, {15, 229}}</string>
 									<reference key="NSSuperview" ref="543522648"/>
-									<reference key="NSWindow"/>
 									<reference key="NSTarget" ref="543522648"/>
 									<string key="NSAction">_doScroller:</string>
 									<double key="NSPercent">9.953704e-01</double>
@@ -488,7 +482,6 @@
 									<int key="NSvFlags">256</int>
 									<string key="NSFrame">{{-100, -100}, {220, 15}}</string>
 									<reference key="NSSuperview" ref="543522648"/>
-									<reference key="NSWindow"/>
 									<int key="NSsFlags">1</int>
 									<reference key="NSTarget" ref="543522648"/>
 									<string key="NSAction">_doScroller:</string>
@@ -497,7 +490,6 @@
 							</object>
 							<string key="NSFrame">{{20, 60}, {237, 231}}</string>
 							<reference key="NSSuperview" ref="820449914"/>
-							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="626631159"/>
 							<int key="NSsFlags">530</int>
 							<reference key="NSVScroller" ref="270818115"/>
@@ -507,8 +499,6 @@
 						</object>
 					</object>
 					<string key="NSFrameSize">{277, 336}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1280, 778}}</string>
 				<string key="NSMaxSize">{3.40282e+38, 3.40282e+38}</string>
@@ -1190,6 +1180,54 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<reference key="destination" ref="587016505"/>
 					</object>
 					<int key="connectionID">570</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">buttonChangeAccount_</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="485531552"/>
+					</object>
+					<int key="connectionID">571</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">buttonChangeNetwork_</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="755625310"/>
+					</object>
+					<int key="connectionID">572</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">buttonUpdateNow_</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="39127495"/>
+					</object>
+					<int key="connectionID">573</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">statusChangeAccount:</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="485531552"/>
+					</object>
+					<int key="connectionID">574</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">statusChangeNetwork:</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="755625310"/>
+					</object>
+					<int key="connectionID">575</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">statusUpdateNow:</string>
+						<reference key="source" ref="195861952"/>
+						<reference key="destination" ref="39127495"/>
+					</object>
+					<int key="connectionID">576</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1890,8 +1928,8 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{10, 303}, {400, 367}}</string>
-					<string>{{10, 303}, {400, 367}}</string>
+					<string>{{39, 15}, {400, 367}}</string>
+					<string>{{39, 15}, {400, 367}}</string>
 					<reference ref="6"/>
 					<boolean value="YES"/>
 					<string>{352, 367}</string>
@@ -1950,7 +1988,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">570</int>
+			<int key="maxID">576</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1969,9 +2007,15 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<string>selectNetworkClick:</string>
 							<string>selectNetworkDoubleClick:</string>
 							<string>showStatusWindow:</string>
+							<string>statusChangeAccount:</string>
+							<string>statusChangeNetwork:</string>
+							<string>statusUpdateNow:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1985,8 +2029,11 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSMutableArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>buttonChangeAccount_</string>
+							<string>buttonChangeNetwork_</string>
 							<string>buttonLogin_</string>
 							<string>buttonSelect_</string>
+							<string>buttonUpdateNow_</string>
 							<string>editOpenDnsAccount_</string>
 							<string>editOpenDnsPassword_</string>
 							<string>menu_</string>
@@ -2005,6 +2052,9 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>NSButton</string>
+							<string>NSButton</string>
+							<string>NSButton</string>
 							<string>NSButton</string>
 							<string>NSButton</string>
 							<string>NSTextField</string>
