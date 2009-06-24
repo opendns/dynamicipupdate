@@ -223,8 +223,50 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [self updateStatusWindow];
 }
 
+- (BOOL)canSendIPUpdates {
+    if (![self isLoggedIn])
+        return NO;
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
+    return [networkState isEqualToString:UNS_OK];
+}
+
+/*
+ bool ShouldSendPeriodicUpdate()
+ {
+ if (!CanSendIPUpdates())
+ return false;
+ 
+ if (m_forceNextIpUpdate) {
+ m_forceNextIpUpdate = false;
+ return true;
+ }
+ 
+ ULONGLONG currTimeInMs = GetTickCount();
+ 
+ // the time wraps-around every 49.7 days.
+ if (currTimeInMs < m_lastIpUpdateTimeInMs) {
+ // going backwards in time - it must be wrap around
+ m_lastIpUpdateTimeInMs = GetTickCount();
+ slog("Detected GetTickCount() wrap-around\n");
+ }
+ 
+ ULONGLONG nextUpdateTimeInMs = m_lastIpUpdateTimeInMs + THREE_HRS_IN_MS;
+ if (currTimeInMs > nextUpdateTimeInMs)
+ return true;
+ return false;
+ }
+*/
+
 - (BOOL)shouldSendPeriodicUpdate {
-	return NO;
+    if (![self canSendIPUpdates])
+        return NO;
+
+    if (forceNextUpdate_) {
+        forceNextUpdate_ = NO;
+        return YES;
+    }
+	return YES;
 }
 
 - (void)sendPeriodicUpdate {
@@ -276,6 +318,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[menuIcon_ release]; 
 
 	exitIpChangeThread_ = NO;
+    forceNextUpdate_ = NO;
 
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	NSString *token = [prefs objectForKey: PREF_TOKEN];
