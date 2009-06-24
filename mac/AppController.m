@@ -247,8 +247,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 			[self sendPeriodicUpdate];
 		}
 
-		NSDate *inOneMinute = [NSDate date];
-		[inOneMinute addTimeInterval:ONE_MINUTE_INTERVAL];
+		NSDate *inOneMinute = [[NSDate date] addTimeInterval:ONE_MINUTE_INTERVAL];
 		[NSThread sleepUntilDate:inOneMinute];
         [myAutoreleasePool drain];
 	}
