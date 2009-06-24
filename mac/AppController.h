@@ -28,6 +28,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 	IBOutlet NSTextField *			textLoginError_;
 
 	IBOutlet NSButton *				buttonLogin_;
+    IBOutlet NSButton *             buttonQuitCancel_;
 
 	// stuff related to select network window
 	IBOutlet NSWindow *				windowSelectNetwork_;
@@ -57,7 +58,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 }
 
 - (IBAction)login:(id)sender;
-- (IBAction)quit:(id)sender;
+- (IBAction)loginQuitOrCancel:(id)sender;
 - (IBAction)loginWindowAbout:(id)sender;
 - (IBAction)selectNetworkCancel:(id)sender;
 - (IBAction)selectNetworkClick:(id)sender;

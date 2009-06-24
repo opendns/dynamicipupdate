@@ -353,6 +353,17 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)showLoginWindow {
+    if ([self isLoggedIn]) {
+        [buttonQuitCancel_ setTitle:@"Cancel"];
+    } else {
+        [buttonQuitCancel_ setTitle:@"Quit"];
+    }
+    [editOpenDnsAccount_ setTitleWithMnemonic:@""];
+    [editOpenDnsPassword_ setTitleWithMnemonic:@""];
+    [progressLogin_ setHidden:YES];
+    [textLoginProgress_ setHidden:YES];
+    [textLoginError_ setHidden:YES];
+
 	[windowSelectNetwork_ orderOut:self];
 	[windowStatus_ orderOut:self];
 	[NSApp activateIgnoringOtherApps:YES];
@@ -530,8 +541,11 @@ Error:
 	exitIpChangeThread_ = YES;
 }
 
-- (IBAction)quit:(id)sender {
-	[NSApp terminate:self];
+- (IBAction)loginQuitOrCancel:(id)sender {
+    if ([self isLoggedIn])
+        [self showStatusWindow:self];
+    else
+        [NSApp terminate:self];
 }
 
 - (IBAction)loginWindowAbout:(id)sender {
@@ -560,7 +574,7 @@ Error:
 }
 
 - (IBAction)statusChangeAccount:(id)sender {
-    
+    [self showLoginWindow];
 }
 
 - (IBAction)statusChangeNetwork:(id)sender {
