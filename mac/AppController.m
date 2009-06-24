@@ -242,7 +242,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 			currIp = [newIp copy];
 			[self performSelectorOnMainThread:@selector(ipAddressChanged:) withObject:currIp waitUntilDone:NO];
 		}
-
+        
 		if ([self shouldSendPeriodicUpdate]) {
 			[self sendPeriodicUpdate];
 		}
@@ -250,6 +250,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 		NSDate *inOneMinute = [NSDate date];
 		[inOneMinute addTimeInterval:ONE_MINUTE_INTERVAL];
 		[NSThread sleepUntilDate:inOneMinute];
+        [myAutoreleasePool drain];
 	}
 	[currIp release];
 	[myAutoreleasePool release];
