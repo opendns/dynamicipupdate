@@ -10,6 +10,7 @@
 #include <netdb.h>
 
 #define API_HOST @"https://api.opendns.com/v1/"
+#define IP_UPDATE_HOST @"https://updates.opendns.com"
 
 #define TIME_INTERVAL_ONE_MINUTE 60.0
 #define TIME_INTERVAL_3HR 60.0*60.0*3.0
@@ -36,8 +37,6 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (void)ipChangeThread;
 - (void)setButtonLoginStatus;
 - (BOOL)isButtonLoginEnabled;
-- (BOOL)shouldSendPeriodicUpdate;
-- (void)sendPeriodicUpdate;
 - (NSString*)apiSignInStringForAccount:(NSString*)userName withPassword:(NSString*)password;
 - (NSString*)apiGetNetworksStringForToken:(NSString*)token;
 - (void)showLoginError;
@@ -193,6 +192,14 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	return url;
 }
 
+- (NSString*)apiIpUpdateForToken:(NSString*)token andHostname:(NSString*)hostname {
+	NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    if (!hostname)
+        hostname = @"";
+	NSString *url = [NSString stringWithFormat:@"%@/nic/update?token=%@&api_key=%@&v=2&hostname=%@", IP_UPDATE_HOST, tokenEncoded, API_KEY, hostname];
+	return url;    
+}
+
 - (NSString *)getMyIp {
 	char **addrs;
 	struct hostent *he = gethostbyname("myip.opendns.com");
@@ -215,14 +222,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)ipAddressChanged:(NSString *)newIpAddress {
-	[currentIpAddress_ release];
-	currentIpAddress_ = [newIpAddress copy];
-    if (newIpAddress) {
-        usingOpenDns_ = YES;
-    } else {
-        usingOpenDns_ = NO;
-    }
-    [self updateStatusWindow];
 }
 
 - (BOOL)canSendIPUpdates {
@@ -249,34 +248,63 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return YES;
 }
 
-- (void)sendPeriodicUpdate {
-
+- (void)scheduleNextIpUpdate {
     // schedule next ip update 3 hours from now
     [nextIpUpdate_ release];
     nextIpUpdate_ = [[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_3HR] retain];
 }
 
+- (void)ipUpdateFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+	//NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
+    NSLog(@"Ok");
+}
+
+- (void)ipUpdateFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
+    NSLog(@"Error");
+}
+
+- (void)sendPeriodicUpdate {
+    NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
+    NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
+    NSString *token = [prefs objectForKey:PREF_TOKEN];
+    NSString *urlString = [self apiIpUpdateForToken:token andHostname:hostname];
+	NSURL *url = [NSURL URLWithString:urlString];
+	NSURLRequest *request = [NSURLRequest requestWithURL:url];
+	GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
+	[fetcher beginFetchWithDelegate:self
+				  didFinishSelector:@selector(ipUpdateFetcher:finishedWithData:)
+					didFailSelector:@selector(ipUpdateFetcher:failedWithError:)];
+
+    [self scheduleNextIpUpdate];
+}
+
+- (void)ipAddressCheckAndPeriodicIpUpdate:(id)dummy {
+    NSString *newIp = [self getMyIp];
+    if (!NSStringsEqual(newIp, currentIpAddress_)) {
+        [currentIpAddress_ release];
+        currentIpAddress_ = [newIp copy];
+        if (newIp) {
+            usingOpenDns_ = YES;
+        } else {
+            usingOpenDns_ = NO;
+        }
+        forceNextUpdate_ = YES;
+        [self updateStatusWindow];
+    }
+    
+    if ([self shouldSendPeriodicUpdate]) {
+        [self sendPeriodicUpdate];
+    }
+}
+
 - (void)ipChangeThread {
 	NSAutoreleasePool* myAutoreleasePool = [[NSAutoreleasePool alloc] init];
-	NSString *currIp = nil;
-
 	while (!exitIpChangeThread_) {
-		NSString *newIp = [self getMyIp];
-		if (!NSStringsEqual(newIp, currIp)) {
-			[currIp release];
-			currIp = [newIp copy];
-			[self performSelectorOnMainThread:@selector(ipAddressChanged:) withObject:currIp waitUntilDone:NO];
-		}
-        
-		if ([self shouldSendPeriodicUpdate]) {
-			[self sendPeriodicUpdate];
-		}
-
+        [self performSelectorOnMainThread:@selector(ipAddressCheckAndPeriodicIpUpdate:) withObject:nil waitUntilDone:YES];
 		NSDate *inOneMinute = [[NSDate date] addTimeInterval:TIME_INTERVAL_ONE_MINUTE];
 		[NSThread sleepUntilDate:inOneMinute];
         [myAutoreleasePool drain];
 	}
-	[currIp release];
 	[myAutoreleasePool release];
 }
 
