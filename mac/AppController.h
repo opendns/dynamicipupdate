@@ -9,6 +9,7 @@ extern NSString * PREF_TOKEN;
 extern NSString * PREF_HOSTNAME;
 extern NSString * PREF_SEND_UPDATES;
 extern NSString * PREF_USER_NETWORKS_STATE;
+extern NSString * PREF_UNIQUE_ID;
 
 extern NSString * UNS_OK;
 extern NSString * UNS_NO_NETWORKS;
@@ -56,6 +57,8 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 	BOOL							exitIpChangeThread_;
     BOOL                            usingOpenDns_;
     BOOL                            forceNextUpdate_;
+    
+    NSDate *                        nextIpUpdate_;
 }
 
 - (IBAction)login:(id)sender;

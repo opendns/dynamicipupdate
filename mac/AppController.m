@@ -11,13 +11,15 @@
 
 #define API_HOST @"https://api.opendns.com/v1/"
 
-#define ONE_MINUTE_INTERVAL 60.0
+#define TIME_INTERVAL_ONE_MINUTE 60.0
+#define TIME_INTERVAL_3HR 60.0*60.0*3.0
 
 NSString * PREF_ACCOUNT = @"account";
 NSString * PREF_TOKEN = @"token";
 NSString * PREF_HOSTNAME = @"hostname";
 NSString * PREF_SEND_UPDATES = @"sendUpdates";
 NSString * PREF_USER_NETWORKS_STATE = @"networksState";
+NSString * PREF_UNIQUE_ID = @"uniqueId";
 
 // selected a network or we're using a default network
 NSString * UNS_OK = @"unsok";
@@ -231,33 +233,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return [networkState isEqualToString:UNS_OK];
 }
 
-/*
- bool ShouldSendPeriodicUpdate()
- {
- if (!CanSendIPUpdates())
- return false;
- 
- if (m_forceNextIpUpdate) {
- m_forceNextIpUpdate = false;
- return true;
- }
- 
- ULONGLONG currTimeInMs = GetTickCount();
- 
- // the time wraps-around every 49.7 days.
- if (currTimeInMs < m_lastIpUpdateTimeInMs) {
- // going backwards in time - it must be wrap around
- m_lastIpUpdateTimeInMs = GetTickCount();
- slog("Detected GetTickCount() wrap-around\n");
- }
- 
- ULONGLONG nextUpdateTimeInMs = m_lastIpUpdateTimeInMs + THREE_HRS_IN_MS;
- if (currTimeInMs > nextUpdateTimeInMs)
- return true;
- return false;
- }
-*/
-
 - (BOOL)shouldSendPeriodicUpdate {
     if (![self canSendIPUpdates])
         return NO;
@@ -266,11 +241,19 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         forceNextUpdate_ = NO;
         return YES;
     }
-	return YES;
+
+    NSDate *now = [NSDate date];
+    if ([now compare:nextIpUpdate_] == NSOrderedAscending)
+        return NO;
+
+    return YES;
 }
 
 - (void)sendPeriodicUpdate {
-	
+
+    // schedule next ip update 3 hours from now
+    [nextIpUpdate_ release];
+    nextIpUpdate_ = [[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_3HR] retain];
 }
 
 - (void)ipChangeThread {
@@ -289,18 +272,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 			[self sendPeriodicUpdate];
 		}
 
-		NSDate *inOneMinute = [[NSDate date] addTimeInterval:ONE_MINUTE_INTERVAL];
+		NSDate *inOneMinute = [[NSDate date] addTimeInterval:TIME_INTERVAL_ONE_MINUTE];
 		[NSThread sleepUntilDate:inOneMinute];
         [myAutoreleasePool drain];
 	}
 	[currIp release];
 	[myAutoreleasePool release];
-}
-
-- (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
-	[NSThread detachNewThreadSelector:@selector(ipChangeThread)
-							 toTarget:(id)self
-						   withObject:(id)nil];
 }
 
 - (void)awakeFromNib {
@@ -311,6 +288,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[statusItem_ setEnabled:YES];
 	[statusItem_ setToolTip:@"OpenDNS Updater"];
 	[statusItem_ setMenu:menu_]; 
+
 	NSBundle *bundle = [NSBundle bundleForClass:[self class]]; 
 	NSString *path = [bundle pathForResource:@"menuicon" ofType:@"tif"]; 
 	menuIcon_= [[NSImage alloc] initWithContentsOfFile:path]; 
@@ -319,7 +297,13 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	exitIpChangeThread_ = NO;
     forceNextUpdate_ = NO;
+    // schedule first update as soon as possible
+    nextIpUpdate_ = [[NSDate date] retain];
 
+	[NSThread detachNewThreadSelector:@selector(ipChangeThread)
+							 toTarget:(id)self
+						   withObject:(id)nil];
+    
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	NSString *token = [prefs objectForKey: PREF_TOKEN];
 	if (![self isLoggedIn]) {
@@ -420,8 +404,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	[windowSelectNetwork_ makeKeyAndOrderFront:self];
 }
 
+// don't bother doing anything, it's not being called by runtime anyway
 - (void)dealloc {
-	[statusItem_ release];
 	[super dealloc];
 }
 
