@@ -646,9 +646,7 @@ Error:
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {
-	NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
-	[prefs setObject:UNS_NO_NETWORK_SELECTED forKey:PREF_USER_NETWORKS_STATE];
-	[prefs setObject:@"" forKey:PREF_HOSTNAME];
+    [self showStatusWindow:self];
 }
 
 - (IBAction)selectNetworkClick:(id)sender {
