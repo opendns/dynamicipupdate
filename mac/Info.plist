@@ -26,5 +26,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUFeedURL</key>
+	<string>https://opendnsupdate.appspot.com/macupdatecheck/ipupdater/AppCast.xml</string>
+	<key>SUEnableAutomaticChecks</key>
+	<string>YES</string>
+	<key>SUScheduledCheckInterval</key>
+	<string>86400</string>
 </dict>
 </plist>
