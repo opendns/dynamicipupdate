@@ -4,6 +4,21 @@
 
 #import <Cocoa/Cocoa.h>
 
+typedef enum {
+	IpUpdateOk,
+	IpUpdateNotYours,
+	IpUpdateBadAuth,
+	IpUpdateNotAvailable,
+	IpUpdateNoHost
+} IpUpdateResult;
+
+enum {
+	SupressOneNetworkMsgFlag   = 0x1,
+	SuppressNoDynamicIpMsgFlag = 0x2,
+	SupressNoNetworksMsgFlag   = 0x4,
+	SupressAll = SupressOneNetworkMsgFlag | SuppressNoDynamicIpMsgFlag | SupressNoNetworksMsgFlag
+};
+
 extern NSString * PREF_ACCOUNT;
 extern NSString * PREF_TOKEN;
 extern NSString * PREF_HOSTNAME;
@@ -53,6 +68,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 	NSImage *						menuIcon_;
 
 	// program state
+    IpUpdateResult                  ipUpdateResult_;
 	NSString *						currentIpAddress_;
 	BOOL							exitIpChangeThread_;
     BOOL                            usingOpenDns_;

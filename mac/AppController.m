@@ -33,7 +33,6 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 
 @interface AppController (Private)
 - (NSString *)getMyIp;
-- (void)ipAddressChanged:(NSString *)newIpAddress;
 - (void)ipChangeThread;
 - (void)setButtonLoginStatus;
 - (BOOL)isButtonLoginEnabled;
@@ -221,9 +220,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 	return nil;
 }
 
-- (void)ipAddressChanged:(NSString *)newIpAddress {
-}
-
 - (BOOL)canSendIPUpdates {
     if (![self isLoggedIn])
         return NO;
@@ -254,13 +250,54 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     nextIpUpdate_ = [[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_3HR] retain];
 }
 
+- (IpUpdateResult)ipUpdateResultFromString:(NSString*)s {
+    
+    if ([s hasPrefix:@"The service is not available"])
+        return IpUpdateNotAvailable;
+    if ([s hasPrefix:@"good"])
+        return IpUpdateOk;
+    if ([s hasPrefix:@"!yours"])
+        return IpUpdateNotYours;
+    if ([s hasPrefix:@"badauth"])
+        return IpUpdateBadAuth;
+    if ([s hasPrefix:@"nohost"])
+        return IpUpdateBadAuth;
+    assert(0);
+    return IpUpdateOk;
+}
+
 - (void)ipUpdateFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
-	//NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
-    NSLog(@"Ok");
+	NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
+
+    IpUpdateResult ipUpdateResult = [self ipUpdateResultFromString:s];
+    if (IpUpdateNotAvailable == ipUpdateResult)
+		return;
+
+    // TODO: this might happen if a user made a network non-dynamic behind our back
+	// not sure what to do in this case - re-download networks?
+	if (IpUpdateNoHost == ipUpdateResult)
+		return;
+
+    if ((IpUpdateOk == ipUpdateResult) || (IpUpdateNotYours == ipUpdateResult)) {
+        /* TODO: port this
+        const char *ip = StrFindChar(ipUpdateRes, ' ');
+        if (ip)
+            m_ipFromHttp = StrToTStr(ip+1);
+         */
+    }
+    
+    if (ipUpdateResult == ipUpdateResult_)
+         return;
+
+    ipUpdateResult_ = ipUpdateResult;
+    [self updateStatusWindow];
+    if (ipUpdateResult != IpUpdateOk)
+        [self showStatusWindow:self];
 }
 
 - (void)ipUpdateFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
-    NSLog(@"Error");
+    // silently ignore
+    NSLog(@"ip update failed");
 }
 
 - (void)sendPeriodicUpdate {
@@ -325,6 +362,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 	exitIpChangeThread_ = NO;
     forceNextUpdate_ = NO;
+    ipUpdateResult_ = IpUpdateOk;
     // schedule first update as soon as possible
     nextIpUpdate_ = [[NSDate date] retain];
 
