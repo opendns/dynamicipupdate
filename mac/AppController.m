@@ -715,7 +715,11 @@ Error:
 }
 
 - (IBAction)statusUpdateNow:(id)sender {
-
+    forceNextUpdate_ = YES;
+    [lastIpUpdateTime_ release];
+    lastIpUpdateTime_ = [[NSDate date] retain];
+    if ([self updateLastIpUpdateTime])
+        [self updateStatusWindow];
 }
 
 @end
