@@ -244,10 +244,24 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return YES;
 }
 
+// update minutesSinceLastIpUpdate_. Return YES if changed
+- (BOOL)updateLastIpUpdateTime {
+    if (!lastIpUpdateTime_)
+        return NO;
+    NSTimeInterval seconds = -[lastIpUpdateTime_ timeIntervalSinceNow];
+    int currMinutesSinceLastUpdate = (int)(seconds / 60.0);
+    if (currMinutesSinceLastUpdate == minutesSinceLastIpUpdate_)
+        return NO;
+    minutesSinceLastIpUpdate_ = currMinutesSinceLastUpdate;
+    return YES;
+}
+
 - (void)scheduleNextIpUpdate {
     // schedule next ip update 3 hours from now
     [nextIpUpdate_ release];
     nextIpUpdate_ = [[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_3HR] retain];
+    [lastIpUpdateTime_ release];
+    lastIpUpdateTime_ = [[NSDate date] retain];
 }
 
 - (IpUpdateResult)ipUpdateResultFromString:(NSString*)s {
@@ -316,22 +330,28 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)ipAddressCheckAndPeriodicIpUpdate:(id)dummy {
+    BOOL updateStatus = NO;
     NSString *newIp = [self getMyIp];
-    if (!NSStringsEqual(newIp, currentIpAddress_)) {
-        [currentIpAddress_ release];
-        currentIpAddress_ = [newIp copy];
+    if (!NSStringsEqual(newIp, currentIpAddressFromDns_)) {
+        [currentIpAddressFromDns_ release];
+        currentIpAddressFromDns_ = [newIp copy];
         if (newIp) {
             usingOpenDns_ = YES;
         } else {
             usingOpenDns_ = NO;
         }
         forceNextUpdate_ = YES;
-        [self updateStatusWindow];
+        updateStatus = YES;
     }
     
     if ([self shouldSendPeriodicUpdate]) {
         [self sendPeriodicUpdate];
     }
+    if ([self updateLastIpUpdateTime])
+        updateStatus = YES;
+    
+    if (updateStatus)
+        [self updateStatusWindow];
 }
 
 - (void)ipChangeThread {
@@ -403,6 +423,26 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return NO;
 }
 
+- (NSString*)formatNum:(int) num withPostfix:(NSString*)postfix {
+    if (1 == num) {
+        return [NSString stringWithFormat:@"%d %@", num, postfix];
+    } else {
+        return [NSString stringWithFormat:@"%d %@s", num, postfix];
+    }
+}
+
+- (NSString*)lastUpdateText {
+    int hours = minutesSinceLastIpUpdate_ / 60;
+    int minutes = minutesSinceLastIpUpdate_ % 60;
+    NSString *s = @"";
+    if (hours > 0) {
+        s = [self formatNum:hours withPostfix:@"hr"];
+        s = [s stringByAppendingString:@" "];
+    }
+    s = [s stringByAppendingString:[self formatNum:minutes withPostfix:@"minute"]];
+    return [s stringByAppendingString:@" ago."];
+}
+
 - (void)updateStatusWindow {
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	NSString *account = [prefs objectForKey:PREF_ACCOUNT];
@@ -419,8 +459,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         hostname = @"default";
     [textHostname_ setTitleWithMnemonic:hostname];
 
-    if (currentIpAddress_)
-        [textIpAddress_ setTitleWithMnemonic:currentIpAddress_];
+    if (currentIpAddressFromDns_)
+        [textIpAddress_ setTitleWithMnemonic:currentIpAddressFromDns_];
     else {
         // TODO: show a different text in red?
         [textIpAddress_ setTitleWithMnemonic:@""];
@@ -434,7 +474,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         [textUsingOpenDns_ setTitleWithMnemonic:@"No"];
     }
 
-    // TODO: show last updated time
+        [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
 }
 
 - (void)showStatusWindow:(id)sender {

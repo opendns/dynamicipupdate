@@ -69,12 +69,15 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
 	// program state
     IpUpdateResult                  ipUpdateResult_;
-	NSString *						currentIpAddress_;
+	NSString *						currentIpAddressFromDns_;
+    NSString *                      ipAddressFromHttp_;
 	BOOL							exitIpChangeThread_;
     BOOL                            usingOpenDns_;
     BOOL                            forceNextUpdate_;
-    
+
     NSDate *                        nextIpUpdate_;
+    NSDate *                        lastIpUpdateTime_;
+    int                             minutesSinceLastIpUpdate_;
 }
 
 - (IBAction)login:(id)sender;

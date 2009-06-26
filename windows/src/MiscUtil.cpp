@@ -692,7 +692,7 @@ TCHAR *FormatUpdateTime(int minutes)
 	TCHAR buf[256];
 
 	int hours = minutes / 60;
-	minutes = minutes - (hours * 60);
+	minutes = minutes % 60);
 	assert(minutes < 60);
 	assert(minutes >= 0);
 
