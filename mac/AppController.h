@@ -5,18 +5,18 @@
 #import <Cocoa/Cocoa.h>
 
 typedef enum {
-	IpUpdateOk,
-	IpUpdateNotYours,
-	IpUpdateBadAuth,
-	IpUpdateNotAvailable,
-	IpUpdateNoHost
+    IpUpdateOk,
+    IpUpdateNotYours,
+    IpUpdateBadAuth,
+    IpUpdateNotAvailable,
+    IpUpdateNoHost
 } IpUpdateResult;
 
 enum {
-	SupressOneNetworkMsgFlag   = 0x1,
-	SuppressNoDynamicIpMsgFlag = 0x2,
-	SupressNoNetworksMsgFlag   = 0x4,
-	SupressAll = SupressOneNetworkMsgFlag | SuppressNoDynamicIpMsgFlag | SupressNoNetworksMsgFlag
+    SupressOneNetworkMsgFlag   = 0x1,
+    SuppressNoDynamicIpMsgFlag = 0x2,
+    SupressNoNetworksMsgFlag   = 0x4,
+    SupressAll = SupressOneNetworkMsgFlag | SuppressNoDynamicIpMsgFlag | SupressNoNetworksMsgFlag
 };
 
 extern NSString * PREF_ACCOUNT;
@@ -33,51 +33,52 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
 @interface AppController : NSObject {
 
-	// stuff related to login window
-	IBOutlet NSWindow *				windowLogin_;
+    // stuff related to login window
+    IBOutlet NSWindow *			windowLogin_;
 
-	IBOutlet NSTextField *			editOpenDnsAccount_;
-	IBOutlet NSTextField *			editOpenDnsPassword_;
-	
-	IBOutlet NSProgressIndicator *	progressLogin_;
-	IBOutlet NSTextField *			textLoginProgress_;
-	IBOutlet NSTextField *			textLoginError_;
+    IBOutlet NSTextField *		editOpenDnsAccount_;
+    IBOutlet NSTextField *		editOpenDnsPassword_;
+    
+    IBOutlet NSProgressIndicator *	progressLogin_;
+    IBOutlet NSTextField *		textLoginProgress_;
+    IBOutlet NSTextField *		textLoginError_;
 
-	IBOutlet NSButton *				buttonLogin_;
-    IBOutlet NSButton *             buttonQuitCancel_;
+    IBOutlet NSButton *                 buttonLogin_;
+    IBOutlet NSButton *                 buttonQuitCancel_;
 
-	// stuff related to select network window
-	IBOutlet NSWindow *				windowSelectNetwork_;
-	IBOutlet NSTableView *			tableNetworksList_;
-    IBOutlet NSButton *             buttonSelect_;
+    // stuff related to select network window
+    IBOutlet NSWindow *                 windowSelectNetwork_;
+    IBOutlet NSTableView *              tableNetworksList_;
+    IBOutlet NSButton *                 buttonSelect_;
 
-	// stuff related to status window
-	IBOutlet NSWindow *				windowStatus_;
-    IBOutlet NSTextField *          textAccount_;
-    IBOutlet NSTextField *          textHostname_;
-    IBOutlet NSTextField *          textIpAddress_;
-    IBOutlet NSTextField *          textUsingOpenDns_;
-    IBOutlet NSTextField *          textLastUpdated_;
-    IBOutlet NSButton *             buttonChangeAccount_;
-    IBOutlet NSButton *             buttonChangeNetwork_;
-    IBOutlet NSButton *             buttonUpdateNow_;
+    // stuff related to status window
+    IBOutlet NSWindow *                 windowStatus_;
+    IBOutlet NSTextField *              textAccount_;
+    IBOutlet NSTextField *              textHostname_;
+    IBOutlet NSTextField *              textIpAddress_;
+    IBOutlet NSTextField *              textUsingOpenDns_;
+    IBOutlet NSTextField *              textLastUpdated_;
+    IBOutlet NSButton *                 buttonChangeAccount_;
+    IBOutlet NSButton *                 buttonChangeNetwork_;
+    IBOutlet NSButton *                 buttonUpdateNow_;
+    IBOutlet NSButton *                 buttonCheckSendUpdates_;
 
-	// menu-related stuff
-	IBOutlet NSMenu *				menu_;
-	NSStatusItem *					statusItem_;
-	NSImage *						menuIcon_;
+    // menu-related stuff
+    IBOutlet NSMenu *                   menu_;
+    NSStatusItem *                      statusItem_;
+    NSImage *                           menuIcon_;
 
-	// program state
-    IpUpdateResult                  ipUpdateResult_;
-	NSString *						currentIpAddressFromDns_;
-    NSString *                      ipAddressFromHttp_;
-	BOOL							exitIpChangeThread_;
-    BOOL                            usingOpenDns_;
-    BOOL                            forceNextUpdate_;
+    // program state
+    IpUpdateResult                      ipUpdateResult_;
+    NSString *                          currentIpAddressFromDns_;
+    NSString *                          ipAddressFromHttp_;
+    BOOL                                exitIpChangeThread_;
+    BOOL                                usingOpenDns_;
+    BOOL                                forceNextUpdate_;
 
-    NSDate *                        nextIpUpdate_;
-    NSDate *                        lastIpUpdateTime_;
-    int                             minutesSinceLastIpUpdate_;
+    NSDate *                            nextIpUpdate_;
+    NSDate *                            lastIpUpdateTime_;
+    int                                 minutesSinceLastIpUpdate_;
 }
 
 - (IBAction)login:(id)sender;
@@ -90,5 +91,6 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)statusChangeAccount:(id)sender;
 - (IBAction)statusChangeNetwork:(id)sender;
 - (IBAction)statusUpdateNow:(id)sender;
+- (IBAction)statusToggleSendUpdates:(id)sender;
 
 @end
