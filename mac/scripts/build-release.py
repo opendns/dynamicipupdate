@@ -145,7 +145,7 @@ def build_and_zip(version):
     (out, err) = run_cmd_throw("xcodebuild", "-project", xcodeproj, "-configuration", "Release", "-target", "OpenDNS Updater")
     ensure_dir_exists(RELEASE_BUILD_DIR)
     os.chdir(RELEASE_BUILD_DIR)
-    (out, err) = run_cmd_throw("zip", "-9", "-r", zip_name(version), "BTerm.app")
+    (out, err) = run_cmd_throw("zip", "-9", "-r", zip_name(version), "OpenDNS Updater.app")
 
 def main():
     ensure_dir_exists(WEBSITE_DESKTOP_DIR)
