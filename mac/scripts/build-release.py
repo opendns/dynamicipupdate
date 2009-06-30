@@ -109,7 +109,7 @@ def ensure_valid_version(version):
     sys.exit(1)
 
 def zip_name(version):
-    return "OpenDNS-Dynamic-IP-Mac-%s.zip" % version
+    return "OpenDNS-Updater-Mac-%s.zip" % version
 
 def zip_path(version):
     return os.path.join(RELEASE_BUILD_DIR, zip_name(version))
@@ -125,15 +125,20 @@ def update_app_cast(path, version, length):
     appcast = readfile(path)
     newver = "sparkle:version=\"%s\"" % version
     appcast = re.sub("sparkle:version=\"[^\"]+\"", newver, appcast)
+
     pubdate = time.strftime("%a, %d %b %y %H:%M:%S %z", time.gmtime())
     newpubdate = "<pubDate>%s</pubDate>" % pubdate
-    appcast = re.sub('<pubDate>.?</pubDate>', newpubdate, appcast)
+    appcast = re.sub('<pubDate>.*</pubDate>', newpubdate, appcast)
+
     url = "http://www.opendns.com/desktop/mac-ipupdater-relnotes-%s.html" % version
     newrelnotes = "<sparkle:releaseNotesLink>%s</sparkle:releaseNotesLink>" % url
-    appcast = re.sub('<sparkle:releaseNotesLink>.+</sparkle:releaseNotesLink>', newrelnotes, appcast)
+    appcast = re.sub('<sparkle:releaseNotesLink>.*</sparkle:releaseNotesLink>', newrelnotes, appcast)
+
     newlen = 'length="%d"' % length
-    appcast = re.sub("length=\"[^\"]?\"", newlen, appcast)
+    appcast = re.sub("length=\"[^\"]*\"", newlen, appcast)
+
     writefile(path, appcast)
+
     print("Updates '%s', make sure to check it in" % path)
 
 def build_and_zip(version):
@@ -153,6 +158,7 @@ def main():
     ensure_file_exists(INFO_PLIST_PATH)
     ensure_file_exists(APP_CAST_PATH)
     version = extract_version_from_plist(INFO_PLIST_PATH)
+    print("Building mac updater version '%s'" % version)
     ensure_valid_version(version)
     ensure_file_doesnt_exist(zip_path_on_website(version))
     ensure_file_exists(relnotes_path(version))
