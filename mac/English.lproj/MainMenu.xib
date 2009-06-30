@@ -9,7 +9,6 @@
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<integer value="526"/>
-			<integer value="57"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -471,6 +470,7 @@
 									</object>
 									<string key="NSFrame">{{1, 1}, {235, 229}}</string>
 									<reference key="NSSuperview" ref="543522648"/>
+									<reference key="NSNextKeyView" ref="251558370"/>
 									<reference key="NSDocView" ref="251558370"/>
 									<reference key="NSBGColor" ref="67205704"/>
 									<int key="NScvFlags">4</int>
@@ -497,6 +497,7 @@
 							</object>
 							<string key="NSFrame">{{20, 60}, {237, 231}}</string>
 							<reference key="NSSuperview" ref="820449914"/>
+							<reference key="NSNextKeyView" ref="626631159"/>
 							<int key="NSsFlags">530</int>
 							<reference key="NSVScroller" ref="270818115"/>
 							<reference key="NSHScroller" ref="970920428"/>
@@ -884,13 +885,13 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<object class="NSButton" id="497914248">
 							<reference key="NSNextResponder" ref="147154640"/>
 							<int key="NSvFlags">289</int>
-							<string key="NSFrame">{{208, 18}, {174, 18}}</string>
+							<string key="NSFrame">{{227, 18}, {155, 18}}</string>
 							<reference key="NSSuperview" ref="147154640"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="382794621">
 								<int key="NSCellFlags">-2080244224</int>
 								<int key="NSCellFlags2">131072</int>
-								<string key="NSContents">Send background IP updates</string>
+								<string key="NSContents">Send dynamic IP updates</string>
 								<reference key="NSSupport" ref="26"/>
 								<reference key="NSControlView" ref="497914248"/>
 								<int key="NSButtonFlags">1211912703</int>
@@ -1253,6 +1254,22 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<reference key="destination" ref="497914248"/>
 					</object>
 					<int key="connectionID">587</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">value: values.sendUpdates</string>
+						<reference key="source" ref="497914248"/>
+						<reference key="destination" ref="898037451"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="497914248"/>
+							<reference key="NSDestination" ref="898037451"/>
+							<string key="NSLabel">value: values.sendUpdates</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">values.sendUpdates</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">589</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2028,7 +2045,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">587</int>
+			<int key="maxID">589</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2049,12 +2066,10 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<string>showStatusWindow:</string>
 							<string>statusChangeAccount:</string>
 							<string>statusChangeNetwork:</string>
-							<string>statusToggleSendUpdates:</string>
 							<string>statusUpdateNow:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>

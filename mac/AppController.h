@@ -91,6 +91,5 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)statusChangeAccount:(id)sender;
 - (IBAction)statusChangeNetwork:(id)sender;
 - (IBAction)statusUpdateNow:(id)sender;
-- (IBAction)statusToggleSendUpdates:(id)sender;
 
 @end

@@ -178,6 +178,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 @implementation AppController
 
++ (void)initialize {
+    NSMutableDictionary *defaultValues = [NSMutableDictionary dictionary];
+    [defaultValues setObject:[NSNumber numberWithBool:YES] forKey:PREF_SEND_UPDATES];
+    [[NSUserDefaults standardUserDefaults] registerDefaults: defaultValues];
+}
+
 - (NSString*)apiSignInStringForAccount:(NSString*)account withPassword:(NSString*)password {
     NSString *accountEncoded = [account stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *passwordEncoded = [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -225,6 +231,9 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     if (![self isLoggedIn])
         return NO;
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSNumber *shouldSend = [prefs objectForKey:PREF_SEND_UPDATES];
+    if (NO == [shouldSend boolValue])
+        return NO;
     NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
     return [networkState isEqualToString:UNS_OK];
 }
@@ -392,6 +401,11 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
                            withObject:(id)nil];
 
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    [prefs addObserver:self
+            forKeyPath:PREF_SEND_UPDATES
+               options:NSKeyValueObservingOptionNew
+               context:nil];
+
     NSString *token = [prefs objectForKey: PREF_TOKEN];
     if (![self isLoggedIn]) {
         [self showLoginWindow];
@@ -403,6 +417,17 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         return;
     }
     [self showStatusWindow:nil];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+    if ([keyPath isEqualToString:PREF_SEND_UPDATES]) {
+        [self updateStatusWindow];
+        return;
+    }
 }
 
 - (BOOL)isLoggedIn {
@@ -446,6 +471,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 - (void)updateStatusWindow {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    BOOL sendingUpdates = [[prefs objectForKey:PREF_SEND_UPDATES] boolValue];
     NSString *account = [prefs objectForKey:PREF_ACCOUNT];
     if ([self isLoggedIn]) {
         [textAccount_ setTitleWithMnemonic:account];
@@ -475,7 +501,15 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         [textUsingOpenDns_ setTitleWithMnemonic:@"No"];
     }
 
-    [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
+    if (sendingUpdates) {
+        [textLastUpdated_ setTextColor:[NSColor blackColor]];
+        [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
+        [buttonUpdateNow_ setEnabled:YES];
+    } else {
+        [textLastUpdated_ setTextColor:[NSColor redColor]];
+        [textLastUpdated_ setTitleWithMnemonic:@"Updates disabled"];
+        [buttonUpdateNow_ setEnabled:NO];
+    }
 }
 
 - (void)showStatusWindow:(id)sender {
@@ -723,10 +757,6 @@ Error:
     lastIpUpdateTime_ = [[NSDate date] retain];
     if ([self updateLastIpUpdateTime])
         [self updateStatusWindow];
-}
-
-- (IBAction)statusToggleSendUpdates:(id)sender {
-    NSLog(@"hello");
 }
 
 @end
