@@ -496,7 +496,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	bool showWindow = true;
 	if (wasAutoStart)
 		showWindow = false;
-	nRet = Run(wasAutoStart);
+	nRet = Run(showWindow);
 
 	PreferencesSave();
 Exit:
