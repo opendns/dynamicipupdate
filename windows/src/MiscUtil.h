@@ -7,9 +7,20 @@
 
 #include "ApiKey.h"
 
+#define ABOUT_URL _T("http://www.opendns.com/software/windows/dynip/about/")
+#define LEARN_MORE_IP_ADDRESS_TAKEN_URL _T("http://www.opendns.com/software/windows/dynip/ip-taken/")
+#define LEARN_MORE_IP_MISMATCH_URL _T("http://www.opendns.com/software/windows/dynip/ip-differs/")
+#define SETUP_OPENDNS_URL _T("http://www.opendns.com/software/windows/dynip/setup-opendns/")
+
+#define FORGOT_PASSWORD_URL _T("https://www.opendns.com/dashboard/signin/")
+#define CREATE_ACCOUNT_URL _T("https://www.opendns.com/start/create_account/")
+
+#define DASHBOARD_URL_DEV _T("http://website.dev6.sfo.opendns.com/dashboard/networks/")
+#define DASHBOARD_URL _T("http://www.opendns.com/dashboard/networks/")
+
 extern UINT g_errorNotifMsg;
 
-#define PROGRAM_VERSION  _T("2.0b4")
+#define PROGRAM_VERSION  _T("2.0b5")
 
 // PROGRAM_VERSION_SIMULATE_UPGRADE must be lower than PROGRAM_VERSION
 #define PROGRAM_VERSION_SIMULATE_UPGRADE _T("0.8")

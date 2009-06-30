@@ -47,11 +47,6 @@ enum {
 
 static bool g_showDebug = false;
 
-#define ABOUT_URL _T("http://www.opendns.com/software/windows/dynip/about/")
-#define LEARN_MORE_IP_ADDRESS_TAKEN_URL _T("http://www.opendns.com/software/windows/dynip/ip-taken/")
-#define LEARN_MORE_IP_MISMATCH_URL _T("http://www.opendns.com/software/windows/dynip/ip-differs/")
-#define SETUP_OPENDNS_URL _T("http://www.opendns.com/software/windows/dynip/setup-opendns/")
-
 #define DEFAULT_FONT_SIZE 12
 
 #define TOP_BAR_TXT _T("OpenDNS Updater")

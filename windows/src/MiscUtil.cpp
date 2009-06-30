@@ -441,12 +441,10 @@ TCHAR *GetWindowsUserName()
 
 #define API_HOST_DEV "api.dev6.sfo.opendns.com"
 #define IP_UPDATE_HOST_DEV "website.dev6.sfo.opendns.com"
-#define DASHBOARD_URL_DEV _T("http://website.dev6.sfo.opendns.com/dashboard/networks/")
 #define API_IS_HTTPS_DEV false
 
 #define API_HOST "api.opendns.com"
 #define IP_UPDATE_HOST "updates.opendns.com"
-#define DASHBOARD_URL _T("http://www.opendns.com/dashboard/networks/")
 #define API_IS_HTTPS true
 
 static bool g_useDevServers = false;
@@ -692,7 +690,7 @@ TCHAR *FormatUpdateTime(int minutes)
 	TCHAR buf[256];
 
 	int hours = minutes / 60;
-	minutes = minutes % 60);
+	minutes = minutes % 60;
 	assert(minutes < 60);
 	assert(minutes >= 0);
 

@@ -10,10 +10,7 @@
 #include "JsonApiResponses.h"
 #include "Prefs.h"
 #include "StrUtil.h"
-
-// TODO: those need to be different urls
-#define FORGOT_PASSWORD_URL _T("http://www.opendns.com")
-#define CREATE_ACCOUNT_URL _T("http://www.opendns.com")
+#include "MiscUtil.h"
 
 enum {
 	WM_HTTP_SIGN_IN = WM_APP + 32,

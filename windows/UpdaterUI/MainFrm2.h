@@ -45,10 +45,6 @@ enum {
 
 static bool g_showDebug = false;
 
-// TODO: this url needs to change
-#define ABOUT_URL _T("http://www.opendns.com")
-#define SETUP_OPENDNS_URL _T("https://www.opendns.com/start/")
-
 #define DEFAULT_FONT_SIZE 12
 #define EDIT_CTRL_FONT_SIZE 10
 
