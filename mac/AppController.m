@@ -427,7 +427,17 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
 }
 
+- (void)generateUniqueIdIfNotExists {
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *uuid = [prefs objectForKey:PREF_UNIQUE_ID];
+    if (uuid)
+        return;
+    uuid = [self generateUniqueId];
+    [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
+}
+
 - (void)awakeFromNib {
+    [self generateUniqueIdIfNotExists];
     [self importOldSettings];
     statusItem_ = [[[NSStatusBar systemStatusBar] 
                                statusItemWithLength:NSSquareStatusItemLength]
