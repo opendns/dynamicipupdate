@@ -375,15 +375,25 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [myAutoreleasePool release];
 }
 
-// decryption of the VString in apple script
-/*
--- function to decrypt a string via openssl
-on decrypt_string(this_text)
-set kR to {"CkvaJWVnwUqetd82MoKB5", "mDgEpsNojkPqnbR9tarUT", "qZj4WNBenX0FfgtRK8vwm"}
-set kF to ((characters 7 through 14 of (item 2 of kR)) & (characters 17 through 21 of (item 3 of kR)) & (characters 4 through 11 of (item 1 of kR))) as string
-return do shell script ("echo " & (quoted form of this_text) & " | openssl enc -bf -d -pass pass:" & (quoted form of kF) & " -salt -a")
-end decrypt_string
-*/
+// equivalent of  echo "${s}" | openssl enc -bf -d -pass pass:"NojkPqnbK8vwmaJWVnwUq" -salt -a
+- (NSString*)decryptString:(NSString*)s {
+    NSTask *task;
+    task = [[NSTask alloc] init];
+    [task setLaunchPath: @"/bin/sh"];
+    NSString *shellArg = [NSString stringWithFormat:@"echo \"%@\" | openssl enc -bf -d -pass pass:\"NojkPqnbK8vwmaJWVnwUq\" -salt -a", s];
+    NSArray *arguments;
+    arguments = [NSArray arrayWithObjects: @"-c", shellArg, nil];
+    [task setArguments: arguments];
+    NSPipe *pipe = [NSPipe pipe];
+    [task setStandardOutput: pipe];
+    NSFileHandle *file = [pipe fileHandleForReading];
+    [task launch];
+    NSData *data = [file readDataToEndOfFile];
+    NSString *string = [[NSString alloc] initWithData: data
+                                   encoding: NSUTF8StringEncoding];
+    string = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    return string;
+}
 
 - (void)importOldSettings {
     NSDictionary *settings;
@@ -403,7 +413,7 @@ end decrypt_string
     NSString *pwd = [settings objectForKey:@"VString"];
     if (!pwd || (0 == [pwd length]))
         return;
-    // TODO: decrypt pwd
+    pwd = [self decryptString:pwd];
     // TODO: verify username/pwd and convert to pwd/token
     NSString *hostname = [settings objectForKey:@"Hostname"];
     NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
