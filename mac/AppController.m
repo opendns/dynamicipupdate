@@ -395,6 +395,14 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return string;
 }
 
+- (NSString*)generateUniqueId {
+    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+    CFStringRef sref = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+    CFRelease(uuidRef);
+    NSString *s = (NSString*)sref;
+    return [s autorelease];
+}
+    
 - (void)importOldSettings {
     NSDictionary *settings;
     NSData *settingsData;
