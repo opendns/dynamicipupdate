@@ -375,7 +375,42 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [myAutoreleasePool release];
 }
 
+// decryption of the VString in apple script
+/*
+-- function to decrypt a string via openssl
+on decrypt_string(this_text)
+set kR to {"CkvaJWVnwUqetd82MoKB5", "mDgEpsNojkPqnbR9tarUT", "qZj4WNBenX0FfgtRK8vwm"}
+set kF to ((characters 7 through 14 of (item 2 of kR)) & (characters 17 through 21 of (item 3 of kR)) & (characters 4 through 11 of (item 1 of kR))) as string
+return do shell script ("echo " & (quoted form of this_text) & " | openssl enc -bf -d -pass pass:" & (quoted form of kF) & " -salt -a")
+end decrypt_string
+*/
+
+- (void)importOldSettings {
+    NSDictionary *settings;
+    NSData *settingsData;
+    NSString *errorString = nil;
+    NSString *path = [@"~/Library/Preferences/com.zweisoft.OpenDNSUpdater.plist" stringByExpandingTildeInPath];
+    NSPropertyListFormat format;
+    settingsData = [NSData dataWithContentsOfFile:path];
+    settings = [NSPropertyListSerialization 
+                propertyListFromData:settingsData
+                mutabilityOption:NSPropertyListImmutable
+                format:&format
+                errorDescription:&errorString];
+    NSString *username = [settings objectForKey:@"Username"];
+    if (!username || (0 == [username length]))
+        return;
+    NSString *pwd = [settings objectForKey:@"VString"];
+    if (!pwd || (0 == [pwd length]))
+        return;
+    // TODO: decrypt pwd
+    // TODO: verify username/pwd and convert to pwd/token
+    NSString *hostname = [settings objectForKey:@"Hostname"];
+    NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
+}
+
 - (void)awakeFromNib {
+    [self importOldSettings];
     statusItem_ = [[[NSStatusBar systemStatusBar] 
                                statusItemWithLength:NSSquareStatusItemLength]
                               retain];

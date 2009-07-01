@@ -20,24 +20,10 @@
 		7FCBDC8A0FE300E9008A54EC /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FCBDC890FE300E9008A54EC /* AppController.m */; };
 		7FCBDC8C0FE30329008A54EC /* menuicon.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7FCBDC8B0FE30329008A54EC /* menuicon.tif */; };
 		7FCBDCBE0FE307A9008A54EC /* opendns.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7FCBDCBD0FE307A9008A54EC /* opendns.icns */; };
-		7FF27B0E0FF29A6D008724AD /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7FF27B0D0FF29A6D008724AD /* Sparkle.framework */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		7FF27B190FF29A90008724AD /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				7FF27B0E0FF29A6D008724AD /* Sparkle.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -72,7 +58,6 @@
 		7FCBDC890FE300E9008A54EC /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		7FCBDC8B0FE30329008A54EC /* menuicon.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = menuicon.tif; sourceTree = "<group>"; };
 		7FCBDCBD0FE307A9008A54EC /* opendns.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = opendns.icns; sourceTree = "<group>"; };
-		7FF27B0D0FF29A6D008724AD /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* OpenDNS Updater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OpenDNS Updater.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -102,7 +87,6 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7FF27B0D0FF29A6D008724AD /* Sparkle.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
@@ -222,7 +206,6 @@
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
-				7FF27B190FF29A90008724AD /* CopyFiles */,
 			);
 			buildRules = (
 			);
