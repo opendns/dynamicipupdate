@@ -403,7 +403,16 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSString *s = (NSString*)sref;
     return [s autorelease];
 }
-    
+
+- (void)generateUniqueIdIfNotExists {
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *uuid = [prefs objectForKey:PREF_UNIQUE_ID];
+    if (uuid)
+        return;
+    uuid = [self generateUniqueId];
+    [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
+}
+
 - (void)importOldSettings {
     NSDictionary *settings;
     NSData *settingsData;
@@ -426,15 +435,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     // TODO: verify username/pwd and convert to pwd/token
     NSString *hostname = [settings objectForKey:@"Hostname"];
     NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
-}
-
-- (void)generateUniqueIdIfNotExists {
-    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    NSString *uuid = [prefs objectForKey:PREF_UNIQUE_ID];
-    if (uuid)
-        return;
-    uuid = [self generateUniqueId];
-    [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
 }
 
 // If we're not a login startup item or if we are but at a different path
