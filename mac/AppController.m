@@ -527,13 +527,13 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (BOOL)noNetworksConfigured {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
-    return [networkState isEqualToString:UNS_NO_DYNAMIC_IP_NETWORKS];
+    return [networkState isEqualToString:UNS_NO_NETWORKS];
 }
 
 - (BOOL)noDynamicNetworks {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
-    return [networkState isEqualToString:UNS_NO_NETWORKS];
+    return [networkState isEqualToString:UNS_NO_DYNAMIC_IP_NETWORKS];
 }
 
 - (BOOL)networkNotSelected {
@@ -558,22 +558,22 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     if ([self noNetworksConfigured]) {
         [textHostname_ setTextColor:[NSColor redColor]];
         [textHostname_ setTitleWithMnemonic:@"No networks"];
-        [buttonUpdateNow_ setTitle:@"Refresh network list"];
+        [buttonChangeNetwork_ setTitle:@"Refresh network list"];
     } else if ([self noDynamicNetworks]) {
         [textHostname_ setTextColor:[NSColor redColor]];
         [textHostname_ setTitleWithMnemonic:@"No dynamic network"];
-        [buttonUpdateNow_ setTitle:@"Select network"];
+        [buttonChangeNetwork_ setTitle:@"Select network"];
     } else if ([self networkNotSelected]) {
         [textHostname_ setTextColor:[NSColor redColor]];
         [textHostname_ setTitleWithMnemonic:@"Network not selected"];
-        [buttonUpdateNow_ setTitle:@"Select network"];
+        [buttonChangeNetwork_ setTitle:@"Select network"];
     } else {
         [textHostname_ setTextColor:[NSColor blackColor]];
         NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
         if (0 == [hostname length])
             hostname = @"default";
         [textHostname_ setTitleWithMnemonic:hostname];
-        [buttonUpdateNow_ setTitle:@"Change network"];
+        [buttonChangeNetwork_ setTitle:@"Change network"];
     }
 
     if (currentIpAddressFromDns_)
@@ -700,8 +700,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
         [prefs setObject:hostname forKey:PREF_HOSTNAME];
         [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
-        [self showStatusWindow:self];
-        goto Exit;
+        goto ShowStatusWindow;
     }
 
     NSArray *dynamicNetworks = labeledDynamicNetworks(networks);
@@ -711,22 +710,24 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [tableNetworksList_ setAction:@selector(selectNetworkClick:)];
     [tableNetworksList_ setDoubleAction:@selector(selectNetworkDoubleClick:)];
     [tableNetworksList_ reloadData];
-    goto Exit;
+    [self showNetworksWindow];
+    return;
+
 Error:
     NSLog(@"Error");
-Exit:
-    [self updateStatusWindow];
-    [self showNetworksWindow];
     return;
 
 NoNetworks:
     [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
-    return;
+    goto ShowStatusWindow;
 
 NoDynamicNetworks:
     [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
+ShowStatusWindow:
+    [self updateStatusWindow];
+    [self showStatusWindow:nil];
     return;
 }
 
@@ -822,6 +823,13 @@ Error:
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {
+    NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
+    NSString *currNetworkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
+    if (![currNetworkState isEqualToString:UNS_OK]) {
+        [prefs setObject:UNS_NO_NETWORK_SELECTED forKey:PREF_USER_NETWORKS_STATE];
+    }
+    
+    [self updateStatusWindow];
     [self showStatusWindow:self];
 }
 
