@@ -19,6 +19,14 @@ enum {
     SupressAll = SupressOneNetworkMsgFlag | SuppressNoDynamicIpMsgFlag | SupressNoNetworksMsgFlag
 };
 
+enum {
+    ERR_UNKNOWN_METHOD			= 1003,
+    ERR_BAD_USERNAME_PWD		= 1004,
+    ERR_BAD_TOKEN				= ERR_BAD_USERNAME_PWD,
+    // if there are no networks in networks_get
+    ERR_NETWORK_DOESNT_EXIST	= 4008
+};
+
 extern NSString * PREF_ACCOUNT;
 extern NSString * PREF_TOKEN;
 extern NSString * PREF_HOSTNAME;

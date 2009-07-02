@@ -504,14 +504,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return YES;
 }
 
-- (BOOL)noNetworksConfigured {
-    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    NSString *networksState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
-    if ([networksState isEqualToString:UNS_NO_NETWORKS])
-        return YES;
-    return NO;
-}
-
 - (NSString*)formatNum:(int) num withPostfix:(NSString*)postfix {
     if (1 == num) {
         return [NSString stringWithFormat:@"%d %@", num, postfix];
@@ -532,6 +524,24 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return [s stringByAppendingString:@" ago."];
 }
 
+- (BOOL)noNetworksConfigured {
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
+    return [networkState isEqualToString:UNS_NO_DYNAMIC_IP_NETWORKS];
+}
+
+- (BOOL)noDynamicNetworks {
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
+    return [networkState isEqualToString:UNS_NO_NETWORKS];
+}
+
+- (BOOL)networkNotSelected {
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
+    return [networkState isEqualToString:UNS_NO_NETWORK_SELECTED];
+}
+
 - (void)updateStatusWindow {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     BOOL sendingUpdates = [[prefs objectForKey:PREF_SEND_UPDATES] boolValue];
@@ -544,10 +554,27 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         [textAccount_ setTitleWithMnemonic:@"Not logged in"];
     }
 
-    NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
-    if (0 == [hostname length])
-        hostname = @"default";
-    [textHostname_ setTitleWithMnemonic:hostname];
+    // TODO: what to do with networks if not logged in?
+    if ([self noNetworksConfigured]) {
+        [textHostname_ setTextColor:[NSColor redColor]];
+        [textHostname_ setTitleWithMnemonic:@"No networks"];
+        [buttonUpdateNow_ setTitle:@"Refresh network list"];
+    } else if ([self noDynamicNetworks]) {
+        [textHostname_ setTextColor:[NSColor redColor]];
+        [textHostname_ setTitleWithMnemonic:@"No dynamic network"];
+        [buttonUpdateNow_ setTitle:@"Select network"];
+    } else if ([self networkNotSelected]) {
+        [textHostname_ setTextColor:[NSColor redColor]];
+        [textHostname_ setTitleWithMnemonic:@"Network not selected"];
+        [buttonUpdateNow_ setTitle:@"Select network"];
+    } else {
+        [textHostname_ setTextColor:[NSColor blackColor]];
+        NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
+        if (0 == [hostname length])
+            hostname = @"default";
+        [textHostname_ setTitleWithMnemonic:hostname];
+        [buttonUpdateNow_ setTitle:@"Change network"];
+    }
 
     if (currentIpAddressFromDns_)
         [textIpAddress_ setTitleWithMnemonic:currentIpAddressFromDns_];
@@ -645,8 +672,16 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         goto Error;
 
     NSString *s2 = [json objectForKey:@"status"];
+    if ([s2 isEqualToString:@"failure"]) {
+        NSNumber *n = [json objectForKey:@"error"];
+        int err = [n intValue];
+        if (ERR_NETWORK_DOESNT_EXIST == err)
+            goto NoNetworks;
+        goto Error;
+    }
     if (![s2 isEqualToString:@"success"])
         goto Error;
+
     NSDictionary *networks = [json objectForKey:@"response"];
     if (!networks)
         goto NoNetworks;
@@ -676,11 +711,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [tableNetworksList_ setAction:@selector(selectNetworkClick:)];
     [tableNetworksList_ setDoubleAction:@selector(selectNetworkDoubleClick:)];
     [tableNetworksList_ reloadData];
-    [self showNetworksWindow];
     goto Exit;
 Error:
     NSLog(@"Error");
 Exit:
+    [self updateStatusWindow];
+    [self showNetworksWindow];
     return;
 
 NoNetworks:
