@@ -6,6 +6,7 @@
 #import "SBJSON.h"
 #import "GDataHTTPFetcher.h"
 #import "ApiKey.h"
+#import "LoginItemsAE.h"
 
 #include <netdb.h>
 
@@ -436,8 +437,58 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
 }
 
+// If we're not a login startup item or if we are but at a different path
+// (e.g. if the user moved the binary), add our binary as a startup login item
+// 10.5 has APIs for that, but no point using them if we have to support
+// 10.4 anyway
+- (void)makeStartAtLogin {
+    NSString *filePath = [[NSBundle mainBundle] bundlePath];
+    NSString *fileName = [filePath lastPathComponent];
+    NSURL * url = [NSURL fileURLWithPath:filePath];
+
+    CFArrayRef loginItems = NULL;
+    OSStatus status = LIAECopyLoginItems (&loginItems);
+    if (status != noErr)
+        goto Exit;
+
+    NSEnumerator * enumerator = [(NSArray *) loginItems objectEnumerator];
+    NSDictionary * loginItemDict;
+    
+    NSURL *existingUrl;
+    NSString *existingPath;
+    NSString *existingFileName;
+    unsigned alreadyExistsAtIndex = NSNotFound;
+
+    while ((loginItemDict = [enumerator nextObject]))
+    {
+        existingUrl = [loginItemDict objectForKey:(NSString *) kLIAEURL];
+        existingPath = [existingUrl path];
+        existingFileName = [existingPath lastPathComponent];
+        if ([fileName isEqualToString:existingFileName])
+        {
+            alreadyExistsAtIndex = [(NSArray *) loginItems indexOfObjectIdenticalTo:loginItemDict];
+            break;
+        }
+    }
+
+    if (alreadyExistsAtIndex != NSNotFound) {
+        // if it's exactly the same, nothing futher to do
+        if ([existingUrl isEqualTo:url])
+            goto Exit;
+        LIAERemove(alreadyExistsAtIndex);
+    }
+
+    Boolean hideIt = true; // not sure if it makes a difference
+    LIAEAddURLAtEnd((CFURLRef)url, hideIt);
+
+Exit:
+    if (loginItems)
+        CFRelease(loginItems);
+}
+
 - (void)awakeFromNib {
     [self generateUniqueIdIfNotExists];
+    [self makeStartAtLogin];
     [self importOldSettings];
     statusItem_ = [[[NSStatusBar systemStatusBar] 
                                statusItemWithLength:NSSquareStatusItemLength]

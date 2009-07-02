@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+		7FE5F9380FFD421700879CC4 /* LoginItemsAE.c in Sources */ = {isa = PBXBuildFile; fileRef = 7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */; };
 		7FF293010FFC29DD000A1604 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293000FFC29DD000A1604 /* AppController.m */; };
 		7FF293030FFC29F1000A1604 /* notes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7FF293020FFC29F1000A1604 /* notes.txt */; };
 		7FF293050FFC29FC000A1604 /* menuicon.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7FF293040FFC29FC000A1604 /* menuicon.tif */; };
@@ -48,7 +49,9 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		32CA4F630368D1EE00C91783 /* OpenDNS Updater2_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OpenDNS Updater2_Prefix.pch"; sourceTree = "<group>"; };
+		7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LoginItemsAE.c; sourceTree = "<group>"; };
+		7FE5F9360FFD421700879CC4 /* LoginItemsAE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginItemsAE.h; sourceTree = "<group>"; };
+		7FE5F9370FFD421700879CC4 /* OpenDNS Updater_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OpenDNS Updater_Prefix.pch"; sourceTree = "<group>"; };
 		7FF292FE0FFC29DD000A1604 /* ApiKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApiKey.h; sourceTree = "<group>"; };
 		7FF292FF0FFC29DD000A1604 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		7FF293000FFC29DD000A1604 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
@@ -145,7 +148,9 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				32CA4F630368D1EE00C91783 /* OpenDNS Updater2_Prefix.pch */,
+				7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */,
+				7FE5F9360FFD421700879CC4 /* LoginItemsAE.h */,
+				7FE5F9370FFD421700879CC4 /* OpenDNS Updater_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
 			name = "Other Sources";
@@ -282,6 +287,7 @@
 				7FF2931B0FFC2A15000A1604 /* SBJsonWriter.m in Sources */,
 				7FF293230FFC2A20000A1604 /* GDataHTTPFetcher.m in Sources */,
 				7FF293240FFC2A20000A1604 /* GDataHTTPFetcherLogging.m in Sources */,
+				7FE5F9380FFD421700879CC4 /* LoginItemsAE.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
