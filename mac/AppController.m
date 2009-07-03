@@ -45,6 +45,7 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (BOOL)noNetworksConfigured;
 - (BOOL)isLoggedIn;
 - (void)updateStatusWindow;
+- (NSString*)tokenFromSignInJsonResponse:(NSData*)data;
 @end
 
 @interface NSDictionary (DynamicNetworks)
@@ -432,9 +433,33 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     if (!pwd || (0 == [pwd length]))
         return;
     pwd = [self decryptString:pwd];
-    // TODO: verify username/pwd and convert to pwd/token
     NSString *hostname = [settings objectForKey:@"Hostname"];
     NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
+
+    NSString *apiString = [self apiSignInStringForAccount:username withPassword:pwd];
+    NSURL *url = [NSURL URLWithString:API_HOST];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPBody:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
+    NSURLResponse *resp = nil;
+    NSError *err = nil;
+    NSData *result = [NSURLConnection sendSynchronousRequest:request 
+                                           returningResponse:&resp 
+                                                       error:&err];
+    if (err)
+        return;
+
+    NSString *token = [self tokenFromSignInJsonResponse:result];
+    if (!token)
+        return;
+    
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    [prefs setObject:username forKey:PREF_ACCOUNT];
+    [prefs setObject:token forKey:PREF_TOKEN];
+
+    // TODO: verify network name
+
+    // TODO: delete the preferences file so that we don't import it again
 }
 
 // If we're not a login startup item or if we are but at a different path
@@ -801,24 +826,31 @@ ShowStatusWindow:
                     didFailSelector:@selector(getNetworksFetcher:failedWithError:)];
 }
 
-- (void)loginFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
-    [progressLogin_ stopAnimation: nil];
-    NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
+// extract token from json response to signin method. Returns nil on error.
+- (NSString*)tokenFromSignInJsonResponse:(NSData*)jsonData {
+    NSString *token = nil;
+    NSString *s = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     SBJSON *parser = [[[SBJSON alloc] init] autorelease];
     id json = [parser objectWithString:s];
     if (![json isKindOfClass:[NSDictionary class]])
         goto Error;
-
+    
     NSString *s2 = [json objectForKey:@"status"];
     if (![s2 isEqualToString:@"success"])
         goto Error;
     NSDictionary *response = [json objectForKey:@"response"];
     if (!response)
         goto Error;
-    NSString *token = [response objectForKey:@"token"];
+    token = [response objectForKey:@"token"];
+Error:
+    return token;
+}
+
+- (void)loginFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+    [progressLogin_ stopAnimation: nil];
+    NSString *token = [self tokenFromSignInJsonResponse:retrievedData];
     if (!token)
         goto Error;
-
     NSString *account = [editOpenDnsAccount_ stringValue];
     [[NSUserDefaults standardUserDefaults] setObject:token forKey:PREF_TOKEN];
     [[NSUserDefaults standardUserDefaults] setObject:account forKey:PREF_ACCOUNT];
@@ -848,14 +880,32 @@ Error:
     [textLoginProgress_ setHidden: NO];
     NSString *account = [editOpenDnsAccount_ stringValue];
     NSString *password = [editOpenDnsPassword_ stringValue];
+
     NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
     NSURL *url = [NSURL URLWithString:API_HOST];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+
+#if 1
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPBody:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
+    NSURLResponse *resp = nil;
+    NSError *err = nil;
+    NSData *result = [NSURLConnection sendSynchronousRequest:request 
+                                           returningResponse:&resp 
+                                                       error:&err];
+
+    if (err) {
+        [self loginFetcher:nil failedWithError:err];
+    } else {
+        [self loginFetcher:nil finishedWithData:result];
+    }
+#else
     GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
     [fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
     [fetcher beginFetchWithDelegate:self
                   didFinishSelector:@selector(loginFetcher:finishedWithData:)
                     didFailSelector:@selector(loginFetcher:failedWithError:)];
+#endif
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification {
