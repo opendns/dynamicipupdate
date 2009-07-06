@@ -70,6 +70,8 @@ NSArray *labeledDynamicNetworks(NSDictionary *networksDict) {
         NSDictionary *network = [networks objectAtIndex:i];
         if ([self isNetworkDynamic:network]) {
             NSString* label = [network objectForKey:@"label"];
+            if (!label || ![label isKindOfClass:[NSString class]])
+                continue;
             if ([label isEqualToString:aLabel])
                 return network;
         }

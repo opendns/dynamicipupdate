@@ -8,7 +8,7 @@
 #import "ApiKey.h"
 #import "LoginItemsAE.h"
 #import "NSDictionary+Networks.h"
-
+#import <Sparkle/Sparkle.h>
 #include <netdb.h>
 
 #define API_HOST @"https://api.opendns.com/v1/"
@@ -325,13 +325,14 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return [s autorelease];
 }
 
-- (void)generateUniqueIdIfNotExists {
+- (NSString*)uniqueId {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSString *uuid = [prefs objectForKey:PREF_UNIQUE_ID];
-    if (uuid)
-        return;
-    uuid = [self generateUniqueId];
-    [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
+    if (!uuid) {
+        uuid = [self generateUniqueId];
+        [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
+    }
+    return uuid;
 }
 
 - (NSData*)apiHostPost:(NSString*)apiString {
@@ -541,7 +542,6 @@ Exit:
 }
 
 - (void)awakeFromNib {
-    [self generateUniqueIdIfNotExists];
     [self makeStartAtLogin];
     [self importOldSettings];
     statusItem_ = [[[NSStatusBar systemStatusBar] 
@@ -983,6 +983,18 @@ Error:
     lastIpUpdateTime_ = [[NSDate date] retain];
     if ([self updateLastIpUpdateTime])
         [self updateStatusWindow];
+}
+
+- (NSArray *)feedParametersForUpdater:(SUUpdater *)updater
+                 sendingSystemProfile:(BOOL)sendingProfile {
+
+    NSString *uniqueId = [self uniqueId];
+    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
+                          @"key", @"uniqueId", @"value", uniqueId,
+                          @"displayKey", @"uniqueId", @"displayValue", uniqueId,
+                          nil];
+    NSArray *arr = [NSArray arrayWithObject:dict];
+    return arr;
 }
 
 @end
