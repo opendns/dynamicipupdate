@@ -33,6 +33,7 @@ NSString * UNS_NO_DYNAMIC_IP_NETWORKS = @"unsnodynip";
 NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 
 @interface AppController (Private)
+
 - (NSString *)getMyIp;
 - (void)ipChangeThread;
 - (void)setButtonLoginStatus;
@@ -46,6 +47,7 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (BOOL)isLoggedIn;
 - (void)updateStatusWindow;
 - (NSString*)tokenFromSignInJsonResponse:(NSData*)data;
+
 @end
 
 @interface NSDictionary (DynamicNetworks)
@@ -54,6 +56,8 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (unsigned)dynamicNetworksCount;
 - (NSDictionary*)findFirstDynamicNetwork;
 - (NSDictionary*)dynamicNetworkAtIndex:(unsigned)idx;
+- (NSDictionary*)dynamicNetworkWithLabel:(NSString*)aLabel;
+
 @end
 
 static BOOL isDynamicNetwork(NSDictionary *network) {
@@ -115,6 +119,20 @@ static NSArray *labeledDynamicNetworks(NSDictionary *networksDict) {
         NSDictionary *network = [networks objectAtIndex:i];
         if ([self isNetworkDynamic:network])
             return network;
+    }
+    return nil;
+}
+
+- (NSDictionary*)dynamicNetworkWithLabel:(NSString*)aLabel {
+    NSArray *networks = [self allValues];
+    unsigned count = [networks count];
+    for (unsigned i = 0; i < count; i++) {
+        NSDictionary *network = [networks objectAtIndex:i];
+        if ([self isNetworkDynamic:network]) {
+            NSString* label = [network objectForKey:@"label"];
+            if ([label isEqualToString:aLabel])
+                return network;
+        }
     }
     return nil;
 }
@@ -197,6 +215,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *url = [NSString stringWithFormat:@"api_key=%@&method=networks_get&token=%@", API_KEY, tokenEncoded];
     return url;
+}
+
+- (NSString*)apiNetworksDynamicSetForNetwork:(NSString*)networkId withToken:token {
+    NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *url = [NSString stringWithFormat:@"api_key=%@&method=network_dynamic_set&token=%@&network_id=%@&setting=on", API_KEY, tokenEncoded, networkId];
+    return url;    
 }
 
 - (NSString*)apiIpUpdateForToken:(NSString*)token andHostname:(NSString*)hostname {
@@ -414,6 +438,142 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
 }
 
+#if 0
+NetworkInfo *MakeFirstNetworkDynamic(NetworkInfo *ni)
+{
+    JsonEl *json = NULL;
+    HttpResult *httpRes = NULL;
+    char *jsonTxt = NULL;
+
+    char *networkId = ni->internalId;
+    CString params = ApiParamsNetworkDynamicSet(g_pref_token, networkId, true);
+    const char *paramsTxt = TStrToStr(params);
+    const char *apiHost = GetApiHost();
+    bool apiHostIsHttps = IsApiHostHttps();
+    httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
+    free((void*)paramsTxt);
+    if (!httpRes || !httpRes->IsValid())
+        goto Error;
+    
+    DWORD dataSize;
+    jsonTxt = (char *)httpRes->data.getData(&dataSize);
+    if (!jsonTxt)
+        goto Error;
+    
+    json = ParseJsonToDoc(jsonTxt);
+    if (!json)
+        goto Error;
+    WebApiStatus status = GetApiStatus(json);
+    if (WebApiStatusSuccess != status)
+        goto Error;
+    
+Exit:
+    JsonElFree(json);
+    delete httpRes;
+    return ni;
+Error:
+    ni = NULL;
+    goto Exit;
+}
+#endif
+
+- (NSData*)apiHostPost:(NSString*)apiString {
+    NSURL *url = [NSURL URLWithString:API_HOST];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPBody:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
+    NSURLResponse *resp = nil;
+    NSError *err = nil;
+    NSData *result = [NSURLConnection sendSynchronousRequest:request 
+                                           returningResponse:&resp 
+                                                       error:&err];
+    if (err)
+        return nil;
+    return result;
+}
+
+- (NSDictionary*)makeFirstNetworkDynamic:(NSDictionary*)networks withToken:(NSString*)token {
+    NSDictionary *dynamicNetwork = [networks findFirstDynamicNetwork];
+    assert(!dynamicNetwork);
+    if (dynamicNetwork)
+        return dynamicNetwork;
+
+    NSString *internalId = [dynamicNetwork objectForKey:@"internalId"];
+    if (!internalId || !([internalId isKindOfClass:[NSString class]]) || (0 == [internalId length]))
+        return nil;
+
+    NSString *apiString = [self apiNetworksDynamicSetForNetwork:internalId withToken:token];
+    NSData *result = [self apiHostPost:apiString];
+    if (!result)
+        return nil;
+    return nil;
+}
+
+// very similar to downloadNetworks and getNetworksFetcher:
+- (void)verifyHostname:(NSString*)hostname withToken:(NSString*)token {
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSDictionary *dynamicNetwork = nil;
+    NSString *apiString = [self apiGetNetworksStringForToken:token];
+    NSData *result = [self apiHostPost:apiString];
+    if (!result)
+        return;
+
+    NSString *s = [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
+    SBJSON *parser = [[[SBJSON alloc] init] autorelease];
+    id json = [parser objectWithString:s];
+    if (![json isKindOfClass:[NSDictionary class]])
+        return;
+
+    NSString *s2 = [json objectForKey:@"status"];
+    if ([s2 isEqualToString:@"failure"]) {
+        NSNumber *n = [json objectForKey:@"error"];
+        int err = [n intValue];
+        if (ERR_NETWORK_DOESNT_EXIST == err)
+            goto NoNetworks;
+        return;
+    }
+    if (![s2 isEqualToString:@"success"])
+        return;
+
+    NSDictionary *networks = [json objectForKey:@"response"];
+    if (!networks || (0 == [networks count]))
+        goto NoNetworks;
+    
+    unsigned dynamicCount = [networks dynamicNetworksCount];
+    if (0 == dynamicCount)
+        goto NoDynamicNetworks;
+
+    dynamicNetwork = [networks dynamicNetworkWithLabel:hostname];
+    if (!dynamicNetwork)
+        dynamicNetwork = [networks findFirstDynamicNetwork];
+    assert(dynamicNetwork);
+    if (!dynamicNetwork)
+        goto NoDynamicNetworks;
+
+SetDynamicNetwork:
+    hostname = [dynamicNetwork objectForKey:@"label"];
+    if (!hostname || ![hostname isKindOfClass:[NSString class]])
+        hostname = @"";
+    
+    [prefs setObject:hostname forKey:PREF_HOSTNAME];
+    [prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
+    return;
+
+NoNetworks:
+    [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+    [prefs setObject:@"" forKey:PREF_HOSTNAME];
+    return;
+
+NoDynamicNetworks:
+    dynamicNetwork = [self makeFirstNetworkDynamic:networks withToken:token];
+    if (dynamicNetwork)
+        goto SetDynamicNetwork;
+    
+    [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+    [prefs setObject:@"" forKey:PREF_HOSTNAME];
+    return;
+}
+
 - (void)importOldSettings {
     NSDictionary *settings;
     NSData *settingsData;
@@ -434,19 +594,11 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         return;
     pwd = [self decryptString:pwd];
     NSString *hostname = [settings objectForKey:@"Hostname"];
-    NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
+    //NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
 
     NSString *apiString = [self apiSignInStringForAccount:username withPassword:pwd];
-    NSURL *url = [NSURL URLWithString:API_HOST];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPBody:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
-    NSURLResponse *resp = nil;
-    NSError *err = nil;
-    NSData *result = [NSURLConnection sendSynchronousRequest:request 
-                                           returningResponse:&resp 
-                                                       error:&err];
-    if (err)
+    NSData *result = [self apiHostPost:apiString];
+    if (!result)
         return;
 
     NSString *token = [self tokenFromSignInJsonResponse:result];
@@ -457,9 +609,13 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [prefs setObject:username forKey:PREF_ACCOUNT];
     [prefs setObject:token forKey:PREF_TOKEN];
 
-    // TODO: verify network name
-
-    // TODO: delete the preferences file so that we don't import it again
+    [self verifyHostname:hostname withToken:token];
+    
+    // delete the old preferences file, so that we don't import it multiple times
+#if 0
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    [fileManager removeFileAtPath:path handler:nil];
+#endif
 }
 
 // If we're not a login startup item or if we are but at a different path
@@ -811,7 +967,7 @@ ShowStatusWindow:
     // TODO: implement me
 }
 
-- (void)downloadNetworks:(NSString*)token suppressUI:(BOOL)suppressUI{
+- (void)downloadNetworks:(NSString*)token suppressUI:(BOOL)suppressUI {
     NSString *apiString = [self apiGetNetworksStringForToken:token];
     NSURL *url = [NSURL URLWithString:API_HOST];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
