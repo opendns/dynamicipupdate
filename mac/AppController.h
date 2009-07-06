@@ -91,7 +91,6 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
 - (IBAction)login:(id)sender;
 - (IBAction)loginQuitOrCancel:(id)sender;
-- (IBAction)loginWindowAbout:(id)sender;
 - (IBAction)selectNetworkCancel:(id)sender;
 - (IBAction)selectNetworkClick:(id)sender;
 - (IBAction)selectNetworkDoubleClick:(id)sender;

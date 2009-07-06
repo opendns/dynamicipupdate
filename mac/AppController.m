@@ -57,6 +57,7 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (NSDictionary*)findFirstDynamicNetwork;
 - (NSDictionary*)dynamicNetworkAtIndex:(unsigned)idx;
 - (NSDictionary*)dynamicNetworkWithLabel:(NSString*)aLabel;
+- (NSDictionary*)firstNetwork;
 
 @end
 
@@ -153,6 +154,13 @@ static NSArray *labeledDynamicNetworks(NSDictionary *networksDict) {
     return nil;
 }
 
+- (NSDictionary*)firstNetwork {
+    NSArray *networks = [self allValues];
+    unsigned count = [networks count];
+    if (0 == count)
+        return nil;
+    return [networks objectAtIndex:0];    
+}
 @end
 
 @interface NSTableDataSourceDynamicNetworks : NSObject {
@@ -438,45 +446,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [prefs setObject:uuid forKey:PREF_UNIQUE_ID];
 }
 
-#if 0
-NetworkInfo *MakeFirstNetworkDynamic(NetworkInfo *ni)
-{
-    JsonEl *json = NULL;
-    HttpResult *httpRes = NULL;
-    char *jsonTxt = NULL;
-
-    char *networkId = ni->internalId;
-    CString params = ApiParamsNetworkDynamicSet(g_pref_token, networkId, true);
-    const char *paramsTxt = TStrToStr(params);
-    const char *apiHost = GetApiHost();
-    bool apiHostIsHttps = IsApiHostHttps();
-    httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
-    free((void*)paramsTxt);
-    if (!httpRes || !httpRes->IsValid())
-        goto Error;
-    
-    DWORD dataSize;
-    jsonTxt = (char *)httpRes->data.getData(&dataSize);
-    if (!jsonTxt)
-        goto Error;
-    
-    json = ParseJsonToDoc(jsonTxt);
-    if (!json)
-        goto Error;
-    WebApiStatus status = GetApiStatus(json);
-    if (WebApiStatusSuccess != status)
-        goto Error;
-    
-Exit:
-    JsonElFree(json);
-    delete httpRes;
-    return ni;
-Error:
-    ni = NULL;
-    goto Exit;
-}
-#endif
-
 - (NSData*)apiHostPost:(NSString*)apiString {
     NSURL *url = [NSURL URLWithString:API_HOST];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
@@ -493,12 +462,17 @@ Error:
 }
 
 - (NSDictionary*)makeFirstNetworkDynamic:(NSDictionary*)networks withToken:(NSString*)token {
-    NSDictionary *dynamicNetwork = [networks findFirstDynamicNetwork];
-    assert(!dynamicNetwork);
-    if (dynamicNetwork)
-        return dynamicNetwork;
+    NSDictionary *network = [networks findFirstDynamicNetwork];
+    assert(!network);
+    if (network)
+        return network;
 
-    NSString *internalId = [dynamicNetwork objectForKey:@"internalId"];
+    network = [networks firstNetwork];
+    assert(network);
+    if (!network)
+        return nil;
+
+    NSString *internalId = [network objectForKey:@"internalId"];
     if (!internalId || !([internalId isKindOfClass:[NSString class]]) || (0 == [internalId length]))
         return nil;
 
@@ -506,7 +480,18 @@ Error:
     NSData *result = [self apiHostPost:apiString];
     if (!result)
         return nil;
-    return nil;
+
+    NSString *s = [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
+    SBJSON *parser = [[[SBJSON alloc] init] autorelease];
+    id json = [parser objectWithString:s];
+    if (![json isKindOfClass:[NSDictionary class]])
+        return nil;
+    
+    NSString *s2 = [json objectForKey:@"status"];
+    if (![s2 isEqualToString:@"success"])
+        return nil;
+
+    return network;
 }
 
 // very similar to downloadNetworks and getNetworksFetcher:
@@ -1037,25 +1022,18 @@ Error:
     NSString *account = [editOpenDnsAccount_ stringValue];
     NSString *password = [editOpenDnsPassword_ stringValue];
 
-    NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
-    NSURL *url = [NSURL URLWithString:API_HOST];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-
 #if 1
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPBody:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
-    NSURLResponse *resp = nil;
-    NSError *err = nil;
-    NSData *result = [NSURLConnection sendSynchronousRequest:request 
-                                           returningResponse:&resp 
-                                                       error:&err];
-
-    if (err) {
-        [self loginFetcher:nil failedWithError:err];
+    NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
+    NSData *result = [self apiHostPost:apiString];
+    if (!result) {
+        [self loginFetcher:nil failedWithError:nil];
     } else {
         [self loginFetcher:nil finishedWithData:result];
     }
 #else
+    NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
+    NSURL *url = [NSURL URLWithString:API_HOST];
+    NSURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
     [fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
     [fetcher beginFetchWithDelegate:self
@@ -1073,10 +1051,6 @@ Error:
         [self showStatusWindow:self];
     else
         [NSApp terminate:self];
-}
-
-- (IBAction)loginWindowAbout:(id)sender {
-    // TODO: implement me
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {
