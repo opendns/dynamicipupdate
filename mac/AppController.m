@@ -774,37 +774,40 @@ Exit:
     [self setButtonLoginStatus];
 }
 
-- (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+- (void)downloadNetworks:(NSString*)token suppressUI:(BOOL)suppressUI {
     NSDictionary *dynamicNetwork = nil;
-    NSString *token = nil, *hostname = nil;
-    BOOL suppressUI = NO;
+    NSString *hostname = nil;
     NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
 
-    if (nil != [fetcher userData])
-        suppressUI = YES;
+    NSString *apiString = [self apiGetNetworksStringForToken:token];
+    NSData *jsonData = [self apiHostPost:apiString];
+    if (!jsonData) {
+        // TODO: show error
+        return;
+    }
 
-    NSDictionary *json = [self dictionaryFromJson:retrievedData];
+    NSDictionary *json = [self dictionaryFromJson:jsonData];
     int err = [self apiResponseError:json];
     if (ERR_NETWORK_DOESNT_EXIST == err)
         goto NoNetworks;
     if (NO_ERROR != err)
         goto Error;
-
+    
     NSDictionary *networks = [json objectForKey:@"response"];
     if (!networks)
         goto NoNetworks;
-
+    
     if (0 == [networks count])
         goto NoNetworks;
-	
+    
     unsigned dynamicCount = [networks dynamicNetworksCount];
     if (0 == dynamicCount)
-            goto NoDynamicNetworks;
-
+        goto NoDynamicNetworks;
+    
     dynamicNetwork = [networks findFirstDynamicNetwork];
     if (1 == dynamicCount)
         goto SetDynamicNetwork;
-
+    
     NSArray *dynamicNetworks = labeledDynamicNetworks(networks);
     NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks];
     [tableNetworksList_ setDataSource:dataSource];
@@ -814,18 +817,17 @@ Exit:
     [tableNetworksList_ reloadData];
     [self showNetworksWindow];
     return;
-
+    
 Error:
     NSLog(@"Error");
     return;
-
+    
 NoNetworks:
     [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
     goto ShowStatusWindow;
-
+    
 NoDynamicNetworks:
-    token = [[NSUserDefaults standardUserDefaults] objectForKey:PREF_TOKEN];
     dynamicNetwork = [self makeFirstNetworkDynamic:networks withToken:token];
     if (dynamicNetwork)
         goto SetDynamicNetwork;
@@ -833,7 +835,7 @@ NoDynamicNetworks:
     [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
     return;
-
+    
 SetDynamicNetwork:
     hostname = [dynamicNetwork objectForKey:@"label"];
     if (!hostname || ![hostname isKindOfClass:[NSString class]])
@@ -845,25 +847,7 @@ ShowStatusWindow:
     [self updateStatusWindow];
     [self showStatusWindow:nil];
     return;
-}
-
-- (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
-    // TODO: implement me
-}
-
-- (void)downloadNetworks:(NSString*)token suppressUI:(BOOL)suppressUI {
-    NSString *apiString = [self apiGetNetworksStringForToken:token];
-    NSURL *url = [NSURL URLWithString:API_HOST];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
-    [fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
-    if (suppressUI) {
-        // it's only significant that it's there
-        [fetcher setUserData:[NSString stringWithString:@"suppress"]];
-    }
-    [fetcher beginFetchWithDelegate:self
-                  didFinishSelector:@selector(getNetworksFetcher:finishedWithData:)
-                    didFailSelector:@selector(getNetworksFetcher:failedWithError:)];
+    
 }
 
 // extract token from json response to signin method. Returns nil on error.
