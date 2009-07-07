@@ -346,6 +346,17 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return result;
 }
 
+- (NSDictionary*)dictionaryFromJson:(NSData*)jsonData {
+    if (!jsonData)
+        return nil;
+    NSString *s = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    SBJSON *parser = [[[SBJSON alloc] init] autorelease];
+    id json = [parser objectWithString:s];
+    if (![json isKindOfClass:[NSDictionary class]])
+        return nil;
+    return json;    
+}
+
 - (NSDictionary*)makeFirstNetworkDynamic:(NSDictionary*)networks withToken:(NSString*)token {
     NSDictionary *network = [networks findFirstDynamicNetwork];
     assert(!network);
@@ -362,18 +373,13 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         return nil;
 
     NSString *apiString = [self apiNetworksDynamicSetForNetwork:internalId withToken:token];
-    NSData *result = [self apiHostPost:apiString];
-    if (!result)
+    NSData *jsonData = [self apiHostPost:apiString];
+    NSDictionary *json = [self dictionaryFromJson:jsonData];
+    if (!json)
         return nil;
 
-    NSString *s = [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
-    SBJSON *parser = [[[SBJSON alloc] init] autorelease];
-    id json = [parser objectWithString:s];
-    if (![json isKindOfClass:[NSDictionary class]])
-        return nil;
-    
-    NSString *s2 = [json objectForKey:@"status"];
-    if (![s2 isEqualToString:@"success"])
+    NSString *s = [json objectForKey:@"status"];
+    if (![s isEqualToString:@"success"])
         return nil;
 
     return network;
@@ -384,25 +390,20 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSDictionary *dynamicNetwork = nil;
     NSString *apiString = [self apiGetNetworksStringForToken:token];
-    NSData *result = [self apiHostPost:apiString];
-    if (!result)
+    NSData *jsonData = [self apiHostPost:apiString];
+    NSDictionary *json = [self dictionaryFromJson:jsonData];
+    if (!json)
         return;
 
-    NSString *s = [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
-    SBJSON *parser = [[[SBJSON alloc] init] autorelease];
-    id json = [parser objectWithString:s];
-    if (![json isKindOfClass:[NSDictionary class]])
-        return;
-
-    NSString *s2 = [json objectForKey:@"status"];
-    if ([s2 isEqualToString:@"failure"]) {
+    NSString *s = [json objectForKey:@"status"];
+    if ([s isEqualToString:@"failure"]) {
         NSNumber *n = [json objectForKey:@"error"];
         int err = [n intValue];
         if (ERR_NETWORK_DOESNT_EXIST == err)
             goto NoNetworks;
         return;
     }
-    if (![s2 isEqualToString:@"success"])
+    if (![s isEqualToString:@"success"])
         return;
 
     NSDictionary *networks = [json objectForKey:@"response"];
@@ -445,6 +446,10 @@ NoDynamicNetworks:
 }
 
 - (void)importOldSettings {
+    // nothing to do if we already have account/token
+    if ([self isLoggedIn])
+        return;
+
     NSDictionary *settings;
     NSData *settingsData;
     NSString *errorString = nil;
@@ -467,11 +472,11 @@ NoDynamicNetworks:
     //NSLog(@"Old settings: %@, %@, %@", username, pwd, hostname);
 
     NSString *apiString = [self apiSignInStringForAccount:username withPassword:pwd];
-    NSData *result = [self apiHostPost:apiString];
-    if (!result)
+    NSData *jsonData = [self apiHostPost:apiString];
+    if (!jsonData)
         return;
 
-    NSString *token = [self tokenFromSignInJsonResponse:result];
+    NSString *token = [self tokenFromSignInJsonResponse:jsonData];
     if (!token)
         return;
     
@@ -854,12 +859,10 @@ ShowStatusWindow:
 // extract token from json response to signin method. Returns nil on error.
 - (NSString*)tokenFromSignInJsonResponse:(NSData*)jsonData {
     NSString *token = nil;
-    NSString *s = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    SBJSON *parser = [[[SBJSON alloc] init] autorelease];
-    id json = [parser objectWithString:s];
-    if (![json isKindOfClass:[NSDictionary class]])
-        goto Error;
-    
+    NSDictionary *json = [self dictionaryFromJson:jsonData];
+    if (!json)
+        return nil;
+
     NSString *s2 = [json objectForKey:@"status"];
     if (![s2 isEqualToString:@"success"])
         goto Error;
@@ -871,29 +874,20 @@ Error:
     return token;
 }
 
-- (void)loginFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
-    [progressLogin_ stopAnimation: nil];
-    NSString *token = [self tokenFromSignInJsonResponse:retrievedData];
-    if (!token)
-        goto Error;
-    NSString *account = [editOpenDnsAccount_ stringValue];
-    [[NSUserDefaults standardUserDefaults] setObject:token forKey:PREF_TOKEN];
-    [[NSUserDefaults standardUserDefaults] setObject:account forKey:PREF_ACCOUNT];
-    [self downloadNetworks:token suppressUI:YES];
-    return;
-Error:
-    [self showLoginError];	
-}
-
-- (void)loginFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
-    [self showLoginError];
-}
-
 - (void)showLoginError {
     [progressLogin_ stopAnimation: nil];
     [progressLogin_ setHidden:YES];
     [textLoginProgress_ setHidden:YES];
     [textLoginError_ setHidden:NO];
+}
+
+- (void)loginFailedSignin {
+    // TODO: write me
+    [self showLoginError];
+}
+
+- (void)setPref:(id)prefValue forKey:(NSString*)key {
+    [[NSUserDefaults standardUserDefaults] setObject:prefValue forKey:key];
 }
 
 - (IBAction)login:(id)sender {
@@ -906,24 +900,21 @@ Error:
     NSString *account = [editOpenDnsAccount_ stringValue];
     NSString *password = [editOpenDnsPassword_ stringValue];
 
-#if 1
     NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
-    NSData *result = [self apiHostPost:apiString];
-    if (!result) {
-        [self loginFetcher:nil failedWithError:nil];
-    } else {
-        [self loginFetcher:nil finishedWithData:result];
+    NSData *jsonData = [self apiHostPost:apiString];
+    [progressLogin_ stopAnimation: nil];
+    if (!jsonData) {
+        [self loginFailedSignin];
+        return;
     }
-#else
-    NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
-    NSURL *url = [NSURL URLWithString:API_HOST];
-    NSURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    GDataHTTPFetcher* fetcher = [GDataHTTPFetcher httpFetcherWithRequest:request];
-    [fetcher setPostData:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
-    [fetcher beginFetchWithDelegate:self
-                  didFinishSelector:@selector(loginFetcher:finishedWithData:)
-                    didFailSelector:@selector(loginFetcher:failedWithError:)];
-#endif
+    NSString *token = [self tokenFromSignInJsonResponse:jsonData];
+    if (!token) {
+        [self showLoginError];
+        return;
+    }
+    [self setPref:token forKey:PREF_TOKEN];
+    [self setPref:account forKey:PREF_ACCOUNT];
+    [self downloadNetworks:token suppressUI:YES];
 }
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification {
