@@ -14,6 +14,8 @@
 #define API_HOST @"https://api.opendns.com/v1/"
 #define IP_UPDATE_HOST @"https://updates.opendns.com"
 
+#define NO_ERROR 0
+
 #define TIME_INTERVAL_ONE_MINUTE 60.0
 #define TIME_INTERVAL_3HR 60.0*60.0*3.0
 
@@ -357,6 +359,26 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return json;    
 }
 
+// 0 means no error, -1 means no json, others are error numbers given in "error"
+// field of json response from our api
+- (int)apiResponseError:(NSDictionary*)json {
+    if (!json)
+        return -1;
+    
+    NSString *s = [json objectForKey:@"status"];
+    if ([s isEqualToString:@"success"])
+        return NO_ERROR;
+    
+    if (![s isEqualToString:@"failure"]) {
+        assert(0);
+        return -1;
+    }
+    NSNumber *n = [json objectForKey:@"error"];
+    int err = [n intValue];
+    assert(NO_ERROR != err);
+    return err;
+}
+
 - (NSDictionary*)makeFirstNetworkDynamic:(NSDictionary*)networks withToken:(NSString*)token {
     NSDictionary *network = [networks findFirstDynamicNetwork];
     assert(!network);
@@ -375,13 +397,9 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSString *apiString = [self apiNetworksDynamicSetForNetwork:internalId withToken:token];
     NSData *jsonData = [self apiHostPost:apiString];
     NSDictionary *json = [self dictionaryFromJson:jsonData];
-    if (!json)
+    int err = [self apiResponseError:json];
+    if (NO_ERROR != err)
         return nil;
-
-    NSString *s = [json objectForKey:@"status"];
-    if (![s isEqualToString:@"success"])
-        return nil;
-
     return network;
 }
 
@@ -392,18 +410,10 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSString *apiString = [self apiGetNetworksStringForToken:token];
     NSData *jsonData = [self apiHostPost:apiString];
     NSDictionary *json = [self dictionaryFromJson:jsonData];
-    if (!json)
-        return;
-
-    NSString *s = [json objectForKey:@"status"];
-    if ([s isEqualToString:@"failure"]) {
-        NSNumber *n = [json objectForKey:@"error"];
-        int err = [n intValue];
-        if (ERR_NETWORK_DOESNT_EXIST == err)
-            goto NoNetworks;
-        return;
-    }
-    if (![s isEqualToString:@"success"])
+    int err = [self apiResponseError:json];
+    if (ERR_NETWORK_DOESNT_EXIST == err)
+        goto NoNetworks;
+    if (NO_ERROR != err)
         return;
 
     NSDictionary *networks = [json objectForKey:@"response"];
@@ -771,21 +781,11 @@ Exit:
     if (nil != [fetcher userData])
         suppressUI = YES;
 
-    NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
-    SBJSON *parser = [[[SBJSON alloc] init] autorelease];
-    id json = [parser objectWithString:s];
-    if (![json isKindOfClass:[NSDictionary class]])
-        goto Error;
-
-    NSString *s2 = [json objectForKey:@"status"];
-    if ([s2 isEqualToString:@"failure"]) {
-        NSNumber *n = [json objectForKey:@"error"];
-        int err = [n intValue];
-        if (ERR_NETWORK_DOESNT_EXIST == err)
-            goto NoNetworks;
-        goto Error;
-    }
-    if (![s2 isEqualToString:@"success"])
+    NSDictionary *json = [self dictionaryFromJson:retrievedData];
+    int err = [self apiResponseError:json];
+    if (ERR_NETWORK_DOESNT_EXIST == err)
+        goto NoNetworks;
+    if (NO_ERROR != err)
         goto Error;
 
     NSDictionary *networks = [json objectForKey:@"response"];
@@ -858,20 +858,14 @@ ShowStatusWindow:
 
 // extract token from json response to signin method. Returns nil on error.
 - (NSString*)tokenFromSignInJsonResponse:(NSData*)jsonData {
-    NSString *token = nil;
     NSDictionary *json = [self dictionaryFromJson:jsonData];
-    if (!json)
+    int err = [self apiResponseError:json];
+    if (NO_ERROR != err)
         return nil;
-
-    NSString *s2 = [json objectForKey:@"status"];
-    if (![s2 isEqualToString:@"success"])
-        goto Error;
     NSDictionary *response = [json objectForKey:@"response"];
     if (!response)
-        goto Error;
-    token = [response objectForKey:@"token"];
-Error:
-    return token;
+        return nil;
+    return [response objectForKey:@"token"];
 }
 
 - (void)showLoginError {
