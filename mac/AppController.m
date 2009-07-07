@@ -829,7 +829,7 @@ Exit:
     NSDictionary *networks = [json objectForKey:@"response"];
     if (!networks)
         goto NoNetworks;
-    
+
     if (0 == [networks count])
         goto NoNetworks;
     
@@ -875,7 +875,7 @@ SetDynamicNetwork:
     if (!hostname || ![hostname isKindOfClass:[NSString class]])
         hostname = @"";
     [prefs setObject:hostname forKey:PREF_HOSTNAME];
-    [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+    [prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
     
 ShowStatusWindow:
     [self updateStatusWindow];
