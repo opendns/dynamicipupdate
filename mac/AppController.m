@@ -129,6 +129,21 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return url;    
 }
 
+- (void)showError:(NSString*)error inWindow:(NSWindow*)window {
+    NSBeginAlertSheet(error, @"OK", nil,
+                      nil, window, self, NULL,
+                      nil, //@selector(endAlertSheet:returnCode:contextInfo:),
+                      NULL,
+                      nil);
+}
+
+#if 0
+- (void)endAlertSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
+{
+    // we don't care about any of the args
+}
+#endif
+
 - (NSString *)getMyIp {
     char **addrs;
     struct hostent *he = gethostbyname("myip.opendns.com");
