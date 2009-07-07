@@ -170,8 +170,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     if (![self isLoggedIn])
         return NO;
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    NSNumber *shouldSend = [prefs objectForKey:PREF_SEND_UPDATES];
-    if (NO == [shouldSend boolValue])
+    if (NO == [prefs boolForKey:PREF_SEND_UPDATES])
         return NO;
     NSString *networkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
     return [networkState isEqualToString:UNS_OK];
@@ -529,7 +528,7 @@ NoDynamicNetworks:
     NSURL * url = [NSURL fileURLWithPath:filePath];
 
     CFArrayRef loginItems = NULL;
-    OSStatus status = LIAECopyLoginItems (&loginItems);
+    OSStatus status = LIAECopyLoginItems(&loginItems);
     if (status != noErr)
         goto Exit;
 
@@ -596,10 +595,12 @@ Exit:
                            withObject:(id)nil];
 
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+#if 0  // TODO: I don't think I need this anymore (there's a connection setup in IB)
     [prefs addObserver:self
             forKeyPath:PREF_SEND_UPDATES
                options:NSKeyValueObservingOptionNew
                context:nil];
+#endif
 
     NSString *token = [prefs objectForKey: PREF_TOKEN];
     if (![self isLoggedIn]) {
@@ -619,10 +620,12 @@ Exit:
                         change:(NSDictionary *)change
                        context:(void *)context
 {
+#if 0  // TODO: I don't think I need this anymore (there's a connection setup in IB)
     if ([keyPath isEqualToString:PREF_SEND_UPDATES]) {
         [self updateStatusWindow];
         return;
     }
+#endif
 }
 
 - (BOOL)isLoggedIn {
