@@ -500,10 +500,8 @@ NoDynamicNetworks:
     [self verifyHostname:hostname withToken:token];
     
     // delete the old preferences file, so that we don't import it multiple times
-#if 0
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [fileManager removeFileAtPath:path handler:nil];
-#endif
 }
 
 // If we're not a login startup item or if we are but at a different path
