@@ -682,33 +682,41 @@ Exit:
     BOOL sendingUpdates = [[prefs objectForKey:PREF_SEND_UPDATES] boolValue];
     NSString *account = [prefs objectForKey:PREF_ACCOUNT];
     if ([self isLoggedIn]) {
+        [textAccount_ setTextColor:[NSColor blackColor]];
         [textAccount_ setTitleWithMnemonic:account];
+        [buttonChangeAccount_ setTitle:@"Change account"];
     } else {
-        // TODO: change 'Change account' to 'Login' ?
-        // TODO: or not allow showing this window if not logged in?
+        [textAccount_ setTextColor:[NSColor redColor]];
         [textAccount_ setTitleWithMnemonic:@"Not logged in"];
+        [buttonChangeAccount_ setTitle:@"Login"];
     }
 
-    // TODO: what to do with networks if not logged in?
-    if ([self noNetworksConfigured]) {
+    if (![self isLoggedIn]) {
         [textHostname_ setTextColor:[NSColor redColor]];
-        [textHostname_ setTitleWithMnemonic:@"No networks"];
-        [buttonChangeNetwork_ setTitle:@"Refresh network list"];
-    } else if ([self noDynamicNetworks]) {
-        [textHostname_ setTextColor:[NSColor redColor]];
-        [textHostname_ setTitleWithMnemonic:@"No dynamic network"];
-        [buttonChangeNetwork_ setTitle:@"Select network"];
-    } else if ([self networkNotSelected]) {
-        [textHostname_ setTextColor:[NSColor redColor]];
-        [textHostname_ setTitleWithMnemonic:@"Network not selected"];
-        [buttonChangeNetwork_ setTitle:@"Select network"];
+        [textHostname_ setTitleWithMnemonic:@"Not logged in"];
+        [buttonChangeNetwork_ setEnabled:NO];
     } else {
-        [textHostname_ setTextColor:[NSColor blackColor]];
-        NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
-        if (0 == [hostname length])
-            hostname = @"default";
-        [textHostname_ setTitleWithMnemonic:hostname];
-        [buttonChangeNetwork_ setTitle:@"Change network"];
+        [buttonChangeNetwork_ setEnabled:YES];
+        if ([self noNetworksConfigured]) {
+            [textHostname_ setTextColor:[NSColor redColor]];
+            [textHostname_ setTitleWithMnemonic:@"No networks"];
+            [buttonChangeNetwork_ setTitle:@"Refresh network list"];
+        } else if ([self noDynamicNetworks]) {
+            [textHostname_ setTextColor:[NSColor redColor]];
+            [textHostname_ setTitleWithMnemonic:@"No dynamic network"];
+            [buttonChangeNetwork_ setTitle:@"Select network"];
+        } else if ([self networkNotSelected]) {
+            [textHostname_ setTextColor:[NSColor redColor]];
+            [textHostname_ setTitleWithMnemonic:@"Network not selected"];
+            [buttonChangeNetwork_ setTitle:@"Select network"];
+        } else {
+            [textHostname_ setTextColor:[NSColor blackColor]];
+            NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
+            if (0 == [hostname length])
+                hostname = @"default";
+            [textHostname_ setTitleWithMnemonic:hostname];
+            [buttonChangeNetwork_ setTitle:@"Change network"];
+        }
     }
 
     if (currentIpAddressFromDns_)
@@ -726,14 +734,20 @@ Exit:
         [textUsingOpenDns_ setTitleWithMnemonic:@"No"];
     }
 
-    if (sendingUpdates) {
-        [textLastUpdated_ setTextColor:[NSColor blackColor]];
-        [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
-        [buttonUpdateNow_ setEnabled:YES];
-    } else {
+    if (![self isLoggedIn]) {
         [textLastUpdated_ setTextColor:[NSColor redColor]];
-        [textLastUpdated_ setTitleWithMnemonic:@"Updates disabled"];
+        [textLastUpdated_ setTitleWithMnemonic:@"Not logged in"];
         [buttonUpdateNow_ setEnabled:NO];
+    } else {        
+        if (sendingUpdates) {
+            [textLastUpdated_ setTextColor:[NSColor blackColor]];
+            [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
+            [buttonUpdateNow_ setEnabled:YES];
+        } else {
+            [textLastUpdated_ setTextColor:[NSColor redColor]];
+            [textLastUpdated_ setTitleWithMnemonic:@"Updates disabled"];
+            [buttonUpdateNow_ setEnabled:NO];
+        }
     }
 }
 
@@ -760,7 +774,9 @@ Exit:
     [windowSelectNetwork_ orderOut:self];
     [windowStatus_ orderOut:self];
     [NSApp activateIgnoringOtherApps:YES];
-    [windowLogin_ makeKeyAndOrderFront:self];	
+    [windowLogin_ makeKeyAndOrderFront:self];
+    [self setButtonLoginStatus];
+    [windowLogin_ makeFirstResponder:editOpenDnsAccount_];
 }
 
 - (void)showNetworksWindow {
@@ -867,7 +883,6 @@ ShowStatusWindow:
     [self updateStatusWindow];
     [self showStatusWindow:nil];
     return;
-    
 }
 
 // extract token from json response to signin method. Returns nil on error.
