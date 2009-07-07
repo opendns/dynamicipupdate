@@ -331,11 +331,11 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return uuid;
 }
 
-- (NSData*)apiHostPost:(NSString*)apiString {
+- (NSData*)apiHostPost:(NSString*)postData {
     NSURL *url = [NSURL URLWithString:API_HOST];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     [request setHTTPMethod:@"POST"];
-    [request setHTTPBody:[apiString dataUsingEncoding:NSUTF8StringEncoding]];
+    [request setHTTPBody:[postData dataUsingEncoding:NSUTF8StringEncoding]];
     NSURLResponse *resp = nil;
     NSError *err = nil;
     NSData *result = [NSURLConnection sendSynchronousRequest:request 
