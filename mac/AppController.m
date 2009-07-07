@@ -595,12 +595,12 @@ Exit:
                            withObject:(id)nil];
 
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-#if 0  // TODO: I don't think I need this anymore (there's a connection setup in IB)
+    // observe changing of PREF_SEND_UPDATES so that we can synchronize
+    // 'Update now' button (disable/enable depending on the value of PREF_SEND_UPDATES)
     [prefs addObserver:self
             forKeyPath:PREF_SEND_UPDATES
                options:NSKeyValueObservingOptionNew
                context:nil];
-#endif
 
     NSString *token = [prefs objectForKey: PREF_TOKEN];
     if (![self isLoggedIn]) {
@@ -620,12 +620,10 @@ Exit:
                         change:(NSDictionary *)change
                        context:(void *)context
 {
-#if 0  // TODO: I don't think I need this anymore (there's a connection setup in IB)
     if ([keyPath isEqualToString:PREF_SEND_UPDATES]) {
         [self updateStatusWindow];
         return;
     }
-#endif
 }
 
 - (BOOL)isLoggedIn {
