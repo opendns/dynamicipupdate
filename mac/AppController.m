@@ -775,6 +775,8 @@ Exit:
 }
 
 - (void)getNetworksFetcher:(GDataHTTPFetcher *)fetcher finishedWithData:(NSData *)retrievedData {
+    NSDictionary *dynamicNetwork = nil;
+    NSString *token = nil, *hostname = nil;
     BOOL suppressUI = NO;
     NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
 
@@ -798,16 +800,10 @@ Exit:
     unsigned dynamicCount = [networks dynamicNetworksCount];
     if (0 == dynamicCount)
             goto NoDynamicNetworks;
-    NSDictionary *dynamicNetwork = [networks findFirstDynamicNetwork];
-    if (1 == dynamicCount) {
-        NSString *hostname = [dynamicNetwork objectForKey:@"label"];
-        if (!hostname || ![hostname isKindOfClass:[NSString class]])
-            hostname = @"";
 
-        [prefs setObject:hostname forKey:PREF_HOSTNAME];
-        [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
-        goto ShowStatusWindow;
-    }
+    dynamicNetwork = [networks findFirstDynamicNetwork];
+    if (1 == dynamicCount)
+        goto SetDynamicNetwork;
 
     NSArray *dynamicNetworks = labeledDynamicNetworks(networks);
     NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks];
@@ -829,8 +825,22 @@ NoNetworks:
     goto ShowStatusWindow;
 
 NoDynamicNetworks:
+    token = [[NSUserDefaults standardUserDefaults] objectForKey:PREF_TOKEN];
+    dynamicNetwork = [self makeFirstNetworkDynamic:networks withToken:token];
+    if (dynamicNetwork)
+        goto SetDynamicNetwork;
+    
     [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
+    return;
+
+SetDynamicNetwork:
+    hostname = [dynamicNetwork objectForKey:@"label"];
+    if (!hostname || ![hostname isKindOfClass:[NSString class]])
+        hostname = @"";
+    [prefs setObject:hostname forKey:PREF_HOSTNAME];
+    [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
+    
 ShowStatusWindow:
     [self updateStatusWindow];
     [self showStatusWindow:nil];
