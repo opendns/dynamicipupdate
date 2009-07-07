@@ -403,9 +403,12 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return network;
 }
 
-// very similar to downloadNetworks and getNetworksFetcher:
+- (void)setPref:(id)prefValue forKey:(NSString*)key {
+    [[NSUserDefaults standardUserDefaults] setObject:prefValue forKey:key];
+}
+
+// very similar to downloadNetworks and downloadNetworks:
 - (void)verifyHostname:(NSString*)hostname withToken:(NSString*)token {
-    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSDictionary *dynamicNetwork = nil;
     NSString *apiString = [self apiGetNetworksStringForToken:token];
     NSData *jsonData = [self apiHostPost:apiString];
@@ -436,13 +439,13 @@ SetDynamicNetwork:
     if (!hostname || ![hostname isKindOfClass:[NSString class]])
         hostname = @"";
     
-    [prefs setObject:hostname forKey:PREF_HOSTNAME];
-    [prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
+    [self setPref:hostname forKey:PREF_HOSTNAME];
+    [self setPref:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
     return;
 
 NoNetworks:
-    [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
-    [prefs setObject:@"" forKey:PREF_HOSTNAME];
+    [self setPref:@"" forKey:PREF_HOSTNAME];
+    [self setPref:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     return;
 
 NoDynamicNetworks:
@@ -450,8 +453,8 @@ NoDynamicNetworks:
     if (dynamicNetwork)
         goto SetDynamicNetwork;
     
-    [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
-    [prefs setObject:@"" forKey:PREF_HOSTNAME];
+    [self setPref:@"" forKey:PREF_HOSTNAME];
+    [self setPref:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     return;
 }
 
@@ -872,10 +875,6 @@ ShowStatusWindow:
 - (void)loginFailedSignin {
     // TODO: write me
     [self showLoginError];
-}
-
-- (void)setPref:(id)prefValue forKey:(NSString*)key {
-    [[NSUserDefaults standardUserDefaults] setObject:prefValue forKey:key];
 }
 
 - (IBAction)login:(id)sender {
