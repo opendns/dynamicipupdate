@@ -10,24 +10,7 @@ import stat
 import shutil
 
 """
-Release build script designed to automate as much of the proces as possible
-and minimize errors.
-
-Pushing an update to mac client is involved. Files that must be changed:
-
-* Info.plist
-* conf.php and mac-ipupdater-relnotes-$ver.html 
-* IpUpdaterAppCast.xml
-  (update pubDate, sparkle:version and sparkle:shortVersionString)
-
-Checklist for pushing a new release:
-* edit Info.plist to set new version
-* create mac-ipupdater-relnotes-$ver.html, check it in and deploy it
-* run this script
-* verify it made the right changes to IpUpdaterAppCast.xml
-* checkin and deploy the binary to the website
-* update conf.php to account for new version, check it in and deploy to website
-* checkin and deploy IpUpdaterCast.xml
+Builds a zip of release version.
 """
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
