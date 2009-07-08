@@ -11,6 +11,10 @@
 #import <Sparkle/Sparkle.h>
 #include <netdb.h>
 
+// TODO: finalize those urls
+#define LOGIN_ABOUT_URL @"http://opendns.com"
+#define STATUS_ABOUT_URL LOGIN_ABOUT_URL
+
 #define API_HOST @"https://api.opendns.com/v1/"
 #define IP_UPDATE_HOST @"https://updates.opendns.com"
 
@@ -836,6 +840,14 @@ Exit:
     return YES;
 }
 
+- (void)showLoginError {
+    [self showErrorInKeyWindow:@"Login failed" additionalText:@"Please double-check your username and password"];
+}
+
+- (void)showGenericNetworkError {
+    [self showErrorInKeyWindow:@"Network error" additionalText:@"Error downloading data"];    
+}
+
 - (void)setButtonLoginStatus {
     [buttonLogin_ setEnabled:[self isButtonLoginEnabled]];
 }
@@ -852,7 +864,7 @@ Exit:
     NSString *apiString = [self apiGetNetworksStringForToken:token];
     NSData *jsonData = [self apiHostPost:apiString];
     if (!jsonData) {
-        // TODO: show error
+        [self showGenericNetworkError];
         return;
     }
 
@@ -958,15 +970,6 @@ ShowStatusWindow:
     return [response objectForKey:@"token"];
 }
 
-- (void)showLoginError {
-    [self showErrorInKeyWindow:@"Login failed" additionalText:@"Please double-check your username and password"];
-}
-
-- (void)loginFailedSignin {
-    // TODO: write me
-    [self showLoginError];
-}
-
 - (IBAction)login:(id)sender {
     if (![self isButtonLoginEnabled])
         return;
@@ -977,7 +980,7 @@ ShowStatusWindow:
     NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
     NSData *jsonData = [self apiHostPost:apiString];
     if (!jsonData) {
-        [self loginFailedSignin];
+        [self showGenericNetworkError];
         return;
     }
     NSString *token = [self tokenFromSignInJsonResponse:jsonData];
@@ -1002,11 +1005,13 @@ ShowStatusWindow:
 }
 
 - (IBAction)loginWindowAbout:(id)sender {
-    // TODO: write me
+    [[NSWorkspace sharedWorkspace]
+                 openURL:[NSURL URLWithString:LOGIN_ABOUT_URL]];
 }
 
 - (IBAction)statusWindowAbout:(id)sender {
-    // TODO: write me
+    [[NSWorkspace sharedWorkspace]
+     openURL:[NSURL URLWithString:STATUS_ABOUT_URL]];
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {
