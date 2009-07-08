@@ -805,9 +805,6 @@ Exit:
     }
     [editOpenDnsAccount_ setTitleWithMnemonic:@""];
     [editOpenDnsPassword_ setTitleWithMnemonic:@""];
-    [progressLogin_ setHidden:YES];
-    [textLoginProgress_ setHidden:YES];
-    [textLoginError_ setHidden:YES];
 
     [windowSelectNetwork_ orderOut:self];
     [windowStatus_ orderOut:self];
@@ -962,10 +959,7 @@ ShowStatusWindow:
 }
 
 - (void)showLoginError {
-    [progressLogin_ stopAnimation: nil];
-    [progressLogin_ setHidden:YES];
-    [textLoginProgress_ setHidden:YES];
-    [textLoginError_ setHidden:NO];
+    [self showErrorInKeyWindow:@"Login failed" additionalText:@"Please double-check your username and password"];
 }
 
 - (void)loginFailedSignin {
@@ -977,15 +971,11 @@ ShowStatusWindow:
     if (![self isButtonLoginEnabled])
         return;
     [buttonLogin_ setEnabled: NO];
-    [progressLogin_ setHidden: NO];
-    [progressLogin_ startAnimation: nil];
-    [textLoginProgress_ setHidden: NO];
     NSString *account = [editOpenDnsAccount_ stringValue];
     NSString *password = [editOpenDnsPassword_ stringValue];
 
     NSString *apiString = [self apiSignInStringForAccount:account withPassword:password];
     NSData *jsonData = [self apiHostPost:apiString];
-    [progressLogin_ stopAnimation: nil];
     if (!jsonData) {
         [self loginFailedSignin];
         return;
@@ -1009,6 +999,14 @@ ShowStatusWindow:
         [self showStatusWindow:self];
     else
         [NSApp terminate:self];
+}
+
+- (IBAction)loginWindowAbout:(id)sender {
+    // TODO: write me
+}
+
+- (IBAction)statusWindowAbout:(id)sender {
+    // TODO: write me
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {

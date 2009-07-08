@@ -46,10 +46,6 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
     IBOutlet NSTextField *		editOpenDnsAccount_;
     IBOutlet NSTextField *		editOpenDnsPassword_;
-    
-    IBOutlet NSProgressIndicator *	progressLogin_;
-    IBOutlet NSTextField *		textLoginProgress_;
-    IBOutlet NSTextField *		textLoginError_;
 
     IBOutlet NSButton *                 buttonLogin_;
     IBOutlet NSButton *                 buttonQuitCancel_;
@@ -91,6 +87,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
 - (IBAction)login:(id)sender;
 - (IBAction)loginQuitOrCancel:(id)sender;
+- (IBAction)loginWindowAbout:(id)sender;
 - (IBAction)selectNetworkCancel:(id)sender;
 - (IBAction)selectNetworkClick:(id)sender;
 - (IBAction)selectNetworkDoubleClick:(id)sender;
@@ -98,5 +95,6 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)statusChangeAccount:(id)sender;
 - (IBAction)statusChangeNetwork:(id)sender;
 - (IBAction)statusUpdateNow:(id)sender;
+- (IBAction)statusWindowAbout:(id)sender;
 
 @end
