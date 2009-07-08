@@ -894,9 +894,16 @@ Exit:
     [tableNetworksList_ setAction:@selector(selectNetworkClick:)];
     [tableNetworksList_ setDoubleAction:@selector(selectNetworkDoubleClick:)];
     [tableNetworksList_ reloadData];
+    // set current state as network not selected, so that when user clicks
+    // 'Cancel' button or hides the window, we end up in the correct state
+    if (suppressUI) {
+        // hack: only when suppressing ui, which really means we're coming
+        // from main window, not the first-time login sequence
+        [self setPref:UNS_NO_NETWORK_SELECTED forKey:PREF_USER_NETWORKS_STATE];
+    }
     [self showNetworksWindow];
     return;
-    
+
 Error:
     [self showErrorInKeyWindow:@"Error downloading information"
                 additionalText:@""];
@@ -1000,12 +1007,6 @@ ShowStatusWindow:
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {
-    NSUserDefaults * prefs = [NSUserDefaults standardUserDefaults];
-    NSString *currNetworkState = [prefs objectForKey:PREF_USER_NETWORKS_STATE];
-    if (![currNetworkState isEqualToString:UNS_OK]) {
-        [prefs setObject:UNS_NO_NETWORK_SELECTED forKey:PREF_USER_NETWORKS_STATE];
-    }
-    
     [self updateStatusWindow];
     [self showStatusWindow:self];
 }
