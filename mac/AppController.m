@@ -705,6 +705,7 @@ Exit:
         [buttonChangeAccount_ setTitle:@"Login"];
     }
 
+    BOOL updateNowAlreadyDisabled = NO;
     if (![self isLoggedIn]) {
         [textHostname_ setTextColor:[NSColor redColor]];
         [textHostname_ setTitleWithMnemonic:@"Not logged in"];
@@ -719,14 +720,28 @@ Exit:
             [buttonChangeNetwork_ setTitle:@"Refresh network list"];
             // this one is bigger
             buttonFrame = NSMakeRect(186, 3, 166, 32);
+
+            updateNowAlreadyDisabled = YES;
+            [textLastUpdated_ setTextColor:[NSColor redColor]];
+            [textLastUpdated_ setTitleWithMnemonic:@"No networks"];
+            [buttonUpdateNow_ setEnabled:NO];
         } else if ([self noDynamicNetworks]) {
             [textHostname_ setTextColor:[NSColor redColor]];
             [textHostname_ setTitleWithMnemonic:@"No dynamic network"];
             [buttonChangeNetwork_ setTitle:@"Select network"];
+            updateNowAlreadyDisabled = YES;
+            [textLastUpdated_ setTextColor:[NSColor redColor]];
+            [textLastUpdated_ setTitleWithMnemonic:@"No dynamic networks"];
+            [buttonUpdateNow_ setEnabled:NO];
         } else if ([self networkNotSelected]) {
             [textHostname_ setTextColor:[NSColor redColor]];
             [textHostname_ setTitleWithMnemonic:@"Network not selected"];
             [buttonChangeNetwork_ setTitle:@"Select network"];
+
+            updateNowAlreadyDisabled = YES;
+            [textLastUpdated_ setTextColor:[NSColor redColor]];
+            [textLastUpdated_ setTitleWithMnemonic:@"Network not selected"];
+            [buttonUpdateNow_ setEnabled:NO];
         } else {
             [textHostname_ setTextColor:[NSColor blackColor]];
             NSString *hostname = [prefs objectForKey:PREF_HOSTNAME];
@@ -757,16 +772,20 @@ Exit:
         [textLastUpdated_ setTextColor:[NSColor redColor]];
         [textLastUpdated_ setTitleWithMnemonic:@"Not logged in"];
         [buttonUpdateNow_ setEnabled:NO];
-    } else {        
-        if (sendingUpdates) {
-            [textLastUpdated_ setTextColor:[NSColor blackColor]];
-            [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
-            [buttonUpdateNow_ setEnabled:YES];
-        } else {
-            [textLastUpdated_ setTextColor:[NSColor redColor]];
-            [textLastUpdated_ setTitleWithMnemonic:@"Updates disabled"];
-            [buttonUpdateNow_ setEnabled:NO];
-        }
+        return;
+    }
+
+    if (!sendingUpdates) {
+        [textLastUpdated_ setTextColor:[NSColor redColor]];
+        [textLastUpdated_ setTitleWithMnemonic:@"Updates disabled"];
+        [buttonUpdateNow_ setEnabled:NO];
+        return;
+    }
+
+    if (!updateNowAlreadyDisabled) {
+        [textLastUpdated_ setTextColor:[NSColor blackColor]];
+        [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
+        [buttonUpdateNow_ setEnabled:YES];
     }
 }
 
