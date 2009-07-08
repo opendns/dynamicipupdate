@@ -254,13 +254,14 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         return;
 
     if ((IpUpdateOk == ipUpdateResult) || (IpUpdateNotYours == ipUpdateResult)) {
-        /* TODO: port this
-        const char *ip = StrFindChar(ipUpdateRes, ' ');
-        if (ip)
-            m_ipFromHttp = StrToTStr(ip+1);
-         */
+        NSRange spacePos = [s rangeOfString:@" "];
+        unsigned pos = spacePos.location;
+        if (pos != NSNotFound) {
+            [ipAddressFromHttp_ release];
+            ipAddressFromHttp_ = [[s substringFromIndex:pos+1] retain];
+        }
     }
-    
+
     if (ipUpdateResult == ipUpdateResult_)
          return;
 
@@ -991,6 +992,7 @@ ShowStatusWindow:
     }
     [self setPref:token forKey:PREF_TOKEN];
     [self setPref:account forKey:PREF_ACCOUNT];
+    forceNextUpdate_ = YES;
     [self downloadNetworks:token suppressUI:YES];
 }
 
