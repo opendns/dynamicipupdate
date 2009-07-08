@@ -157,13 +157,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     
 }
 
-#if 0
-- (void)endAlertSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
-{
-    // we don't care about any of the args
-}
-#endif
-
 - (NSString *)getMyIp {
     char **addrs;
     struct hostent *he = gethostbyname("myip.opendns.com");
@@ -323,14 +316,22 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)ipChangeThread {
-    NSAutoreleasePool* myAutoreleasePool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool* myAutoreleasePool = nil;
+    int cyclesBeforeDrain;
     while (!exitIpChangeThread_) {
+        if (!myAutoreleasePool) {
+            myAutoreleasePool = [[NSAutoreleasePool alloc] init];
+            cyclesBeforeDrain = 10;
+        }
         [self performSelectorOnMainThread:@selector(ipAddressCheckAndPeriodicIpUpdate:) withObject:nil waitUntilDone:YES];
         NSDate *inOneMinute = [[NSDate date] addTimeInterval:TIME_INTERVAL_ONE_MINUTE];
         [NSThread sleepUntilDate:inOneMinute];
-        [myAutoreleasePool drain];
+        if (0 == --cyclesBeforeDrain) {
+            [myAutoreleasePool drain];
+            myAutoreleasePool = nil;
+        }
     }
-    [myAutoreleasePool release];
+    [myAutoreleasePool drain];
 }
 
 // equivalent of  echo "${s}" | openssl enc -bf -d -pass pass:"NojkPqnbK8vwmaJWVnwUq" -salt -a
