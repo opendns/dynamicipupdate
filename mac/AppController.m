@@ -887,7 +887,12 @@ Exit:
     }
 
     NSArray *dynamicNetworks = labeledDynamicNetworks(networks);
-    // TODO: should protect agains 0 labeled networks?
+    if (0 == [dynamicNetworks count]) {
+        // if we have more than one dynamic networks but none of them has a
+        // label, use the first dynamic network found above.
+        // TODO: not sure if updates will work for that case.
+        goto SetDynamicNetwork;
+    }
     NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks];
     [tableNetworksList_ setDataSource:dataSource];
     [tableNetworksList_ setTarget:self];
