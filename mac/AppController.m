@@ -129,12 +129,28 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return url;    
 }
 
-- (void)showError:(NSString*)error inWindow:(NSWindow*)window {
-    NSBeginAlertSheet(error, @"OK", nil,
-                      nil, window, self, NULL,
+- (void)showError:(NSString*)error inWindow:(NSWindow*)window additionalText:(NSString*)s {
+    NSBeginAlertSheet(error, 
+                      @"OK", nil, nil, 
+                      window,
+                      nil, // delegate
+                      nil, //@selector(sheetDidEndShouldDelete:returnCode:contextInfo:),
                       nil, //@selector(endAlertSheet:returnCode:contextInfo:),
-                      NULL,
-                      nil);
+                      nil, // context info
+                      s);
+}
+
+- (void)showErrorInKeyWindow:(NSString*)error additionalText:(NSString*)s {
+    NSWindow *window = [NSApp keyWindow];
+    NSBeginAlertSheet(error, 
+                      @"OK", nil, nil, 
+                      window,
+                      nil, // delegate
+                      nil, //@selector(sheetDidEndShouldDelete:returnCode:contextInfo:),
+                      nil, //@selector(endAlertSheet:returnCode:contextInfo:),
+                      nil, // context info
+                      s);
+    
 }
 
 #if 0
@@ -695,10 +711,14 @@ Exit:
         [buttonChangeNetwork_ setEnabled:NO];
     } else {
         [buttonChangeNetwork_ setEnabled:YES];
+        // default button size for most texts. The value is taken from IB 
+        NSRect buttonFrame = NSMakeRect(210, 3, 143, 32);
         if ([self noNetworksConfigured]) {
             [textHostname_ setTextColor:[NSColor redColor]];
             [textHostname_ setTitleWithMnemonic:@"No networks"];
             [buttonChangeNetwork_ setTitle:@"Refresh network list"];
+            // this one is bigger
+            buttonFrame = NSMakeRect(186, 3, 166, 32);
         } else if ([self noDynamicNetworks]) {
             [textHostname_ setTextColor:[NSColor redColor]];
             [textHostname_ setTitleWithMnemonic:@"No dynamic network"];
@@ -715,6 +735,7 @@ Exit:
             [textHostname_ setTitleWithMnemonic:hostname];
             [buttonChangeNetwork_ setTitle:@"Change network"];
         }
+        [buttonChangeNetwork_ setFrame:buttonFrame];
     }
 
     if (currentIpAddressFromDns_)
@@ -838,8 +859,13 @@ Exit:
         goto NoDynamicNetworks;
     
     dynamicNetwork = [networks findFirstDynamicNetwork];
-    if (1 == dynamicCount)
+    if (1 == dynamicCount) {
+        if (!suppressUI) {
+            [self showErrorInKeyWindow:@"Only one network configured for dynamic IP updates" 
+                        additionalText:@"Using that network."];
+        }
         goto SetDynamicNetwork;
+    }
 
     NSArray *dynamicNetworks = labeledDynamicNetworks(networks);
     // TODO: should protect agains 0 labeled networks?
@@ -853,10 +879,15 @@ Exit:
     return;
     
 Error:
-    NSLog(@"Error");
+    [self showErrorInKeyWindow:@"Error downloading information"
+                additionalText:@""];
     return;
     
 NoNetworks:
+    if (!suppressUI) {
+        [self showErrorInKeyWindow:@"You don't have any networks configured" 
+                    additionalText:@"You need to configure a network in your OpenDNS account"];
+    }
     [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
     goto ShowStatusWindow;
@@ -865,7 +896,11 @@ NoDynamicNetworks:
     dynamicNetwork = [self makeFirstNetworkDynamic:networks withToken:token];
     if (dynamicNetwork)
         goto SetDynamicNetwork;
-    
+    if (!suppressUI) {
+        [self showErrorInKeyWindow:@"You don't have any networks enabled for Dynamic IP Update" 
+                    additionalText:@"Enable Dynamic IP Updates in your OpenDNS account"];
+    }
+
     [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
     return;
