@@ -12,8 +12,11 @@
 #include <netdb.h>
 
 // TODO: finalize those urls
-#define LOGIN_ABOUT_URL @"http://opendns.com"
+#define LOGIN_ABOUT_URL @"http://www.opendns.com/software/mac/dynip/about/"
 #define STATUS_ABOUT_URL LOGIN_ABOUT_URL
+#define LEARN_MORE_IP_ADDRESS_TAKEN_URL @"http://www.opendns.com/software/mac/dynip/ip-taken/"
+#define LEARN_MORE_IP_MISMATCH_URL @"http://www.opendns.com/software/mac/dynip/ip-differs/"
+#define SETUP_OPENDNS_URL @"http://www.opendns.com/software/mac/dynip/setup-opendns/"
 
 #define API_HOST @"https://api.opendns.com/v1/"
 #define IP_UPDATE_HOST @"https://updates.opendns.com"
@@ -55,6 +58,8 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (void)updateStatusWindow;
 - (NSString*)tokenFromSignInJsonResponse:(NSData*)data;
 - (void)hideErrorMessage;
+- (void)forceHideErrorMessage;
+- (void)showErrorMessage:(NSString*)msg;
 
 @end
 
@@ -616,7 +621,7 @@ Exit:
     ipUpdateResult_ = IpUpdateOk;
     // schedule first update as soon as possible
     nextIpUpdate_ = [[NSDate date] retain];
-    [self hideErrorMessage];
+    [self forceHideErrorMessage];
 
     [NSThread detachNewThreadSelector:@selector(ipChangeThread)
                              toTarget:(id)self
@@ -703,10 +708,19 @@ Exit:
     return [networkState isEqualToString:UNS_NO_NETWORK_SELECTED];
 }
 
+- (BOOL)dnsVsHttpIpMismatch {
+    if (!currentIpAddressFromDns_ || !ipAddressFromHttp_)
+        return NO;
+    if ([currentIpAddressFromDns_ isEqualToString:ipAddressFromHttp_])
+        return NO;
+    return YES;
+}
+
 - (void)updateStatusWindow {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     BOOL sendingUpdates = [[prefs objectForKey:PREF_SEND_UPDATES] boolValue];
     NSString *account = [prefs objectForKey:PREF_ACCOUNT];
+
     if ([self isLoggedIn]) {
         [textAccount_ setTextColor:[NSColor blackColor]];
         [textAccount_ setTitleWithMnemonic:account];
@@ -799,6 +813,17 @@ Exit:
         [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
         [buttonUpdateNow_ setEnabled:YES];
     }
+
+    NSMutableString *errorMsg = [NSMutableString stringWithCapacity:128];
+    if ([self dnsVsHttpIpMismatch]) {
+        [errorMsg appendFormat:@"Your OpenDNS filtering settings might not work due to DNS IP address (%@) and HTTP IP address (%@) mismatch. Learn more at %@", currentIpAddressFromDns_, ipAddressFromHttp_, LEARN_MORE_IP_MISMATCH_URL];
+    }
+
+    if ([errorMsg length] > 0) {
+        [self showErrorMessage:errorMsg];
+    } else {
+        [self hideErrorMessage];
+    }
 }
 
 - (void)hiliteAndActivateURLs:(NSTextView*)textView
@@ -863,7 +888,7 @@ Exit:
     return ![scrollViewError_ isHidden];
 }
 
-- (void)hideErrorMessage {
+- (void)forceHideErrorMessage {
     [scrollViewError_ setHidden:YES];
     NSRect contentFrame = [[windowStatus_ contentView] frame];
     int oldHeight = contentFrame.size.height;
@@ -875,6 +900,11 @@ Exit:
     newWinFrame.origin = winFrame.origin;
     newWinFrame.origin.y -= heightDiff;
     [windowStatus_ setFrame:newWinFrame display:YES animate:YES];
+}
+
+- (void)hideErrorMessage {
+    if ([self errorMessageVisible])
+        [self forceHideErrorMessage];
 }
 
 - (void)showErrorMessage:(NSString*)msg {
