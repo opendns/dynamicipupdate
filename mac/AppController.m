@@ -54,6 +54,7 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 - (BOOL)isLoggedIn;
 - (void)updateStatusWindow;
 - (NSString*)tokenFromSignInJsonResponse:(NSData*)data;
+- (void)hideErrorMessage;
 
 @end
 
@@ -592,6 +593,10 @@ Exit:
 - (void)awakeFromNib {
     [self makeStartAtLogin];
     [self importOldSettings];
+
+    [textError_ setHorizontallyResizable:NO];
+    [textError_ setVerticallyResizable:YES];
+    
     statusItem_ = [[[NSStatusBar systemStatusBar] 
                                statusItemWithLength:NSSquareStatusItemLength]
                               retain];
@@ -611,6 +616,7 @@ Exit:
     ipUpdateResult_ = IpUpdateOk;
     // schedule first update as soon as possible
     nextIpUpdate_ = [[NSDate date] retain];
+    [self hideErrorMessage];
 
     [NSThread detachNewThreadSelector:@selector(ipChangeThread)
                              toTarget:(id)self
@@ -792,6 +798,127 @@ Exit:
         [textLastUpdated_ setTextColor:[NSColor blackColor]];
         [textLastUpdated_ setTitleWithMnemonic:[self lastUpdateText]];
         [buttonUpdateNow_ setEnabled:YES];
+    }
+}
+
+- (void)hiliteAndActivateURLs:(NSTextView*)textView
+{
+    NSTextStorage* textStorage=[textView textStorage];
+    NSString* string=[textStorage string];
+    NSRange searchRange=NSMakeRange(0, [string length]);
+    NSRange foundRange;
+    
+    [textStorage beginEditing];
+    do {
+        foundRange=[string rangeOfString:@"http://" options:0 range:searchRange];
+        
+        if (foundRange.length > 0) {
+            NSURL* theURL;
+            NSDictionary* linkAttributes;
+            NSRange endOfURLRange;
+            
+            searchRange.location=foundRange.location+foundRange.length;
+            searchRange.length = [string length]-searchRange.location;
+            
+            endOfURLRange=[string rangeOfCharacterFromSet:
+                           [NSCharacterSet whitespaceAndNewlineCharacterSet]
+                                                  options:0 
+                                                    range:searchRange];
+            
+            if (endOfURLRange.length==0)
+                endOfURLRange.location=[string length]-1;
+            
+            foundRange.length = endOfURLRange.location-foundRange.location+1;
+            theURL=[NSURL URLWithString:[string substringWithRange:foundRange]];			
+            linkAttributes= [NSDictionary dictionaryWithObjectsAndKeys: theURL, NSLinkAttributeName,
+                             [NSNumber numberWithInt:NSSingleUnderlineStyle], NSUnderlineStyleAttributeName,
+                             [NSColor blueColor], NSForegroundColorAttributeName,
+                             NULL];
+            
+            [textStorage addAttributes:linkAttributes range:foundRange];
+        }
+    } while (foundRange.length!=0);
+    
+    [textStorage endEditing];
+}
+
+- (void)setTextView:(NSTextView*)textView string:(NSString*)aString
+{
+    NSTextStorage *ts = [textView textStorage];
+    [ts beginEditing];
+    NSString *s = [ts string];
+    unsigned len = [s length];
+    NSRange r = NSMakeRange(0, len);
+    [ts deleteCharactersInRange:r];
+    
+    NSAttributedString *attrString =
+    [[NSAttributedString alloc] initWithString:aString
+                                    attributes:nil];
+    [ts setAttributedString:attrString];
+    [ts endEditing];
+    [self hiliteAndActivateURLs:textView];
+}
+
+- (BOOL)errorMessageVisible {
+    return ![scrollViewError_ isHidden];
+}
+
+- (void)hideErrorMessage {
+    [scrollViewError_ setHidden:YES];
+    NSRect contentFrame = [[windowStatus_ contentView] frame];
+    int oldHeight = contentFrame.size.height;
+    int newHeight = 367;
+    contentFrame.size.height = newHeight;
+    int heightDiff = newHeight - oldHeight;
+    NSRect newWinFrame = [windowStatus_ frameRectForContentRect:contentFrame];
+    NSRect winFrame = [windowStatus_ frame];
+    newWinFrame.origin = winFrame.origin;
+    newWinFrame.origin.y -= heightDiff;
+    [windowStatus_ setFrame:newWinFrame display:YES animate:YES];
+}
+
+- (void)showErrorMessage:(NSString*)msg {
+    NSRect frame;
+    [self setTextView:textError_ string:msg];
+    [textError_ setTextColor:[NSColor redColor]];
+    
+    // figure out how big the NSTextView for the error message needs to be
+    NSLayoutManager *layoutManager = [textError_ layoutManager];
+    NSTextContainer *textContainer = [textError_ textContainer];
+    // force layout (so that usedRectForTextContainer: works)
+    [layoutManager glyphRangeForTextContainer:textContainer];
+    NSRect textSize = [layoutManager usedRectForTextContainer:textContainer];
+    int textHeight = textSize.size.height;
+    int textViewHeight = textHeight + 4;
+
+    NSRect contentFrame = [[windowStatus_ contentView] frame];
+    int oldHeight = contentFrame.size.height;
+    int newHeight = 367 + textViewHeight + 8;
+    int heightDiff = newHeight - oldHeight;
+ 
+    contentFrame.size.height = newHeight;
+    NSRect newWinFrame = [windowStatus_ frameRectForContentRect:contentFrame];
+    NSRect winFrame = [windowStatus_ frame];
+    newWinFrame.origin = winFrame.origin;
+    newWinFrame.origin.y -= heightDiff;
+    [windowStatus_ setFrame:newWinFrame display:YES animate:YES];
+
+    frame = [boxLastUpdated_ frame];
+    int lastUpdateY = frame.origin.y;
+
+    frame = [scrollViewError_ frame];
+    frame.size.height = textViewHeight;
+    frame.origin.y = lastUpdateY - textViewHeight - 12;
+    [scrollViewError_ setFrame:frame];
+    
+    [scrollViewError_ setHidden:NO];
+}
+
+- (void)toggleErrorMessage {
+    if ([self errorMessageVisible]) {
+        [self hideErrorMessage];
+    } else {
+        [self showErrorMessage:@"Hello, this is your friendly error message. This is another message that is a little bit longer, to see how it wraps.\n\nAnd this is a new line."];
     }
 }
 

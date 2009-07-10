@@ -57,6 +57,8 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
     // stuff related to status window
     IBOutlet NSWindow *                 windowStatus_;
+    IBOutlet NSScrollView *             scrollViewError_;
+    IBOutlet NSTextView *               textError_;
     IBOutlet NSTextField *              textAccount_;
     IBOutlet NSTextField *              textHostname_;
     IBOutlet NSTextField *              textIpAddress_;
@@ -66,6 +68,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
     IBOutlet NSButton *                 buttonChangeNetwork_;
     IBOutlet NSButton *                 buttonUpdateNow_;
     IBOutlet NSButton *                 buttonCheckSendUpdates_;
+    IBOutlet NSBox *                    boxLastUpdated_;
 
     // menu-related stuff
     IBOutlet NSMenu *                   menu_;
