@@ -278,8 +278,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)ipUpdateFetcher:(GDataHTTPFetcher *)fetcher failedWithError:(NSError *)error {
-    // silently ignore
-    NSLog(@"ip update failed");
+    // TODO: maybe this is a good place to detect that there is no network?
 }
 
 - (void)sendPeriodicUpdate {
@@ -816,32 +815,46 @@ Exit:
     // build up error message to be shown at the bottom, if there are
     // any error conditions
     NSMutableString *errorMsg = [NSMutableString stringWithCapacity:128];
-
+    BOOL needNewline = NO;
     // TODO: no network connectivity error
 
     if ([self isLoggedIn]) {
         if ([self noNetworksConfigured]) {
-            [errorMsg appendString:@"You don't have any networks. First, add a network in your OpenDNS account. Then refresh network list.\n\n"];
+            if (needNewline) [errorMsg appendString:@"\n\n"];
+            needNewline = YES;
+            [errorMsg appendString:@"You don't have any networks. First, add a network in your OpenDNS account. Then refresh network list."];
         } else if ([self noDynamicNetworks]) {
-            [errorMsg appendString:@"None of your networks is configured for dynamic IP. First, configure a network for dynamic IP in your OpenDNS account. Then select a network.\n\n"];
+            if (needNewline) [errorMsg appendString:@"\n\n"];
+            needNewline = YES;
+            [errorMsg appendString:@"None of your networks is configured for dynamic IP. First, configure a network for dynamic IP in your OpenDNS account. Then select a network."];
         } else if ([self networkNotSelected]) {
+            if (needNewline) [errorMsg appendString:@"\n\n"];
+            needNewline = YES;
             [errorMsg appendString:@"You need to select one of your networks."];
         }
     }
 
     if (IpUpdateNotYours == ipUpdateResult_) {
-        [errorMsg appendFormat:@"Your IP address is taken by another user. Learn more at %@\n\n", LEARN_MORE_IP_ADDRESS_TAKEN_URL];
+        if (needNewline) [errorMsg appendString:@"\n\n"];
+        needNewline = YES;
+        [errorMsg appendFormat:@"Your IP address is taken by another user. Learn more at %@", LEARN_MORE_IP_ADDRESS_TAKEN_URL];
     }
     
     if (IpUpdateBadAuth == ipUpdateResult_) {
         // this should never happen
-        [errorMsg appendString:@"Your authorization token is invalid.\n\n"];
+        if (needNewline) [errorMsg appendString:@"\n\n"];
+        needNewline = YES;
+        [errorMsg appendString:@"Your authorization token is invalid."];
     }
 
     if ([self dnsVsHttpIpMismatch]) {
-        [errorMsg appendFormat:@"Your OpenDNS filtering settings might not work due to DNS IP address (%@) and HTTP IP address (%@) mismatch. Learn more at %@\n\n", currentIpAddressFromDns_, ipAddressFromHttp_, LEARN_MORE_IP_MISMATCH_URL];
+        if (needNewline) [errorMsg appendString:@"\n\n"];
+        needNewline = YES;
+        [errorMsg appendFormat:@"Your OpenDNS filtering settings might not work due to DNS IP address (%@) and HTTP IP address (%@) mismatch. Learn more at %@", currentIpAddressFromDns_, ipAddressFromHttp_, LEARN_MORE_IP_MISMATCH_URL];
     }
     
+    if (needNewline) [errorMsg appendString:@"\n"];
+
     if ([errorMsg length] > 0) {
         [self showErrorMessage:errorMsg];
     } else {
