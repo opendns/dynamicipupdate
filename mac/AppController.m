@@ -645,7 +645,6 @@ Exit:
         [self downloadNetworks:token suppressUI:YES];
         return;
     }
-    [self showStatusWindow:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
