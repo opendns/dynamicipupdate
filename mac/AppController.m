@@ -11,7 +11,6 @@
 #import <Sparkle/Sparkle.h>
 #include <netdb.h>
 
-// TODO: finalize those urls
 #define LOGIN_ABOUT_URL @"http://www.opendns.com/software/mac/dynip/about/"
 #define STATUS_ABOUT_URL LOGIN_ABOUT_URL
 #define LEARN_MORE_IP_ADDRESS_TAKEN_URL @"http://www.opendns.com/software/mac/dynip/ip-taken/"
