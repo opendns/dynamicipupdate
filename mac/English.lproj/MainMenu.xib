@@ -8,9 +8,9 @@
 		<string key="IBDocument.HIToolboxVersion">353.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="57"/>
 			<integer value="372"/>
-			<integer value="526"/>
+			<integer value="57"/>
+			<integer value="531"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -447,6 +447,7 @@
 									</object>
 									<string key="NSFrame">{{1, 1}, {235, 229}}</string>
 									<reference key="NSSuperview" ref="543522648"/>
+									<reference key="NSNextKeyView" ref="251558370"/>
 									<reference key="NSDocView" ref="251558370"/>
 									<reference key="NSBGColor" ref="67205704"/>
 									<int key="NScvFlags">4</int>
@@ -473,6 +474,7 @@
 							</object>
 							<string key="NSFrame">{{20, 60}, {237, 231}}</string>
 							<reference key="NSSuperview" ref="820449914"/>
+							<reference key="NSNextKeyView" ref="626631159"/>
 							<int key="NSsFlags">530</int>
 							<reference key="NSVScroller" ref="270818115"/>
 							<reference key="NSHScroller" ref="970920428"/>
@@ -779,7 +781,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 										<object class="NSTextField" id="587016505">
 											<reference key="NSNextResponder" ref="928419174"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{15, 14}, {134, 17}}</string>
+											<string key="NSFrame">{{15, 14}, {191, 17}}</string>
 											<reference key="NSSuperview" ref="928419174"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="611024144">
