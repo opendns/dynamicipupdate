@@ -57,7 +57,7 @@
 		7FE5F9370FFD421700879CC4 /* OpenDNS Updater_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OpenDNS Updater_Prefix.pch"; sourceTree = "<group>"; };
 		7FF292FE0FFC29DD000A1604 /* ApiKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApiKey.h; sourceTree = "<group>"; };
 		7FF292FF0FFC29DD000A1604 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
-		7FF293000FFC29DD000A1604 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
+		7FF293000FFC29DD000A1604 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; wrapsLines = 1; };
 		7FF293020FFC29F1000A1604 /* notes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
 		7FF293040FFC29FC000A1604 /* menuicon.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = menuicon.tif; sourceTree = "<group>"; };
 		7FF293060FFC2A04000A1604 /* opendns.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = opendns.icns; sourceTree = "<group>"; };

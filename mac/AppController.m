@@ -724,14 +724,14 @@ Exit:
         [buttonChangeAccount_ setTitle:@"Change account"];
     } else {
         [textAccount_ setTextColor:[NSColor redColor]];
-        [textAccount_ setTitleWithMnemonic:@"Not logged in"];
-        [buttonChangeAccount_ setTitle:@"Login"];
+        [textAccount_ setTitleWithMnemonic:@"Not signed in"];
+        [buttonChangeAccount_ setTitle:@"Sign in"];
     }
 
     BOOL updateNowAlreadyDisabled = NO;
     if (![self isLoggedIn]) {
         [textHostname_ setTextColor:[NSColor redColor]];
-        [textHostname_ setTitleWithMnemonic:@"Not logged in"];
+        [textHostname_ setTitleWithMnemonic:@"Not signed in"];
         [buttonChangeNetwork_ setEnabled:NO];
     } else {
         [buttonChangeNetwork_ setEnabled:YES];
@@ -750,20 +750,20 @@ Exit:
             [buttonUpdateNow_ setEnabled:NO];
         } else if ([self noDynamicNetworks]) {
             [textHostname_ setTextColor:[NSColor redColor]];
-            [textHostname_ setTitleWithMnemonic:@"No dynamic network"];
+            [textHostname_ setTitleWithMnemonic:@"No dynamic IP networks"];
             [buttonChangeNetwork_ setTitle:@"Select network"];
             updateNowAlreadyDisabled = YES;
             [textLastUpdated_ setTextColor:[NSColor redColor]];
-            [textLastUpdated_ setTitleWithMnemonic:@"No dynamic networks"];
+            [textLastUpdated_ setTitleWithMnemonic:@"No dynamic IP networks"];
             [buttonUpdateNow_ setEnabled:NO];
         } else if ([self networkNotSelected]) {
             [textHostname_ setTextColor:[NSColor redColor]];
-            [textHostname_ setTitleWithMnemonic:@"Network not selected"];
+            [textHostname_ setTitleWithMnemonic:@"No network selected"];
             [buttonChangeNetwork_ setTitle:@"Select network"];
 
             updateNowAlreadyDisabled = YES;
             [textLastUpdated_ setTextColor:[NSColor redColor]];
-            [textLastUpdated_ setTitleWithMnemonic:@"Network not selected"];
+            [textLastUpdated_ setTitleWithMnemonic:@"No network selected"];
             [buttonUpdateNow_ setEnabled:NO];
         } else {
             [textHostname_ setTextColor:[NSColor blackColor]];
@@ -793,7 +793,7 @@ Exit:
 
     if (![self isLoggedIn]) {
         [textLastUpdated_ setTextColor:[NSColor redColor]];
-        [textLastUpdated_ setTitleWithMnemonic:@"Not logged in"];
+        [textLastUpdated_ setTitleWithMnemonic:@"Not signed in"];
         [buttonUpdateNow_ setEnabled:NO];
         return;
     }
@@ -825,7 +825,7 @@ Exit:
         } else if ([self noDynamicNetworks]) {
             if (needNewline) [errorMsg appendString:@"\n\n"];
             needNewline = YES;
-            [errorMsg appendString:@"None of your networks is configured for dynamic IP. First, configure a network for dynamic IP in your OpenDNS account. Then select a network."];
+            [errorMsg appendString:@"None of your networks is configured for dynamic IP updates. First, configure a network for dynamic IP updates in your OpenDNS account. Then select a network."];
         } else if ([self networkNotSelected]) {
             if (needNewline) [errorMsg appendString:@"\n\n"];
             needNewline = YES;
@@ -849,7 +849,7 @@ Exit:
     if ([self dnsVsHttpIpMismatch]) {
         if (needNewline) [errorMsg appendString:@"\n\n"];
         needNewline = YES;
-        [errorMsg appendFormat:@"Your OpenDNS filtering settings might not work due to DNS IP address (%@) and HTTP IP address (%@) mismatch. Learn more at %@", currentIpAddressFromDns_, ipAddressFromHttp_, LEARN_MORE_IP_MISMATCH_URL];
+        [errorMsg appendFormat:@"Your OpenDNS settings might not work due to DNS IP address (%@) and HTTP IP address (%@) mismatch. Learn more at %@", currentIpAddressFromDns_, ipAddressFromHttp_, LEARN_MORE_IP_MISMATCH_URL];
     }
     
     if (needNewline) [errorMsg appendString:@"\n"];
@@ -979,14 +979,6 @@ Exit:
     [scrollViewError_ setHidden:NO];
 }
 
-- (void)toggleErrorMessage {
-    if ([self errorMessageVisible]) {
-        [self hideErrorMessage];
-    } else {
-        [self showErrorMessage:@"Hello, this is your friendly error message. This is another message that is a little bit longer, to see how it wraps.\n\nAnd this is a new line."];
-    }
-}
-
 - (void)showStatusWindow:(id)sender {
     [windowLogin_ orderOut:self];
     [windowSelectNetwork_ orderOut:self];
@@ -1035,7 +1027,7 @@ Exit:
 }
 
 - (void)showLoginError {
-    [self showErrorInKeyWindow:@"Login failed" additionalText:@"Please double-check your username and password"];
+    [self showErrorInKeyWindow:@"Login failed" additionalText:@"Please double-check your username and password."];
 }
 
 - (void)showGenericNetworkError {
@@ -1083,8 +1075,8 @@ Exit:
     dynamicNetwork = [networks findFirstDynamicNetwork];
     if (1 == dynamicCount) {
         if (!suppressUI) {
-            [self showErrorInKeyWindow:@"Only one network configured for dynamic IP updates" 
-                        additionalText:@"Using that network."];
+            [self showErrorInKeyWindow:@"No other networks available" 
+                        additionalText:@"You only have one network configured for dynamic IP updates."];
         }
         goto SetDynamicNetwork;
     }
@@ -1119,8 +1111,8 @@ Error:
     
 NoNetworks:
     if (!suppressUI) {
-        [self showErrorInKeyWindow:@"You don't have any networks configured" 
-                    additionalText:@"You need to configure a network in your OpenDNS account"];
+        [self showErrorInKeyWindow:@"You have no networks" 
+                    additionalText:@"Add a network and enable dynamic IP updates in your OpenDNS account."];
     }
     [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
@@ -1131,8 +1123,8 @@ NoDynamicNetworks:
     if (dynamicNetwork)
         goto SetDynamicNetwork;
     if (!suppressUI) {
-        [self showErrorInKeyWindow:@"You don't have any networks enabled for Dynamic IP Update" 
-                    additionalText:@"Enable Dynamic IP Updates in your OpenDNS account"];
+        [self showErrorInKeyWindow:@"No networks enabled for dynamic IP updates" 
+                    additionalText:@"Make sure at least one network is enabled for dynamic IP updates in your OpenDNS account."];
     }
 
     [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
