@@ -676,6 +676,9 @@ Exit:
 }
 
 - (NSString*)lastUpdateText {
+    if (0 == minutesSinceLastIpUpdate_) {
+        return @"Less than a minute ago.";
+    }
     int hours = minutesSinceLastIpUpdate_ / 60;
     int minutes = minutesSinceLastIpUpdate_ % 60;
     NSString *s = @"";
