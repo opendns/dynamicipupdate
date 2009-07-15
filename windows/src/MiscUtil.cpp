@@ -689,6 +689,9 @@ TCHAR *FormatUpdateTime(int minutes)
 {
 	TCHAR buf[256];
 
+	if (0 == minutes)
+		return tstrdup(_T("Less than a minute"));
+
 	int hours = minutes / 60;
 	minutes = minutes % 60;
 	assert(minutes < 60);
