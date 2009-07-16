@@ -608,6 +608,11 @@ Exit:
     [statusItem_ setToolTip:@"OpenDNS Updater"];
     [statusItem_ setMenu:menu_]; 
 
+    NSFont *font = [buttonChangeAccount_ font];
+    //NSFont *font2 = [textError_ font];
+    [textError_ setFont:font];
+    //font2 = [textError_ font];
+
     NSBundle *bundle = [NSBundle bundleForClass:[self class]]; 
     NSString *path = [bundle pathForResource:@"menuicon" ofType:@"tif"]; 
     menuIcon_= [[NSImage alloc] initWithContentsOfFile:path]; 

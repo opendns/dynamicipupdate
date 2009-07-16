@@ -33,6 +33,7 @@ Checklist for pushing a new release:
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, ".."))
 RELEASE_BUILD_DIR = os.path.join(SRC_DIR, "build", "Release")
+BUNDLE_DIR = os.path.join(RELEASE_BUILD_DIR, "OpenDNS Updater.app")
 INFO_PLIST_PATH = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "Info.plist"))
 WEBSITE_DESKTOP_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "website", "desktop"))
 APPENGINE_SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "appengine-opendnsupdate"))
@@ -117,6 +118,15 @@ def zip_path(version):
 def zip_path_on_website(version):
     return os.path.join(WEBSITE_DESKTOP_DIR, zip_name(version))
 
+def dmg_name(version):
+    return "OpenDNS-Updater-Mac-%s.dmg" % version
+
+def dmg_path(version):
+    return os.path.join(SCRIPT_DIR, dmg_name(version))
+
+def dmg_path_on_website(version):
+    return os.path.join(WEBSITE_DESKTOP_DIR, dmg_name(version))
+
 def relnotes_path(version):
     return os.path.join(WEBSITE_DESKTOP_DIR, "mac-ipupdater-relnotes-%s.html" % version)
 
@@ -136,9 +146,7 @@ def update_app_cast(path, version, length):
 
     newlen = 'length="%d"' % length
     appcast = re.sub("length=\"[^\"]*\"", newlen, appcast)
-
     writefile(path, appcast)
-
     print("Updates '%s', make sure to check it in" % path)
 
 def build_and_zip(version):
@@ -152,6 +160,66 @@ def build_and_zip(version):
     os.chdir(RELEASE_BUILD_DIR)
     (out, err) = run_cmd_throw("zip", "-9", "-r", zip_name(version), "OpenDNS Updater.app")
 
+# hdiutil attach returns to stdout sth. that looks like:
+"""
+/dev/disk1        	                      	/Volumes/OpenDNS Updater"""
+# This function parses this output and returns dev_file (/dev/disk1) and vol_path
+# (/Volumes/OpenDNS Updater)
+def parse_hdiutil_attach_out(txt):
+    dev_file = None
+    vol_path = None
+    lines = txt.split("\n")
+    for l in lines:
+        parts = l.split()
+        if len(parts) < 2:
+            continue
+        #print l
+        dev_file = parts[0]
+        assert dev_file.startswith("/dev/disk")
+        vol_path = " ".join(parts[1:])
+        assert vol_path.startswith("/Volumes/OpenDNS")
+        return (dev_file, vol_path)
+    assert 0
+
+def create_dmg(version):
+    sparse_src = os.path.join(SCRIPT_DIR, "template.sparseimage.bz2")
+    sparse_tmp_src = os.path.join(SCRIPT_DIR, "template-tmp.sparseimage.bz2")
+    sparse_tmp = os.path.join(SCRIPT_DIR, "template-tmp.sparseimage")
+    if os.path.exists(sparse_tmp_src):
+        os.remove(sparse_tmp_src)
+    if os.path.exists(sparse_tmp):
+        os.remove(sparse_tmp)
+    shutil.copy(sparse_src, sparse_tmp_src)
+    run_cmd_throw("bzip2", "-d", sparse_tmp_src)
+
+    ensure_file_exists(sparse_tmp)
+
+    (hdiutil_out, hdutil_err) = run_cmd_throw("hdiutil", "attach", sparse_tmp)
+    #print("hdiutil_out:\n%s" % hdiutil_out)
+    (dev_file, vol_path) = parse_hdiutil_attach_out(hdiutil_out)
+    #print("Copying files to dmg")
+
+    #shutil.copytree(BUNDLE_DIR, os.path.join(vol_path, "OpenDNS Updater.app"), True)
+    src_dir = os.path.join(BUNDLE_DIR, "Contents")
+    dst_dir = os.path.join(vol_path, "OpenDNS Updater.app", "Contents")
+    run_cmd_throw("ditto", src_dir, dst_dir)
+
+    #os.symlink("/Applications", os.path.join(vol_path, "Applications"))
+    run_cmd_throw("hdiutil", "detach", dev_file)
+    #hdiutil convert "${PRODUCT}.sparseimage" -format 'UDBZ' -o "${PRODUCT}.dmg"
+    run_cmd_throw("hdiutil", "convert", "-quiet", sparse_tmp, "-format", "UDZO", "-imagekey", "zlib-level=9", "-o", dmg_path(version))
+    #run_cmd_throw("hdiutil", "unflatten", dmg_path())
+
+def build_and_dmg(version):
+    os.chdir(SRC_DIR)
+    print("Cleaning release target...")
+    xcodeproj = "OpenDNS Updater.xcodeproj"
+    run_cmd_throw("xcodebuild", "-project", xcodeproj, "-configuration", "Release", "clean");
+    print("Building release target...")
+    (out, err) = run_cmd_throw("xcodebuild", "-project", xcodeproj, "-configuration", "Release", "-target", "OpenDNS Updater")
+    ensure_dir_exists(RELEASE_BUILD_DIR)
+    create_dmg(version)
+
 def main():
     ensure_dir_exists(WEBSITE_DESKTOP_DIR)
     ensure_dir_exists(APPENGINE_SRC_DIR)
@@ -160,17 +228,17 @@ def main():
     version = extract_version_from_plist(INFO_PLIST_PATH)
     print("Building mac updater version '%s'" % version)
     ensure_valid_version(version)
-    ensure_file_doesnt_exist(zip_path_on_website(version))
+    ensure_file_doesnt_exist(dmg_path_on_website(version))
     ensure_file_exists(relnotes_path(version))
 
-    build_and_zip(version)
-    ensure_file_exists(zip_path(version))
+    build_and_dmg(version)
+    ensure_file_exists(dmg_path(version))
 
-    src = zip_path(version)
-    dst = zip_path_on_website(version)
+    src = dmg_path(version)
+    dst = dmg_path_on_website(version)
     shutil.copyfile(src, dst)
     print("Don't forget to checkin and deploy '%s'" % dst)
-    length = get_file_size(zip_path(version))
+    length = get_file_size(dmg_path(version))
     update_app_cast(APP_CAST_PATH, version, length)
     print("Don't forget to checkin and deploy '%s'" % APP_CAST_PATH)
 
