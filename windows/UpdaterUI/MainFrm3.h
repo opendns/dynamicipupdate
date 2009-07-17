@@ -66,6 +66,7 @@ enum {
 	WMAPP_DO_LAYOUT = WM_APP + 33
 	, WMAPP_UPDATE_STATUS
 	, WMAPP_NEW_VERSION
+	, WMAPP_SWITCH_TO_VISIBLE
 };
 
 static void CrashMe()
@@ -213,6 +214,7 @@ public:
 		MESSAGE_HANDLER_EX(WMAPP_DO_LAYOUT, OnLayout)
 		MESSAGE_HANDLER_EX(WMAPP_UPDATE_STATUS, OnUpdateStatus)
 		MESSAGE_HANDLER_EX(WMAPP_NEW_VERSION, OnNewVersion)
+		MESSAGE_HANDLER_EX(WMAPP_SWITCH_TO_VISIBLE, OnSwitchToVisible)
 		COMMAND_HANDLER_EX(IDC_CHECK_SEND_UPDATES, BN_CLICKED, OnSendUpdatesButtonClicked)
 		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_ACCOUNT, BN_CLICKED, OnChangeAccount)
 		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_NETWORK, BN_CLICKED, OnChangeNetwork)
@@ -241,6 +243,7 @@ public:
 	virtual void OnNewVersionAvailable(TCHAR *setupFilePath);
 
 	LRESULT OnNewVersion(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
+	LRESULT OnSwitchToVisible(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
 
 	void OnClose();
 	BOOL OnEraseBkgnd(CDCHandle dc);

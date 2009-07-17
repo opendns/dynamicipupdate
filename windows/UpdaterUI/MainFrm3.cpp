@@ -1053,14 +1053,14 @@ void CMainFrame::DoLayout()
 
 	// position "Using OpenDNS: " + "Yes"/"No" line
 	y += DIVIDER_Y_SPACING;
-	textSizer.SetFont(m_defaultGuiFont);
+	textSizer.SetFont(m_dividerTextFont);
 	if (IsUsingOpenDns()) {
 		textSizer.SetText(_T("Yes"));
 		m_linkLearnSetup.ShowWindow(SW_HIDE);
 	} else {
 		textSizer.SetText(_T("No. Learn how to setup OpenDNS.  "));
 		s = textSizer.GetIdealSize2();
-		minDx = max(minDx, s.cx);
+		minDx = max(minDx, s.cx + LEFT_MARGIN + RIGHT_MARGIN);
 		textSizer.SetText(_T("No. Learn how to "));
 		s = textSizer.GetIdealSize2();
 		int linkX = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN + s.cx;
@@ -1166,9 +1166,15 @@ void CMainFrame::OnIpCheckResult(IP4_ADDRESS myIp)
 	// This is called on dns thread so trigger update of
 	// the ui on ui thread
 	PostMessage(WMAPP_UPDATE_STATUS);
-	// on ip change force sending ip update to update
-	// possible error state
-	m_updaterThread->ForceSendIpUpdate();
+	if (RealIpAddress(myIp)) {
+		// on ip change force sending ip update to update
+		// possible error state
+		m_updaterThread->ForceSendIpUpdate();
+	} else {
+		if (IP_NOT_USING_OPENDNS == myIp) {
+			PostMessage(WMAPP_SWITCH_TO_VISIBLE);
+		}
+	}
 }
 
 LRESULT CMainFrame::OnLinkAbout(LPNMHDR /*pnmh*/)
@@ -1225,6 +1231,12 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
 {
 	m_newVersionSetupFilepath = (TCHAR*)wParam;
+	SwitchToVisibleState();
+	return 0;
+}
+
+LRESULT CMainFrame::OnSwitchToVisible(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
 	SwitchToVisibleState();
 	return 0;
 }
