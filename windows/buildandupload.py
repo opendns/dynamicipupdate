@@ -103,8 +103,17 @@ def extract_version():
     m = regex.search(data)
     return m.group(1)
 
-def exe_name(version):
+def installer_name(version):
     return "OpenDNS-Updater-%s.exe" % version
+
+def installer_path(version):
+    return installer_name(version)
+
+def exe_name():
+    return "OpenDNSUpdater.exe"
+
+def exe_path():
+    return os.path.join(SRC_DIR, "UpdaterUI", "Release", exe_name())
 
 def pdb_name():
     return "OpenDNSUpdater.pdb"
@@ -116,7 +125,10 @@ def s3_path(version):
     return "software/win/dynamicipudater/" + version + "/"
 
 def s3_exe_key(version):
-    return s3_path(version) + exe_name(version)
+    return s3_path(version) + exe_name()
+
+def s3_installer_key(version):
+    return s3_path(version) + installer_name(version)
 
 def s3_pdb_key(version):
     return s3_path(version) + pdb_name()
@@ -128,17 +140,20 @@ def nsis(version):
     run_cmd_throw("makensis", "/DVERSION=%s" % version, "installer")
 
 def sign(version):
-    run_cmd_throw("signtool", "sign", "/f", "opendns-sign.pfx", "/p", "bulba", "/d", '"OpenDNS Updater"', "/du", '"http://www.opendns.com/support/"', "/t", "http://timestamp.comodoca.com/authenticode", exe_name(version))
+    run_cmd_throw("signtool", "sign", "/f", "opendns-sign.pfx", "/p", "bulba", "/d", '"OpenDNS Updater"', "/du", '"http://www.opendns.com/support/"', "/t", "http://timestamp.comodoca.com/authenticode", installer_name(version))
     
 def main():
     version = extract_version()
     print("version: '%s'" % version)
     ensure_s3_doesnt_exist(s3_exe_key(version))
     ensure_file_exists(pdb_path())
+    ensure_file_exists(exe_path())
     build()
     nsis(version)
+    ensure_file_exists(installer_path(version))
     sign(version)
-    s3UploadFilePublic(exe_name(version), s3_exe_key(version))
+    s3UploadFilePrivate(installer_path(version), s3_installer_key(version))
+    s3UploadFilePublic(exe_path(), s3_exe_key(version))
     s3UploadFilePrivate(pdb_path(), s3_pdb_key(version))
 
 if __name__ == "__main__":
