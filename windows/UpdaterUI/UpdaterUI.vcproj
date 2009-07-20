@@ -305,11 +305,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\res\OpenDNSUpdater.ico"
+				RelativePath=".\res\OpenDNSUpdater.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\OpenDNSUpdater.ico"
+				RelativePath=".\res\res\OpenDNSUpdater.ico"
 				>
 			</File>
 			<File
@@ -638,6 +638,14 @@
 			</File>
 			<File
 				RelativePath="..\src\MiscUtil.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\NTray.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\NTray.h"
 				>
 			</File>
 			<File
