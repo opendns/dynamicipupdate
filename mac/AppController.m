@@ -16,6 +16,7 @@
 #define LEARN_MORE_IP_ADDRESS_TAKEN_URL @"http://www.opendns.com/software/mac/dynip/ip-taken/"
 #define LEARN_MORE_IP_MISMATCH_URL @"http://www.opendns.com/software/mac/dynip/ip-differs/"
 #define SETUP_OPENDNS_URL @"http://www.opendns.com/software/mac/dynip/setup-opendns/"
+#define MANAGE_SETTINGS_URL @"https://www.opendns.com/dashboard"
 
 #define API_HOST @"https://api.opendns.com/v1/"
 #define IP_UPDATE_HOST @"https://updates.opendns.com"
@@ -1202,6 +1203,11 @@ ShowStatusWindow:
 - (IBAction)loginWindowAbout:(id)sender {
     [[NSWorkspace sharedWorkspace]
                  openURL:[NSURL URLWithString:LOGIN_ABOUT_URL]];
+}
+
+- (IBAction)manageMySettings:(id)sender {
+    [[NSWorkspace sharedWorkspace]
+     openURL:[NSURL URLWithString:MANAGE_SETTINGS_URL]];    
 }
 
 - (IBAction)statusWindowAbout:(id)sender {

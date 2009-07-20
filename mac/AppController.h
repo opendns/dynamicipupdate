@@ -95,6 +95,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)selectNetworkClick:(id)sender;
 - (IBAction)selectNetworkDoubleClick:(id)sender;
 - (IBAction)showStatusWindow:(id)sender;
+- (IBAction)manageMySettings:(id)sender;
 - (IBAction)statusChangeAccount:(id)sender;
 - (IBAction)statusChangeNetwork:(id)sender;
 - (IBAction)statusUpdateNow:(id)sender;
