@@ -9,6 +9,21 @@ import subprocess
 import stat 
 import shutil
 
+try:
+    import boto.s3
+    from boto.s3.key import Key
+except:
+    print("You need boto library (http://code.google.com/p/boto/)")
+    print("svn checkout http://boto.googlecode.com/svn/trunk/ boto")
+    print("cd boto; python setup.py install")
+    raise
+
+try:
+    import awscreds
+except:
+    print "awscreds.py file needed with access and secret globals for aws access"
+    sys.exit(1)
+
 """
 Release build script designed to automate as much of the proces as possible
 and minimize errors.
@@ -38,6 +53,51 @@ INFO_PLIST_PATH = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "Info.plist"))
 WEBSITE_DESKTOP_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "website", "desktop"))
 APPENGINE_SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "appengine-opendnsupdate"))
 APP_CAST_PATH = os.path.join(APPENGINE_SRC_DIR, "IpUpdaterAppCast.xml")
+
+S3_BUCKET = "opendns"
+g_s3conn = None
+
+def s3connection():
+    global g_s3conn
+    if g_s3conn is None:
+        g_s3conn = boto.s3.connection.S3Connection(awscreds.access, awscreds.secret, True)
+    return g_s3conn
+
+def s3PubBucket(): return s3connection().get_bucket(S3_BUCKET)
+
+def ul_cb(sofar, total):
+    print("So far: %d, total: %d" % (sofar , total))
+
+def s3UploadFilePublic(local_file_name, remote_file_name):
+    print("Uploading public '%s' as '%s'" % (local_file_name, remote_file_name))
+    bucket = s3PubBucket()
+    k = Key(bucket)
+    k.key = remote_file_name
+    k.set_contents_from_filename(local_file_name, cb=ul_cb)
+    k.make_public()
+
+def s3UploadFilePrivate(local_file_name, remote_file_name):
+    print("Uploading private '%s' as '%s'" % (local_file_name, remote_file_name))
+    bucket = s3PubBucket()
+    k = Key(bucket)
+    k.key = remote_file_name
+    k.set_contents_from_filename(local_file_name, cb=ul_cb)
+
+def s3UploadDataPublic(data, remote_file_name):
+    bucket = s3PubBucket()
+    k = Key(bucket)
+    k.key = remote_file_name
+    k.set_contents_from_string(data)
+    k.make_public()
+
+def s3KeyExists(key):
+    k = Key(s3PubBucket(), key)
+    return k.exists()
+
+def ensure_s3_doesnt_exist(key):
+    if s3KeyExists(key):
+        print("'%s' already exists in s3. Forgot to update version number?" % key)
+        sys.exit(1)
 
 def exit_with_error(s):
     print(s)
@@ -127,6 +187,22 @@ def dmg_path(version):
 def dmg_path_on_website(version):
     return os.path.join(WEBSITE_DESKTOP_DIR, dmg_name(version))
 
+def dmg_path_on_s3(version):
+    return "software/mac/dynamicupdate/" + version + "/" + dmg_name(version)
+
+SYMS_NAME = "OpenDNS Updater.app.dSYM"
+
+def syms_path():
+    return os.path.join(RELEASE_BUILD_DIR, SYMS_NAME)
+
+SYMS_ZIP_NAME = "OpenDNS Updater.app.dSYM.zip"
+
+def syms_zip_path():
+    return os.path.join(RELEASE_BUILD_DIR, SYMS_ZIP_NAME)
+
+def syms_zip_path_on_s3(version):
+    return "software/mac/dynamicupdate/" + version + "/" + SYMS_ZIP_NAME
+
 def relnotes_path(version):
     return os.path.join(WEBSITE_DESKTOP_DIR, "mac-ipupdater-relnotes-%s.html" % version)
 
@@ -210,6 +286,11 @@ def create_dmg(version):
     run_cmd_throw("hdiutil", "convert", "-quiet", sparse_tmp, "-format", "UDZO", "-imagekey", "zlib-level=9", "-o", dmg_path(version))
     #run_cmd_throw("hdiutil", "unflatten", dmg_path())
 
+def create_syms_zip():
+    os.chdir(RELEASE_BUILD_DIR)
+    (out, err) = run_cmd_throw("zip", "-9", "-r", SYMS_ZIP_NAME, SYMS_NAME)
+
+
 def build_and_dmg(version):
     os.chdir(SRC_DIR)
     print("Cleaning release target...")
@@ -221,6 +302,8 @@ def build_and_dmg(version):
     create_dmg(version)
 
 def main():
+    test = "-test" in sys.argv or "--test" in sys.argv
+    if test: print("Running in test mode. Will build but not upload")
     ensure_dir_exists(WEBSITE_DESKTOP_DIR)
     ensure_dir_exists(APPENGINE_SRC_DIR)
     ensure_file_exists(INFO_PLIST_PATH)
@@ -228,11 +311,21 @@ def main():
     version = extract_version_from_plist(INFO_PLIST_PATH)
     print("Building mac updater version '%s'" % version)
     ensure_valid_version(version)
-    ensure_file_doesnt_exist(dmg_path_on_website(version))
+    if not test:
+        ensure_file_doesnt_exist(dmg_path_on_website(version))
+        ensure_s3_doesnt_exist(dmg_path_on_s3(version))
     ensure_file_exists(relnotes_path(version))
 
     build_and_dmg(version)
+    create_syms_zip()
     ensure_file_exists(dmg_path(version))
+    ensure_file_exists(syms_zip_path())
+
+    # don't upload in test mode
+    if test: return
+
+    s3UploadFilePublic(dmg_path(version), dmg_path_on_s3(version))
+    s3UploadFilePrivate(syms_zip_path(), syms_zip_path_on_s3(version))
 
     src = dmg_path(version)
     dst = dmg_path_on_website(version)
