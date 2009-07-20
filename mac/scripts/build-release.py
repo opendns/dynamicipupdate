@@ -290,7 +290,6 @@ def create_syms_zip():
     os.chdir(RELEASE_BUILD_DIR)
     (out, err) = run_cmd_throw("zip", "-9", "-r", SYMS_ZIP_NAME, SYMS_NAME)
 
-
 def build_and_dmg(version):
     os.chdir(SRC_DIR)
     print("Cleaning release target...")
@@ -301,9 +300,26 @@ def build_and_dmg(version):
     ensure_dir_exists(RELEASE_BUILD_DIR)
     create_dmg(version)
 
+def valid_api_key(key):
+    valid_chars = "0123456789ABCDEF"
+    for c in key:
+        if c not in valid_chars:
+            return False
+    return True
+
+def ensure_valid_api_key():
+    api_key_path = os.path.join(SRC_DIR, "ApiKey.h")
+    data = readfile(api_key_path)
+    regex = re.compile("#define API_KEY @\"([^\"]+)\"", re.DOTALL | re.MULTILINE)
+    m = regex.search(data)
+    apikey = m.group(1)
+    if not valid_api_key(apikey):
+        exit_with_error("NOT A VALID API KEY: '%s'" % apikey)
+
 def main():
     test = "-test" in sys.argv or "--test" in sys.argv
     if test: print("Running in test mode. Will build but not upload")
+    ensure_valid_api_key()
     ensure_dir_exists(WEBSITE_DESKTOP_DIR)
     ensure_dir_exists(APPENGINE_SRC_DIR)
     ensure_file_exists(INFO_PLIST_PATH)
