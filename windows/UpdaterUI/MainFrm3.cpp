@@ -373,25 +373,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		dc.SelectFont(prevFont);
 
 		if (m_showStatusMsgEdit) {
-#if !NICER_ERROR_MSG
-			// draw line above edit text box
-			y += (m_btnDy - DIVIDER_Y_SPACING - 6);
-			y += DIVIDER_LINE_Y_OFF;
-			rc.top = y;
-			rc.bottom = y + 1;
-			dc.FillSolidRect(rc, colDivLine);
-
-			// draw line below edit text box
-			y += m_editErrorMsgRequestedDy;
-			y += DIVIDER_LINE_Y_OFF;
-			y += 4;
-			rc.top = y;
-			rc.bottom = y + 1;
-			dc.FillSolidRect(rc, colDivLine);
-#endif
-
 			// draw frame around edit box
-#if NICER_ERROR_MSG
 			RECT editRect;
 			m_editErrorMsg.GetWindowRect(&editRect);
 			editRect.top -= 6;
@@ -406,7 +388,6 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			editRect.left += 1;
 			editRect.right -= 1;
 			dc.FillSolidRect(&editRect, colEditBg);
-#endif
 		}
 
 #if 0
@@ -1246,6 +1227,7 @@ void CMainFrame::OnToggleWindow(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 {
 	m_notifyIcon.Hide();
+	SwitchToHiddenState();
 }
 
 LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
@@ -1598,6 +1580,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_hIconErr = CTrayNotifyIcon::LoadIcon(IDR_SYSTRAY_ERR);
 
 	m_notifyIcon.Create(this, IDR_MENU1, _T(""), m_hIconOk, WMAPP_NOTIFY_ICON);
+	m_notifyIcon.SetTooltipText(_T("OpenDNS Updater v") PROGRAM_VERSION);
+
 	m_updaterThread = new UpdaterThread(this);
 	if (IsLoggedIn() && strempty(g_pref_user_networks_state))
 		ChangeNetwork(SupressAll);
