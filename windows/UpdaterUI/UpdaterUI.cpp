@@ -398,6 +398,28 @@ static CString LogFileName(const TCHAR *dir)
 	return fileName;
 }
 
+static bool IsApiKeyCharValid(char c)
+{
+	static char *validKeyChars = "01234566789ABCDEF";
+	char *tmp = validKeyChars;
+	char c2;
+	while (c2 = *tmp++) {
+		if (c == c2)
+			return true;
+	}
+	return false;
+}
+
+static bool IsApiKeyValid(char *apiKey)
+{
+	char c;
+	while (c = *apiKey++) {
+		if (!IsApiKeyCharValid(c))
+			return false;
+	}
+	return true;
+}
+
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cmdLine, int /* nCmdShow */)
 {
 	int nRet = 0;
@@ -409,6 +431,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 		return failedCount;
 	}
 #endif
+
+	if (!IsApiKeyValid(API_KEY)) {
+		::MessageBox(NULL, _T("Invalid API key"), _T("Error"), MB_OK);
+		return 1;
+	}
 
 	CString appDataDir = AppDataDir();
 	InstallCrashHandler(appDataDir, GUI_EXE_NAME_WITHOUT_EXE);
