@@ -402,20 +402,22 @@ static bool IsApiKeyCharValid(char c)
 {
 	static char *validKeyChars = "01234566789ABCDEF";
 	char *tmp = validKeyChars;
-	char c2;
-	while (c2 = *tmp++) {
+	char c2 = *tmp++;
+	while (c2) {
 		if (c == c2)
 			return true;
+		c2 = *tmp++;
 	}
 	return false;
 }
 
 static bool IsApiKeyValid(char *apiKey)
 {
-	char c;
-	while (c = *apiKey++) {
+	char c = *apiKey++;
+	while (c) {
 		if (!IsApiKeyCharValid(c))
 			return false;
+		c = *apiKey++;
 	}
 	return true;
 }
