@@ -141,7 +141,23 @@ def nsis(version):
 
 def sign(version):
     run_cmd_throw("signtool", "sign", "/f", "opendns-sign.pfx", "/p", "bulba", "/d", '"OpenDNS Updater"', "/du", '"http://www.opendns.com/support/"', "/t", "http://timestamp.comodoca.com/authenticode", installer_name(version))
-    
+
+def valid_api_key(key):
+    valid_chars = "0123456789ABCDEF"
+    for c in key:
+        if c not in valid_chars:
+            return False
+    return True
+
+def ensure_valid_api_key():
+    api_key_path = os.path.join(SRC_DIR, "src", "ApiKey.h")
+    data = readfile(api_key_path)
+    regex = re.compile("#define API_KEY \"([^\"]+)\"", re.DOTALL | re.MULTILINE)
+    m = regex.search(data)
+    apikey = m.group(1)
+    if not valid_api_key(apikey):
+        exit_with_error("NOT A VALID API KEY: '%s'" % apikey)
+
 def main():
     version = extract_version()
     print("version: '%s'" % version)
