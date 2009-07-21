@@ -77,6 +77,7 @@ CMainFrame::CMainFrame()
 	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 	m_updaterThread = NULL;
 	m_newVersionSetupFilepath = NULL;
+	m_forceExitOnClose = FALSE;
 }
 
 CMainFrame::~CMainFrame()
@@ -95,7 +96,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 void CMainFrame::OnClose()
 {
 	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
-	if (CanSendIPUpdates() && sendingUpdates && !IsLeftAltAndCtrlPressed()) {
+	if (CanSendIPUpdates() && sendingUpdates && !IsLeftAltAndCtrlPressed() && !m_forceExitOnClose) {
 		SwitchToHiddenState();
 		SetMsgHandled(TRUE);
 	} else {
@@ -1115,7 +1116,7 @@ void CMainFrame::DoLayout()
 	}
 
 	int minDy = y + buttonDy + 8;
-	
+
 	// resize the window if the current size is smaller than
 	// what's needed to display content
 	int newClientDx = clientDx;
@@ -1224,8 +1225,27 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 
 	m_ipUpdateResult = ipUpdateResult;
 	if (ipUpdateResult != IpUpdateOk)
-		SwitchToVisibleState();
+		PostMessage(WMAPP_SWITCH_TO_VISIBLE);
 	PostMessage(WMAPP_UPDATE_STATUS);
+}
+
+void CMainFrame::OnExit(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
+{
+	m_forceExitOnClose = TRUE;
+	PostMessage(WM_CLOSE);
+}
+
+void CMainFrame::OnToggleWindow(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
+{
+	if (UI_STATE_HIDDEN == m_uiState)
+		SwitchToVisibleState();
+	else
+		SwitchToHiddenState();
+}
+
+void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
+{
+	m_notifyIcon.Hide();
 }
 
 LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
@@ -1238,6 +1258,12 @@ LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/
 LRESULT CMainFrame::OnSwitchToVisible(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	SwitchToVisibleState();
+	return 0;
+}
+
+LRESULT CMainFrame::OnNotifyIcon(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam)
+{
+	m_notifyIcon.OnTrayNotification(wParam, lParam);
 	return 0;
 }
 
@@ -1571,8 +1597,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_hIconOk = CTrayNotifyIcon::LoadIcon(IDR_SYSTRAY_OK);
 	m_hIconErr = CTrayNotifyIcon::LoadIcon(IDR_SYSTRAY_ERR);
 
-	m_notifyIcon.Create(this, IDR_MENU, _T(""), m_hIconOk, WMAPP_NOTIFY_ICON);
-
+	m_notifyIcon.Create(this, IDR_MENU1, _T(""), m_hIconOk, WMAPP_NOTIFY_ICON);
 	m_updaterThread = new UpdaterThread(this);
 	if (IsLoggedIn() && strempty(g_pref_user_networks_state))
 		ChangeNetwork(SupressAll);
@@ -1597,6 +1622,11 @@ void CMainFrame::SwitchToVisibleState()
 {
 	ShowWindow(SW_SHOW);
 	m_uiState = UI_STATE_VISIBLE;
+	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU2));
+	m_notifyIcon.SetMenu(menu);
+	m_notifyIcon.SetDefaultMenuItem(1, TRUE);
+	if (m_notifyIcon.IsHidden())
+		m_notifyIcon.Show();
 	UpdateStatusEdit();
 }
 
@@ -1604,6 +1634,9 @@ void CMainFrame::SwitchToHiddenState()
 {
 	ShowWindow(SW_HIDE);
 	m_uiState = UI_STATE_HIDDEN;
+	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU1));
+	m_notifyIcon.SetMenu(menu);
+	m_notifyIcon.SetDefaultMenuItem(1, TRUE);
 }
 
 LRESULT CMainFrame::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lParam*/)

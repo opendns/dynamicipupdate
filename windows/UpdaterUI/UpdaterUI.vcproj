@@ -309,10 +309,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\res\OpenDNSUpdater.ico"
-				>
-			</File>
-			<File
 				RelativePath=".\res\OpenDNSUpdater.rc"
 				>
 				<FileConfiguration
@@ -323,6 +319,14 @@
 						AdditionalIncludeDirectories="$(ProjectDir);$(ProjectDir)\..\wtl\include"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\res\systray-err.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\systray-ok.ico"
+				>
 			</File>
 		</Filter>
 		<Filter

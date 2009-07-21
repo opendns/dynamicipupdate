@@ -159,6 +159,7 @@ def ensure_valid_api_key():
         exit_with_error("NOT A VALID API KEY: '%s'" % apikey)
 
 def main():
+    ensure_valid_api_key()
     version = extract_version()
     print("version: '%s'" % version)
     ensure_s3_doesnt_exist(s3_exe_key(version))

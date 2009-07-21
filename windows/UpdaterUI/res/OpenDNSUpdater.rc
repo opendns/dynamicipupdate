@@ -154,11 +154,23 @@ BEGIN
     END
 END
 
-IDR_MENU MENU 
+IDR_MENU1 MENU 
 BEGIN
     POPUP ""
     BEGIN
-        MENUITEM "Exit",       IDM_EXIT
+        MENUITEM "Run hidden",        IDM_RUN_HIDDEN
+        MENUITEM "Show window",       IDM_TOGGLE_WINDOW
+        MENUITEM "Exit",       		  IDM_EXIT
+    END
+END
+
+IDR_MENU2 MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Run hidden",        IDM_RUN_HIDDEN
+        MENUITEM "Hide window",       IDM_TOGGLE_WINDOW
+        MENUITEM "Exit",       		  IDM_EXIT
     END
 END
 

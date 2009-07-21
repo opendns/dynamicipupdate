@@ -162,7 +162,7 @@ public:
 	CRect			m_txtStatusRect;
 	CRect			m_txtUpdateRect;
 
-	CTrayNotifyIcon m_notifyIcon;
+	CTrayNotifyIcon	m_notifyIcon;
 
 	CLinkCtrl		m_linkAbout;
 	CLinkCtrl		m_linkLearnSetup;
@@ -208,6 +208,7 @@ public:
 	int					m_minWinDx, m_minWinDy;
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
+	BOOL				m_forceExitOnClose;
 
 	BEGIN_MSG_MAP(CMainFrame)
 		MSG_WM_CREATE(OnCreate)
@@ -222,10 +223,16 @@ public:
 		MESSAGE_HANDLER_EX(WMAPP_UPDATE_STATUS, OnUpdateStatus)
 		MESSAGE_HANDLER_EX(WMAPP_NEW_VERSION, OnNewVersion)
 		MESSAGE_HANDLER_EX(WMAPP_SWITCH_TO_VISIBLE, OnSwitchToVisible)
+		MESSAGE_HANDLER_EX(WMAPP_NOTIFY_ICON, OnNotifyIcon)
 		COMMAND_HANDLER_EX(IDC_CHECK_SEND_UPDATES, BN_CLICKED, OnSendUpdatesButtonClicked)
 		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_ACCOUNT, BN_CLICKED, OnChangeAccount)
 		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_NETWORK, BN_CLICKED, OnChangeNetwork)
 		COMMAND_HANDLER_EX(IDC_BUTTON_SEND_IP_UPDATE, BN_CLICKED, OnSendUpdate)
+
+		COMMAND_ID_HANDLER_EX(IDM_EXIT, OnExit)
+		COMMAND_ID_HANDLER_EX(IDM_TOGGLE_WINDOW, OnToggleWindow)
+		COMMAND_ID_HANDLER_EX(IDM_RUN_HIDDEN, OnRunHidden)
+
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_LINK, OnLinkStatusEdit)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_REQUESTRESIZE, OnRequestResize)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_SELCHANGE, OnSelChange)
@@ -251,6 +258,11 @@ public:
 
 	LRESULT OnNewVersion(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
 	LRESULT OnSwitchToVisible(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
+	LRESULT OnNotifyIcon(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam);
+
+	void OnExit(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
+	void OnToggleWindow(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
+	void OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
 
 	void OnClose();
 	BOOL OnEraseBkgnd(CDCHandle dc);
