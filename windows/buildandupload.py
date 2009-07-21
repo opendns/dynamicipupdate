@@ -87,6 +87,16 @@ def run_cmd_throw(*args):
     raise Exception("'%s' failed with error code %d" % (cmd, errcode))
   return (res[0], res[1])
 
+def exit_with_error(s):
+    print(s)
+    sys.exit(1)
+
+def readfile(path):
+    fo = open(path)
+    data = fo.read()
+    fo.close()
+    return data
+
 def ensure_file_exists(path):
     if not os.path.exists(path) or not os.path.isfile(path):
         exit_with_error("File '%s' desn't exist" % path)
