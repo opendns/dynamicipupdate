@@ -1568,6 +1568,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 		dlg.DoModal();
 	}
 
+	m_hIconOk = CTrayNotifyIcon::LoadIcon(IDR_SYSTRAY_OK);
+	m_hIconErr = CTrayNotifyIcon::LoadIcon(IDR_SYSTRAY_ERR);
+
+	m_notifyIcon.Create(this, IDR_MENU, _T(""), m_hIconOk, WMAPP_NOTIFY_ICON);
+
 	m_updaterThread = new UpdaterThread(this);
 	if (IsLoggedIn() && strempty(g_pref_user_networks_state))
 		ChangeNetwork(SupressAll);

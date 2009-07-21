@@ -7,6 +7,7 @@
 
 #if MAIN_FRM == 3
 
+#include "NTray.h"
 #include "DnsQuery.h"
 #include "UpdaterThread.h"
 #include "Errors.h"
@@ -67,6 +68,7 @@ enum {
 	, WMAPP_UPDATE_STATUS
 	, WMAPP_NEW_VERSION
 	, WMAPP_SWITCH_TO_VISIBLE
+	, WMAPP_NOTIFY_ICON
 };
 
 static void CrashMe()
@@ -160,12 +162,17 @@ public:
 	CRect			m_txtStatusRect;
 	CRect			m_txtUpdateRect;
 
+	CTrayNotifyIcon m_notifyIcon;
+
 	CLinkCtrl		m_linkAbout;
 	CLinkCtrl		m_linkLearnSetup;
 	CButton			m_buttonSendIpUpdates;
 	CButton			m_buttonChangeAccount;
 	CButton			m_buttonChangeConfigureNetwork;
 	CButton			m_buttonUpdate;
+
+	HICON			m_hIconOk;
+	HICON			m_hIconErr;
 
 	RtfTextInfo		m_rti;
 

@@ -4,6 +4,13 @@
 //
 #define IDR_MAINFRAME                   128
 #define IDR_MAINFRAME_OLD               129
+#define IDR_SYSTRAY_OK                  130
+#define IDR_SYSTRAY_ERR                 131
+
+#define IDR_MENU                        150
+
+#define IDM_EXIT                        160
+
 #define IDD_DIALOG1                     201
 #define IDD_DIALOG_SIGNIN               201
 #define IDD_DIALOG_SELECT_NETWORK       202

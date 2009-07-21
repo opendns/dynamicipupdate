@@ -55,6 +55,8 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\OpenDNSUpdater.ico"
+IDR_SYSTRAY_OK			ICON					"res\\systray-ok.ico"
+IDR_SYSTRAY_ERR			ICON					"res\\systray-err.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -152,6 +154,13 @@ BEGIN
     END
 END
 
+IDR_MENU MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Exit",       IDM_EXIT
+    END
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //
