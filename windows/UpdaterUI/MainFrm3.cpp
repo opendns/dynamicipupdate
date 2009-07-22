@@ -84,6 +84,7 @@ CMainFrame::CMainFrame()
 	m_updaterThread = NULL;
 	m_newVersionSetupFilepath = NULL;
 	m_forceExitOnClose = false;
+	m_hiddenMode = false;
 }
 
 CMainFrame::~CMainFrame()
@@ -1207,8 +1208,13 @@ void CMainFrame::OnToggleWindow(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 
 void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 {
-	m_notifyIcon.Hide();
-	SwitchToHiddenState();
+	m_hiddenMode = !m_hiddenMode;
+	// when enabling hidden mode, it acts as a command and hides the window
+	// when disabling hidden mode, it acts as an off button. It's a bit weird
+	if (m_hiddenMode)
+		SwitchToHiddenState();
+	else
+		UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
 }
 
 LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)
@@ -1601,6 +1607,7 @@ void CMainFrame::SwitchToVisibleState()
 	m_notifyIcon.SetDefaultMenuItem(1, TRUE);
 	if (m_notifyIcon.IsHidden())
 		m_notifyIcon.Show();
+	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
 	UpdateUpdateEdit();
 	UpdateErrorEdit();
 }
@@ -1612,6 +1619,9 @@ void CMainFrame::SwitchToHiddenState()
 	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU1));
 	m_notifyIcon.SetMenu(menu);
 	m_notifyIcon.SetDefaultMenuItem(1, TRUE);
+	if (!m_notifyIcon.IsHidden())
+		m_notifyIcon.Hide();
+	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
 }
 
 LRESULT CMainFrame::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lParam*/)

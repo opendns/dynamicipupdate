@@ -217,6 +217,12 @@ public:
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
 	bool				m_forceExitOnClose;
+	bool				m_hiddenMode;
+
+
+	BEGIN_UPDATE_UI_MAP(CMainFrame)
+		UPDATE_ELEMENT(IDM_RUN_HIDDEN, UPDUI_MENUPOPUP)
+	END_UPDATE_UI_MAP()
 
 	BEGIN_MSG_MAP(CMainFrame)
 		MSG_WM_CREATE(OnCreate)
@@ -255,9 +261,6 @@ public:
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
 		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
 	END_MSG_MAP()
-
-	BEGIN_UPDATE_UI_MAP(CMainFrame)
-	END_UPDATE_UI_MAP()
 
 	CMainFrame();
 	~CMainFrame();
