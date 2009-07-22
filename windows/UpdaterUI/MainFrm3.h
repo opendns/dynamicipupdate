@@ -60,6 +60,7 @@ enum {
 	IDC_LINK_ABOUT,
 	IDC_LINK_LEARN_SETUP_OPENDNS,
 	IDC_EDIT_STATUS,
+	IDC_EDIT_UPDATE,
 };
 
 // TODO: ensure those are unique by gathering them in a common file
@@ -110,8 +111,14 @@ static const int Y_SPACING = 4;
 #else
 	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
 
+	// background and border color for edit box showing error message(s)
 	static const COLORREF colEditBg    = RGB(0xff, 0xff, 0xe7);
 	static const COLORREF colEditFrame = RGB(0xf7, 0xe3, 0x84);
+
+	// background and border color for edit box showing 'update available' message
+	static const COLORREF colEditUpdateBg    = RGB(0xe7, 0xfb, 0xe7);
+	static const COLORREF colEditUpdateFrame = RGB(0x00, 0x9a, 0x00);
+
 	static const int DIVIDER_LINE_Y_OFF = 12;
 
 	//static const COLORREF colEditBg    = RGB(0xff, 0xdb, 0x18);
@@ -166,13 +173,22 @@ public:
 	HICON			m_hIconOk;
 	HICON			m_hIconErr;
 
-	RtfTextInfo		m_rti;
-
+	// info related to edit control for error message(s)
+	RtfTextInfo		m_rtiError;
 	CRichEditCtrl	m_editErrorMsg;
 	bool			m_showStatusMsgEdit;
 	int				m_editErrorMsgRequestedDy;
 	int				m_editErrorMsgDx;
 	int				m_minStatusEditDx;
+
+	// info related to edit control for 'update available' message
+	RtfTextInfo		m_rtiUpdate;
+	CRichEditCtrl	m_editUpdateMsg;
+	bool			m_showUpdateMsgEdit;
+	int				m_editUpdateMsgRequestedDy;
+	int				m_editUpdateMsgDx;
+	int				m_minUpdateEditDx;
+
 	int				m_topBarY;
 	int				m_topBarX;
 
@@ -200,7 +216,7 @@ public:
 	int					m_minWinDx, m_minWinDy;
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
-	BOOL				m_forceExitOnClose;
+	bool				m_forceExitOnClose;
 
 	BEGIN_MSG_MAP(CMainFrame)
 		MSG_WM_CREATE(OnCreate)
@@ -228,6 +244,11 @@ public:
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_LINK, OnLinkStatusEdit)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_REQUESTRESIZE, OnRequestResize)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_SELCHANGE, OnSelChange)
+
+		NOTIFY_HANDLER_EX(IDC_EDIT_UPDATE, EN_LINK, OnLinkStatusEdit)
+		NOTIFY_HANDLER_EX(IDC_EDIT_UPDATE, EN_REQUESTRESIZE, OnRequestResize)
+		NOTIFY_HANDLER_EX(IDC_EDIT_UPDATE, EN_SELCHANGE, OnSelChange)
+
 		NOTIFY_HANDLER_EX(IDC_LINK_ABOUT, NM_CLICK, OnLinkAbout)
 		NOTIFY_HANDLER_EX(IDC_LINK_LEARN_SETUP_OPENDNS, NM_CLICK, OnLinkLearnSetupOpenDns)
 
@@ -271,11 +292,17 @@ public:
 	bool ShowLastUpdated();
 
 	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd);
+
+	void SetRtfLinks(CRichEditCtrl *edit, RtfTextInfo *rti);
+
 	void BuildStatusEditRtf(RtfTextInfo& ti);
-	void UpdateStatusEdit(bool doLayout=true);
+	void UpdateErrorEdit(bool doLayout=true);
+
+	void BuildUpdateEditRtf(RtfTextInfo& ti);
+	void UpdateUpdateEdit(bool doLayout=true);
+
 	TCHAR *LastUpdateTxt();
 	TCHAR *IpAddress();
-	void SetRtfLinks(RtfTextInfo *rti);
 	LRESULT OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/);
 	void OnGetMinMaxInfo(LPMINMAXINFO lpMMI);
 	void ChangeNetwork(int supressFlags);

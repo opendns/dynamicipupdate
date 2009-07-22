@@ -66,18 +66,24 @@ CMainFrame::CMainFrame()
 	m_ipFromHttp = NULL;
 	m_ipUpdateResult = IpUpdateOk;
 	m_simulatedError = SE_NO_ERROR;
+
 	m_editErrorMsgRequestedDy = 0;
+	m_showUpdateMsgEdit = false;
+
+	m_editUpdateMsgRequestedDy = 0;
+	m_showStatusMsgEdit = false;
+
 	m_editFontName = NULL;
 	m_minWinDx = 320;
 	// this is absolute minimum height of the window's client area
 	m_minWinDy = 200;
-	m_minStatusEditDx = 320 - 16;
+	m_minUpdateEditDx = m_minStatusEditDx = 320 - 16;
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
 	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 	m_updaterThread = NULL;
 	m_newVersionSetupFilepath = NULL;
-	m_forceExitOnClose = FALSE;
+	m_forceExitOnClose = false;
 }
 
 CMainFrame::~CMainFrame()
@@ -139,7 +145,7 @@ void CMainFrame::UpdateLastUpdateText()
 {
 	if (!GetLastIpUpdateTime())
 		return;
-	UpdateStatusEdit();
+	UpdateErrorEdit();
 }
 
 BOOL CMainFrame::OnIdle()
@@ -150,7 +156,7 @@ BOOL CMainFrame::OnIdle()
 void CMainFrame::ChangeNetwork(int supressFlags)
 {
 	StartDownloadNetworks(g_pref_token, supressFlags);
-	UpdateStatusEdit();
+	UpdateErrorEdit();
 }
 
 LRESULT CMainFrame::OnSelChange(LPNMHDR /*pnmh*/)
@@ -172,7 +178,7 @@ void CMainFrame::OnChangeNetwork(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wn
 void CMainFrame::OnSendUpdate(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/)
 {
 	m_updaterThread->ForceSendIpUpdate();
-	UpdateStatusEdit();
+	UpdateErrorEdit();
 }
 
 void CMainFrame::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
@@ -181,14 +187,21 @@ void CMainFrame::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, C
 	BOOL checked = b.GetCheck();
 	SetPrefValBool(&g_pref_send_updates, checked);
 	PreferencesSave();
-	UpdateStatusEdit();
+	UpdateErrorEdit();
 }
 
 // sent by rich edit control so that we can know its desired height
 LRESULT CMainFrame::OnRequestResize(LPNMHDR pnmh)
 {
 	REQRESIZE* r = (REQRESIZE*)pnmh;
-	m_editErrorMsgRequestedDy =  RectDy(r->rc);
+
+	if (IDC_EDIT_UPDATE == pnmh->idFrom) {
+		m_editUpdateMsgRequestedDy = RectDy(r->rc);
+		return 0;
+	}
+
+	assert(IDC_EDIT_STATUS == pnmh->idFrom);
+	m_editErrorMsgRequestedDy = RectDy(r->rc);
 	return 0;
 }
 
@@ -390,6 +403,24 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			dc.FillSolidRect(&editRect, colEditBg);
 		}
 
+		if (m_showUpdateMsgEdit) {
+			// draw frame around edit box
+			RECT editRect;
+			m_editUpdateMsg.GetWindowRect(&editRect);
+			editRect.top -= 6;
+			editRect.bottom += 6;
+			editRect.left -= 4;
+			editRect.right += 4;
+			ScreenToClient(&editRect);
+			dc.FillSolidRect(&editRect, colEditUpdateFrame);
+
+			editRect.top += 1;
+			editRect.bottom -= 1;
+			editRect.left += 1;
+			editRect.right -= 1;
+			dc.FillSolidRect(&editRect, colEditUpdateBg);
+		}
+
 #if 0
 		// draw top bar text
 		HFONT prevFont = dc.SelectFont(m_topBarFont);
@@ -527,96 +558,38 @@ bool CMainFrame::NetworkNotSelected()
 	return false;
 }
 
+void CMainFrame::BuildUpdateEditRtf(RtfTextInfo& ti)
+{
+	m_showUpdateMsgEdit = false;
+	if (!m_newVersionSetupFilepath)
+		return;
+
+	m_showUpdateMsgEdit = true;
+	ti.Init(m_editFontName, EDIT_FONT_SIZE);
+	ti.StartFgCol(RtfTextInfo::ColBlack);
+	ti.StartBoldStyle();
+	ti.StartCentered();
+	ti.AddTxt(_T("New version is available! "));
+	ti.AddLink(_T("Install now"), LINK_INSTALL_NEW_VERSION);
+	ti.AddTxt(_T("."));
+	ti.EndStyle();
+	ti.EndStyle();
+	ti.EndCol();
+	ti.End();
+}
+
 void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 {
 	CString s;
-	CUITextSizer sizer(*this);
-	sizer.SetFont(m_statusEditFont);
-	int minDx = 80;
-
 	m_showStatusMsgEdit = false;
 
 	ti.Init(m_editFontName, EDIT_FONT_SIZE);
-
-#if 0
-	int dx;
-	ti.StartBoldStyle();
-	if (IsLoggedIn()) {
-		m_showStatusMsgEdit = true;
-		s = "Logged in as ";
-		s += g_pref_user_name;
-		s += ". ";
-		ti.AddTxt(s);
-		ti.AddLink("Change account.", LINK_CHANGE_ACCOUNT);
-		s += "Change account. ";
-		sizer.SetText(s);
-		dx = sizer.GetIdealSizeDx();
-		if (dx > minDx)
-			minDx = dx;
-		ti.AddPara();
-	}
-
-	if (!strempty(g_pref_user_name)) {
-		if (streq(UNS_OK, g_pref_user_networks_state)) {
-			m_showStatusMsgEdit = true;
-			if (strempty(g_pref_hostname)) {
-				s = "Sending updates for default network. ";
-			} else {
-				s = "Sending updates for network '";
-				s += g_pref_hostname;
-				s += "'. ";
-			}
-			ti.AddTxt(s);
-			ti.AddLink("Change network.", LINK_CHANGE_NETWORK);
-			s += "Change network. ";
-			sizer.SetText(s);
-			dx = sizer.GetIdealSizeDx();
-			if (dx > minDx)
-				minDx = dx;
-			ti.AddPara();
-		}
-	}
-
-	if (RealIpAddress(m_ipFromDns)) {
-		m_showStatusMsgEdit = true;
-		IP4_ADDRESS a = m_ipFromDns;
-		s.Format(_T("Your IP address is %u.%u.%u.%u"), (a >> 24) & 255, (a >> 16) & 255, (a >> 8) & 255, a & 255);
-		ti.AddTxt(s);
-		ti.AddPara();
-		ti.AddTxt("You're using OpenDNS service.");
-	}
-
-	if (m_minutesSinceLastUpdate >= 0) {
-		m_showStatusMsgEdit = true;
-		ti.AddPara();
-		ti.AddTxt("Last update: ");
-		TCHAR *timeTxt = FormatUpdateTime(m_minutesSinceLastUpdate);
-		if (timeTxt) {
-			ti.AddTxt(timeTxt);
-			free(timeTxt);
-		}
-		ti.AddTxt(" ago. ");
-		ti.AddLink("Update now", LINK_SEND_IP_UPDATE);
-	}
-
-	ti.EndStyle();
-	ti.AddPara();
-	ti.AddPara();
-#endif
 
 	// show error scenarios at the end, in bold red
 	ti.StartFgCol(RtfTextInfo::ColRed);
 	ti.StartBoldStyle();
 
-	if (!IsUsingOpenDns()) {
-#if 0 // TODO: remove me, this is covered by a link in Uisng OpenDNS section
-		m_showStatusMsgEdit = true;
-		ti.AddTxt("You're not using OpenDNS service. Learn how to ");
-		ti.AddLink("setup OpenDNS.", LINK_SETUP_OPENDNS);
-		ti.AddPara();
-		ti.AddPara();
-#endif
-	} else if (NoInternetConnectivity()) {
+	if (NoInternetConnectivity()) {
 		m_showStatusMsgEdit = true;
 		ti.AddParasIfNeeded();
 		ti.AddTxt("Looks like there's no internet connectivity.");
@@ -638,14 +611,6 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 			ti.AddTxt(" for dynamic IP in your OpenDNS account. Then ");
 			ti.AddLink("select a network", LINK_SELECT_NETWORK);
 		}
-#if 0 // TODO: remove this
-		else if (NetworkNotSelected()) {
-			m_showStatusMsgEdit = true;
-			ti.AddParasIfNeeded();
-			ti.AddTxt("You need to select one of your networks for IP updates. ");
-			ti.AddLink("Select network.", LINK_SELECT_NETWORK);
-		}
-#endif
 	}
 
 	if ((IpUpdateNotYours == m_ipUpdateResult) || (SE_IP_NOT_YOURS == m_simulatedError)) {
@@ -671,14 +636,6 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddTxt(m_ipFromHttp);
 		ti.AddTxt(_T(") mismatch. "));
 		ti.AddLink(_T("Learn more."), LINK_LEARN_MORE_IP_MISMATCH);
-	}
-
-	if (m_newVersionSetupFilepath != NULL) {
-		m_showStatusMsgEdit = true;
-		ti.AddParasIfNeeded();
-		ti.AddTxt(_T("New version is available. "));
-		ti.AddLink(_T("Install"), LINK_INSTALL_NEW_VERSION);
-		ti.AddTxt(_T(" new version"));
 	}
 
 	ti.EndStyle();
@@ -708,14 +665,33 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 	}
 
 	ti.End();
-	m_minStatusEditDx = minDx;
 }
 
-void CMainFrame::UpdateStatusEdit(bool doLayout)
+void CMainFrame::UpdateUpdateEdit(bool doLayout)
+{
+	BuildUpdateEditRtf(m_rtiUpdate);
+	const TCHAR *s = m_rtiUpdate.text;
+#ifdef UNICODE
+	// Don't know why I have to do this, but SetWindowText() with unicode
+	// doesn't work (rtf codes are not being recognized)
+	const char *sUtf = WstrToUtf8(s);
+	m_editUpdateMsg.SetTextEx((LPCTSTR)sUtf, ST_DEFAULT, CP_UTF8);
+#else
+	m_editUpdateMsg.SetWindowText(s);
+#endif
+	SetRtfLinks(&m_editUpdateMsg, &m_rtiUpdate);
+
+	m_editUpdateMsg.SetSelNone();
+	m_editUpdateMsg.RequestResize();
+	if (doLayout)
+		PostMessage(WMAPP_DO_LAYOUT);
+}
+
+void CMainFrame::UpdateErrorEdit(bool doLayout)
 {
 	GetLastIpUpdateTime();
-	BuildStatusEditRtf(m_rti);
-	const TCHAR *s = m_rti.text;
+	BuildStatusEditRtf(m_rtiError);
+	const TCHAR *s = m_rtiError.text;
 #ifdef UNICODE
 	// Don't know why I have to do this, but SetWindowText() with unicode
 	// doesn't work (rtf codes are not being recognized)
@@ -724,20 +700,7 @@ void CMainFrame::UpdateStatusEdit(bool doLayout)
 #else
 	m_editErrorMsg.SetWindowText(s);
 #endif
-	SetRtfLinks(&m_rti);
-
-#if 0
-	m_editErrorMsg.SetSelAll();
-	PARAFORMAT2 paraFormat;
-	memset(&paraFormat, 0, sizeof(paraFormat));
-	paraFormat.cbSize = sizeof(PARAFORMAT2);
-	paraFormat.dwMask = PFM_LINESPACING;
-	paraFormat.bLineSpacingRule = 5;
-	// spacing is dyLineSpacing/20 lines (i.e. 20 - single spacing, 40 - double spacing etc.)
-	paraFormat.dyLineSpacing = 20;
-	HWND hwndEdit = m_editErrorMsg;
-	::SendMessage(hwndEdit, EM_SETPARAFORMAT, 0, (LPARAM)&paraFormat);
-#endif
+	SetRtfLinks(&m_editErrorMsg, &m_rtiError);
 
 	m_editErrorMsg.SetSelNone();
 	m_editErrorMsg.RequestResize();
@@ -745,18 +708,18 @@ void CMainFrame::UpdateStatusEdit(bool doLayout)
 		PostMessage(WMAPP_DO_LAYOUT);
 }
 
-void CMainFrame::SetRtfLinks(RtfTextInfo *rti)
+void CMainFrame::SetRtfLinks(CRichEditCtrl *edit, RtfTextInfo *rti)
 {
 	RtfLinkInfo *link = rti->firstLink;
 	while (link) {
 		LONG start = link->start;
 		LONG end = link->end;
-		m_editErrorMsg.SetSel(start, end);
+		edit->SetSel(start, end);
 		CHARFORMAT2 cf;
 		cf.cbSize = sizeof(cf);
 		cf.dwMask = CFM_LINK;
 		cf.dwEffects = CFE_LINK;
-		m_editErrorMsg.SetCharFormat(cf, SCF_SELECTION);
+		edit->SetCharFormat(cf, SCF_SELECTION);
 		link = link->next;
 	}
 }
@@ -771,7 +734,9 @@ LRESULT CMainFrame::OnLinkStatusEdit(LPNMHDR pnmh)
 	LONG start = chr.cpMin;
 	LONG end = chr.cpMax;
 	RtfLinkId linkId;
-	BOOL found = m_rti.FindLinkFromRange(start, end, linkId);
+	BOOL found = m_rtiError.FindLinkFromRange(start, end, linkId);
+	if (!found)
+	    found = m_rtiUpdate.FindLinkFromRange(start, end, linkId);
 	assert(found);
 	if (!found)
 		return 0;
@@ -790,10 +755,10 @@ LRESULT CMainFrame::OnLinkStatusEdit(LPNMHDR pnmh)
 			UseDevServers(false);
 		else
 			UseDevServers(true);
-		UpdateStatusEdit();
+		UpdateErrorEdit();
 	} else if (LINK_SEND_IP_UPDATE == linkId) {
 		m_updaterThread->ForceSendIpUpdate();
-		UpdateStatusEdit();
+		UpdateErrorEdit();
 	} else if (LINK_CRASH_ME == linkId) {
 		CrashMe();
 	} else if (LINK_INSTALL_NEW_VERSION == linkId) {
@@ -819,7 +784,7 @@ void CMainFrame::ChangeAccount()
 		return;
 	}
 	StartDownloadNetworks(g_pref_token, SupressAll);
-	UpdateStatusEdit();
+	UpdateErrorEdit();
 }
 
 // Calculate @rectOut for a divider line with text @txt, starting at position @y,
@@ -912,6 +877,11 @@ void CMainFrame::DoLayout()
 		m_editErrorMsg.ShowWindow(SW_SHOW);
 	else
 		m_editErrorMsg.ShowWindow(SW_HIDE);
+
+	if (m_showUpdateMsgEdit)
+		m_editUpdateMsg.ShowWindow(SW_SHOW);
+	else
+		m_editUpdateMsg.ShowWindow(SW_HIDE);
 
 	BOOL sendUpdates = GetPrefValBool(g_pref_send_updates);
 	if (sendUpdates)
@@ -1084,17 +1054,28 @@ void CMainFrame::DoLayout()
 			minDx = dxLine;
 	}
 
-	// position status edit box
-	if (m_showStatusMsgEdit) {
+	if (m_showStatusMsgEdit || m_showUpdateMsgEdit) {
 		y += DIVIDER_LINE_Y_OFF;
 		y += EDIT_BOX_Y_OFF;
+	}
+
+	// position status edit box
+	if (m_showStatusMsgEdit) {
 		m_editErrorMsg.MoveWindow(EDIT_MARGIN_X, y, m_editErrorMsgDx, m_editErrorMsgRequestedDy);
 		y += m_editErrorMsgRequestedDy;
 		y += DIVIDER_LINE_Y_OFF;
 		y += EDIT_BOX_Y_OFF;
-	} else {
-		y += 18;
 	}
+
+	if (m_showUpdateMsgEdit) {
+		m_editUpdateMsg.MoveWindow(EDIT_MARGIN_X, y, m_editUpdateMsgDx, m_editUpdateMsgRequestedDy);
+		y += m_editUpdateMsgRequestedDy;
+		y += DIVIDER_LINE_Y_OFF;
+		y += EDIT_BOX_Y_OFF;
+	}
+
+	if (!m_showUpdateMsgEdit && !m_showStatusMsgEdit)
+		y+= 18;
 
 	int minDy = y + buttonDy + 8;
 
@@ -1167,7 +1148,7 @@ LRESULT CMainFrame::OnLinkAbout(LPNMHDR /*pnmh*/)
 			g_showDebug = false;
 		else
 			g_showDebug = true;
-		UpdateStatusEdit();
+		UpdateErrorEdit();
 		return 0;
 	}
 	LaunchUrl(ABOUT_URL);
@@ -1264,6 +1245,9 @@ void CMainFrame::OnSize(UINT nType, CSize /*size*/)
 	int clientDx = RectDx(clientRect);
 	m_editErrorMsgDx = clientDx - EDIT_MARGIN_X * 2;
 	m_editErrorMsg.RequestResize();
+
+	m_editUpdateMsgDx = m_editErrorMsgDx;
+	m_editUpdateMsg.RequestResize();
 	PostMessage(WMAPP_DO_LAYOUT);
 }
 
@@ -1569,6 +1553,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_editErrorMsg.SetBackgroundColor(colEditBg);
 	m_editErrorMsg.SetDlgCtrlID(IDC_EDIT_STATUS);
 
+	m_editUpdateMsg.Create(m_hWnd, r, _T(""), WS_CHILD | WS_VISIBLE | ES_MULTILINE);
+	m_editUpdateMsg.SetReadOnly(TRUE);
+	m_editUpdateMsg.SetEventMask(ENM_REQUESTRESIZE | ENM_LINK | ENM_SELCHANGE);
+	m_editUpdateMsg.SetBackgroundColor(colEditUpdateBg);
+	m_editUpdateMsg.SetDlgCtrlID(IDC_EDIT_UPDATE);
+
 	if (strempty(g_pref_user_name) ||
 		strempty(g_pref_token))
 	{
@@ -1598,7 +1588,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 
 LRESULT CMainFrame::OnUpdateStatus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	UpdateStatusEdit();
+	UpdateErrorEdit();
 	return 0;
 }
 
@@ -1611,7 +1601,8 @@ void CMainFrame::SwitchToVisibleState()
 	m_notifyIcon.SetDefaultMenuItem(1, TRUE);
 	if (m_notifyIcon.IsHidden())
 		m_notifyIcon.Show();
-	UpdateStatusEdit();
+	UpdateUpdateEdit();
+	UpdateErrorEdit();
 }
 
 void CMainFrame::SwitchToHiddenState()

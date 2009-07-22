@@ -53,6 +53,8 @@ public:
 	enum RtfCol {
 		ColFirst = 1
 		,ColRed = ColFirst
+		,ColBlack
+		,ColWhite
 		,ColAfterLast
 	};
 
@@ -152,6 +154,15 @@ public:
 		assert(m_styleNesting > 0);
 		text += "}";
 		--m_styleNesting;
+	}
+
+	void StartCentered() {
+		++m_styleNesting;
+		text += "{\\qr ";
+	}
+
+	void EndCentered() {
+		EndStyle();
 	}
 
 	void AddTxt(const char *s) {
