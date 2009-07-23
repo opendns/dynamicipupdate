@@ -137,6 +137,11 @@ static const int Y_SPACING = 4;
 	static const int EDIT_MARGIN_X = LEFT_MARGIN + 4;
 	static const TCHAR *EDIT_FONT_NAME = _T("Arial");
 	static const int EDIT_FONT_SIZE = 8;
+
+	static const int UPDATE_BITMAP_MARGIN_X_LEFT = 4;
+	static const int UPDATE_BITMAP_MARGIN_X_RIGHT = 4;
+	static const int UPDATE_BITMAP_DX = 15;
+	static const int UPDATE_BITMAP_DX_TOTAL = UPDATE_BITMAP_MARGIN_X_LEFT + UPDATE_BITMAP_MARGIN_X_RIGHT + UPDATE_BITMAP_DX; 
 #endif
 
 class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
@@ -172,6 +177,8 @@ public:
 
 	HICON			m_hIconOk;
 	HICON			m_hIconErr;
+
+	HBITMAP			m_updateBitmap;
 
 	// info related to edit control for error message(s)
 	RtfTextInfo		m_rtiError;

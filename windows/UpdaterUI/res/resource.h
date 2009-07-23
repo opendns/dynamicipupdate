@@ -6,6 +6,7 @@
 #define IDR_MAINFRAME_OLD               129
 #define IDR_SYSTRAY_OK                  130
 #define IDR_SYSTRAY_ERR                 131
+#define IDR_UPDATE_BMP                  132
 
 #define IDR_MENU1                       1500
 #define IDR_MENU2                       1501

@@ -93,6 +93,7 @@ CMainFrame::~CMainFrame()
 	free(m_editFontName);
 	free(m_newVersionSetupFilepath);
 	DeleteObject(m_winBgColorBrush);
+	DeleteObject(m_updateBitmap);
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
@@ -410,7 +411,7 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			m_editUpdateMsg.GetWindowRect(&editRect);
 			editRect.top -= 6;
 			editRect.bottom += 6;
-			editRect.left -= 4;
+			editRect.left -= (4 + UPDATE_BITMAP_DX_TOTAL);
 			editRect.right += 4;
 			ScreenToClient(&editRect);
 			dc.FillSolidRect(&editRect, colEditUpdateFrame);
@@ -420,7 +421,25 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 			editRect.left += 1;
 			editRect.right -= 1;
 			dc.FillSolidRect(&editRect, colEditUpdateBg);
+
+			// draw the 'update available' bitmap
+			{
+				HDC			bitmapDC;
+				BITMAP		bm;
+				HBITMAP 	hOldBitmap;
+				GetObject(m_updateBitmap, sizeof(BITMAP), &bm);
+				int			bmpX = editRect.left + 2 + UPDATE_BITMAP_MARGIN_X_LEFT;
+				int			bmpY = editRect.bottom - bm.bmHeight - 3;
+				bitmapDC = CreateCompatibleDC(dc);
+				hOldBitmap = (HBITMAP)SelectObject(bitmapDC, m_updateBitmap);
+
+				::BitBlt(dc, bmpX, bmpY, bm.bmWidth, bm.bmHeight, bitmapDC, 0, 0, SRCCOPY);
+
+				SelectObject(bitmapDC, hOldBitmap);
+				DeleteObject(bitmapDC);
+			}
 		}
+
 
 #if 0
 		// draw top bar text
@@ -1069,7 +1088,7 @@ void CMainFrame::DoLayout()
 	}
 
 	if (m_showUpdateMsgEdit) {
-		m_editUpdateMsg.MoveWindow(EDIT_MARGIN_X, y, m_editUpdateMsgDx, m_editUpdateMsgRequestedDy);
+		m_editUpdateMsg.MoveWindow(EDIT_MARGIN_X + UPDATE_BITMAP_DX_TOTAL, y, m_editUpdateMsgDx, m_editUpdateMsgRequestedDy);
 		y += m_editUpdateMsgRequestedDy;
 		y += DIVIDER_LINE_Y_OFF;
 		y += EDIT_BOX_Y_OFF;
@@ -1252,7 +1271,7 @@ void CMainFrame::OnSize(UINT nType, CSize /*size*/)
 	m_editErrorMsgDx = clientDx - EDIT_MARGIN_X * 2;
 	m_editErrorMsg.RequestResize();
 
-	m_editUpdateMsgDx = m_editErrorMsgDx;
+	m_editUpdateMsgDx = m_editErrorMsgDx - UPDATE_BITMAP_DX_TOTAL;
 	m_editUpdateMsg.RequestResize();
 	PostMessage(WMAPP_DO_LAYOUT);
 }
@@ -1572,6 +1591,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 		dlg.DoModal();
 	}
 
+	HINSTANCE hinst = ATL::_AtlBaseModule.GetResourceInstance();
+	m_updateBitmap = (HBITMAP)::LoadImage(hinst,  MAKEINTRESOURCE(IDR_UPDATE_BMP), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE);
 	m_hIconOk = CTrayNotifyIcon::LoadIcon(IDR_SYSTRAY_OK);
 	m_hIconErr = CTrayNotifyIcon::LoadIcon(IDR_SYSTRAY_ERR);
 

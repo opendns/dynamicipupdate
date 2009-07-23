@@ -58,6 +58,8 @@ IDR_MAINFRAME           ICON                    "res\\OpenDNSUpdater.ico"
 IDR_SYSTRAY_OK			ICON					"res\\systray-ok.ico"
 IDR_SYSTRAY_ERR			ICON					"res\\systray-err.ico"
 
+IDR_UPDATE_BMP			BITMAP					"res\\windows_update_icon.bmp"
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog

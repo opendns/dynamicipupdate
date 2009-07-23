@@ -321,11 +321,23 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\res\res\systray-err.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\res\systray-err.ico"
 				>
 			</File>
 			<File
+				RelativePath=".\res\res\systray-ok.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\res\systray-ok.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\windows_update_icon.bmp"
 				>
 			</File>
 		</Filter>
