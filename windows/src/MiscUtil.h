@@ -20,7 +20,7 @@
 
 extern UINT g_errorNotifMsg;
 
-#define PROGRAM_VERSION  _T("2.0b9")
+#define PROGRAM_VERSION  _T("2.0b10")
 
 // PROGRAM_VERSION_SIMULATE_UPGRADE must be lower than PROGRAM_VERSION
 #define PROGRAM_VERSION_SIMULATE_UPGRADE _T("0.8")
