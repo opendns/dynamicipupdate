@@ -25,6 +25,7 @@ extern CAppModule _Module;
 
 #include <Winhttp.h>
 #include <shlwapi.h>
+#include <iphlpapi.h>
 
 #if 0
 // I wish I knew why I have to define SECURITY_WIN32
@@ -40,4 +41,7 @@ extern CAppModule _Module;
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "winhttp.lib")
+#pragma comment(lib, "mpr.lib")
+#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "ws2_32.lib")
 

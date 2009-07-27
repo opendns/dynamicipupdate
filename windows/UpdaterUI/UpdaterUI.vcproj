@@ -321,19 +321,19 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\res\res\systray-err.ico"
-				>
-			</File>
-			<File
 				RelativePath=".\res\systray-err.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\res\systray-ok.ico"
+				RelativePath=".\res\res\systray-err.ico"
 				>
 			</File>
 			<File
 				RelativePath=".\res\systray-ok.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\res\systray-ok.ico"
 				>
 			</File>
 			<File
@@ -706,6 +706,10 @@
 			</File>
 			<File
 				RelativePath="..\src\StrUtil.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\TypoExceptions.cpp"
 				>
 			</File>
 			<File
