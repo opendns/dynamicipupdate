@@ -1290,7 +1290,7 @@ void CMainFrame::StartDownloadNetworks(char *token, int supressFlags)
 	//HttpPostAsync(API_HOST, API_URL, paramsTxt, API_IS_HTTPS, m_hWnd, WM_HTTP_DOWNLOAD_NETOWRKS);
 	const char *apiHost = GetApiHost();
 	bool apiHostIsHttps = IsApiHostHttps();
-	HttpResult *httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);		
+	HttpResult *httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
 	free((void*)paramsTxt);
 	OnDownloadNetworks(0, (WPARAM)httpRes, (LPARAM)supressFlags);
 }

@@ -14,7 +14,9 @@ typedef struct StringTimeNode {
 	time_t t;
 } StringTimeNode;
 
-StringTimeNode *AllocStringTimeNode(char *s)
+static StringTimeNode *g_allTypoExceptions;
+
+static StringTimeNode *AllocStringTimeNode(char *s, time_t t = 0)
 {
 	if (!s)
 		return NULL;
@@ -26,7 +28,9 @@ StringTimeNode *AllocStringTimeNode(char *s)
 		free(node);
 		return NULL;
 	}
-	time(&node->t);
+	if (0 == t)
+		time(&t);
+	node->t = t;
 	return node;
 }
 
@@ -42,11 +46,10 @@ static void InsertStringTimeNode(StringTimeNode **head, StringTimeNode *node)
 	}
 }
 
-static void AllocAndInsertStringTimeNode(StringTimeNode **head, char *s)
+static void AllocAndInsertStringTimeNode(StringTimeNode **head, char *s, time_t t=0)
 {
-	StringTimeNode *node = AllocStringTimeNode(s);
+	StringTimeNode *node = AllocStringTimeNode(s, t);
 	InsertStringTimeNode(head, node);
-	free(s);
 }
 
 static void AddToListIfServer(StringTimeNode **head, NETRESOURCE *nr)
@@ -62,7 +65,8 @@ static void AddToListIfServer(StringTimeNode **head, NETRESOURCE *nr)
 		return;
 
 	char *name2 = TStrToStr(name);
-	AllocAndInsertStringTimeNode(head, name2); // name2 freed inside
+	AllocAndInsertStringTimeNode(head, name2);
+	free(name2);
 }
 
 static BOOL GetNetworkServersEnum(StringTimeNode** head, NETRESOURCE *nr)
@@ -71,14 +75,11 @@ static BOOL GetNetworkServersEnum(StringTimeNode** head, NETRESOURCE *nr)
 	DWORD cbBuffer = 16384;
 	NETRESOURCE *nrLocal;
 	DWORD dwResultEnum;
-	DWORD cEntries = 0;
+	DWORD cEntries = (DWORD)-1;
 	DWORD i;
 
-	DWORD dwResult = WNetOpenEnum(RESOURCE_GLOBALNET,
-									RESOURCETYPE_ANY,
-									RESOURCEUSAGE_CONTAINER,
-									nr,
-									&hEnum);
+	DWORD dwResult = WNetOpenEnum(RESOURCE_GLOBALNET, RESOURCETYPE_ANY,
+									RESOURCEUSAGE_CONTAINER, nr, &hEnum);
 
 	if (dwResult != NO_ERROR)
 		return FALSE;
@@ -166,7 +167,8 @@ static void GetDNSPrefixes(StringTimeNode **head)
 			WCHAR *dnsSuffix = pCurrAddresses->DnsSuffix;
 			if (dnsSuffix && *dnsSuffix) {
 				char *dnsSuffix2 = WstrToUtf8(dnsSuffix);
-				AllocAndInsertStringTimeNode(head, dnsSuffix2); // dnsSuffix2 freed inside
+				AllocAndInsertStringTimeNode(head, dnsSuffix2);
+				free(dnsSuffix2);
 			}
 			pCurrAddresses = pCurrAddresses->Next;
 		}
@@ -178,14 +180,124 @@ static void GetDNSPrefixes(StringTimeNode **head)
 // result must be freed by FreeStringTimeList()
 static StringTimeNode* GetTypoExceptions()
 {
-	StringTimeNode *list = NULL;
-	GetDNSPrefixes(&list);
-	GetNetworkServersEnum(&list, NULL);
-	return list;
+	StringTimeNode *head = NULL;
+	GetDNSPrefixes(&head);
+	GetNetworkServersEnum(&head, NULL);
+	return head;
+}
+
+static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
+{
+	if (!added)
+		return FALSE;
+
+	return TRUE;
+}
+
+static BOOL SubmitExpiredTypoExceptions(StringTimeNode *expired)
+{
+	if (!expired)
+		return FALSE;
+
+	return TRUE;
+}
+
+static BOOL StringTimeNodeExists(StringTimeNode *head, char *s)
+{
+	StringTimeNode *curr = head;
+	while (curr) {
+		if (strieq(curr->s, s))
+			return TRUE;
+		curr = curr->next;
+	}
+	return FALSE;
+}
+
+// Note: this is slow (O(n*m) where n=len(all), m=len(current)) but it probably
+// doesn't matter. Could be faster if we sorted names or used hash table
+static StringTimeNode *StringTimeNodeListGetAdded(StringTimeNode *all, StringTimeNode *current)
+{
+	StringTimeNode *added = NULL;
+	StringTimeNode *curr = current;
+	while (curr) {
+		if (!StringTimeNodeExists(all, curr->s)) {
+			AllocAndInsertStringTimeNode(&added, curr->s);
+		}
+		curr = curr->next;
+	}
+	return added;
+}
+
+static BOOL StringTimeNodeIsExpired(StringTimeNode *n)
+{
+	time_t curr;
+	time(&curr);
+	const time_t TWO_WEEKS_IN_SECONDS = 60*60*24*14;
+	time_t expirationTime = n->t + TWO_WEEKS_IN_SECONDS;
+	if (curr > expirationTime)
+		return TRUE;
+	return FALSE;
+}
+
+static StringTimeNode *StringTimeNodeListGetExpired(StringTimeNode *head)
+{
+	StringTimeNode *expiredList = NULL;
+	StringTimeNode *curr = head;
+	while (curr) {
+		if (StringTimeNodeIsExpired(curr)) {
+			AllocAndInsertStringTimeNode(&expiredList, curr->s, curr->t);
+		}
+		curr = head->next;
+	}
+	return expiredList;
+}
+
+static void StringTimeNodeListAdd(StringTimeNode **head, StringTimeNode *toAdd)
+{
+	StringTimeNode *curr = toAdd;
+	while (curr) {
+		AllocAndInsertStringTimeNode(head, curr->s, curr->t);
+		curr = curr->next;
+	}
+}
+
+static void StringTimeNodeListRemoveExpired(StringTimeNode **head)
+{
+	// TODO: if I was smarter, I would do in-place removal but I'm not so I'll
+	// do something more expensive but simpler: rebuild a list without expired
+	// nodes. It should happen very rarely.
+	StringTimeNode *newHead = NULL;
+	StringTimeNode *curr = *head;
+	while (curr) {
+		if (!StringTimeNodeIsExpired(curr)) {
+			AllocAndInsertStringTimeNode(&newHead, curr->s, curr->t);
+		}
+		curr = curr->next;
+	}
+	FreeStringTimeList(*head);
+	*head = newHead;
 }
 
 DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/) 
 {
+	StringTimeNode *currentList = GetTypoExceptions();
+	StringTimeNode *added = StringTimeNodeListGetAdded(g_allTypoExceptions, currentList);
+	StringTimeNode *expired = StringTimeNodeListGetExpired(g_allTypoExceptions);
+
+	BOOL addedOk = SubmitAddedTypoExceptions(added);
+	BOOL expiredOk = SubmitExpiredTypoExceptions(expired);
+
+	if (addedOk) {
+		StringTimeNodeListAdd(&g_allTypoExceptions, added);
+	}
+
+	if (expiredOk) {
+		StringTimeNodeListRemoveExpired(&g_allTypoExceptions);
+	}
+
+	FreeStringTimeList(currentList);
+	FreeStringTimeList(added);
+	FreeStringTimeList(expired);
 	return 0;
 }
 
