@@ -15,6 +15,8 @@ typedef struct StringTimeNode {
 
 StringTimeNode *AllocStringTimeNode(char *s)
 {
+	if (!s)
+		return NULL;
 	StringTimeNode *node = (StringTimeNode*)calloc(1, sizeof(StringTimeNode));
 	if (!node)
 		return NULL;
@@ -27,7 +29,7 @@ StringTimeNode *AllocStringTimeNode(char *s)
 	return node;
 }
 
-void InsertStringTimeNode(StringTimeNode **head, StringTimeNode *node)
+static void InsertStringTimeNode(StringTimeNode **head, StringTimeNode *node)
 {
 	if (!node)
 		return;
@@ -39,7 +41,14 @@ void InsertStringTimeNode(StringTimeNode **head, StringTimeNode *node)
 	}
 }
 
-void AddToListIfServer(StringTimeNode **head, NETRESOURCE *nr)
+static void AllocAndInsertStringTimeNode(StringTimeNode **head, char *s)
+{
+	StringTimeNode *node = AllocStringTimeNode(s);
+	InsertStringTimeNode(head, node);
+	free(s);
+}
+
+static void AddToListIfServer(StringTimeNode **head, NETRESOURCE *nr)
 {
 	if (RESOURCEDISPLAYTYPE_SERVER != nr->dwDisplayType)
 		return;
@@ -52,14 +61,10 @@ void AddToListIfServer(StringTimeNode **head, NETRESOURCE *nr)
 		return;
 
 	char *name2 = TStrToStr(name);
-	if (!name2)
-		return;
-	StringTimeNode *node = AllocStringTimeNode(name2);
-	InsertStringTimeNode(head, node);
-	free(name2);
+	AllocAndInsertStringTimeNode(head, name2); // name2 freed inside
 }
 
-BOOL GetNetworkServersEnum(StringTimeNode** head, NETRESOURCE *nr)
+static BOOL GetNetworkServersEnum(StringTimeNode** head, NETRESOURCE *nr)
 {
 	HANDLE hEnum;
 	DWORD cbBuffer = 16384;
@@ -168,11 +173,7 @@ void GetDNSPrefixes(StringTimeNode **head)
 			WCHAR *dnsSuffix = pCurrAddresses->DnsSuffix;
 			if (dnsSuffix && *dnsSuffix) {
 				char *dnsSuffix2 = WstrToUtf8(dnsSuffix);
-				if (dnsSuffix2) {
-					StringTimeNode *node = AllocStringTimeNode(dnsSuffix2);
-					InsertStringTimeNode(head, node);
-				}
-				free(dnsSuffix2);
+				AllocAndInsertStringTimeNode(head, dnsSuffix2); // dnsSuffix2 freed inside
 			}
 			pCurrAddresses = pCurrAddresses->Next;
 		}
@@ -181,12 +182,12 @@ void GetDNSPrefixes(StringTimeNode **head)
 	return;
 }
 
-void ListServersAndDnsSuffixes()
+// result must be freed by FreeStringTimeList()
+StringTimeNode* GetTypoExceptions()
 {
-	NETRESOURCE* nr = NULL;
 	StringTimeNode *list = NULL;
 	GetDNSPrefixes(&list);
-	GetNetworkServersEnum(&list, nr);
-	FreeStringTimeList(list);
+	GetNetworkServersEnum(&list, NULL);
+	return list;
 }
 
