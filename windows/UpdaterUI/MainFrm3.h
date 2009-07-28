@@ -239,6 +239,7 @@ public:
 		MSG_WM_GETMINMAXINFO(OnGetMinMaxInfo)
 		MSG_WM_CTLCOLORSTATIC(OnCtlColorStatic)
 		MSG_WM_CLOSE(OnClose)
+		MSG_WM_TIMER(OnTimer)
 		MESSAGE_HANDLER_EX(g_errorNotifMsg, OnErrorNotif)
 		MESSAGE_HANDLER_EX(WMAPP_DO_LAYOUT, OnLayout)
 		MESSAGE_HANDLER_EX(WMAPP_UPDATE_STATUS, OnUpdateStatus)
@@ -278,6 +279,8 @@ public:
 	virtual void OnIpCheckResult(IP4_ADDRESS myIp);
 	virtual void OnIpUpdateResult(char *ipUpdateRes);
 	virtual void OnNewVersionAvailable(TCHAR *setupFilePath);
+
+	void OnTimer(UINT_PTR nIDEvent);
 
 	LRESULT OnNewVersion(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
 	LRESULT OnSwitchToVisible(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);

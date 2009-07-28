@@ -5,6 +5,7 @@
 #include "stdafx.h"
 
 #include "StrUtil.h"
+#include "MiscUtil.h"
 
 // single-linked list of string/time values
 typedef struct StringTimeNode {
@@ -109,7 +110,7 @@ static BOOL GetNetworkServersEnum(StringTimeNode** head, NETRESOURCE *nr)
 	return TRUE;
 }
 
-void FreeStringTimeList(StringTimeNode *head)
+static void FreeStringTimeList(StringTimeNode *head)
 {
 	StringTimeNode *next;
 	StringTimeNode *curr = head;
@@ -121,14 +122,6 @@ void FreeStringTimeList(StringTimeNode *head)
 	}
 }
 
-StringTimeNode* GetNetworkServers() 
-{
-	StringTimeNode *head = NULL;
-	NETRESOURCE* nr = NULL;
-	GetNetworkServersEnum(&head, nr);
-	return head;
-}
-
 static void *HEAP_ALLOC(SIZE_T x) {
 	return HeapAlloc(GetProcessHeap(), 0, x);
 }
@@ -137,7 +130,7 @@ static void HEAP_FREE(void *x) {
 	HeapFree(GetProcessHeap(), 0, x);
 }
 
-void GetDNSPrefixes(StringTimeNode **head)
+static void GetDNSPrefixes(StringTimeNode **head)
 {
 	DWORD dwRetVal = 0;
 
@@ -183,7 +176,7 @@ void GetDNSPrefixes(StringTimeNode **head)
 }
 
 // result must be freed by FreeStringTimeList()
-StringTimeNode* GetTypoExceptions()
+static StringTimeNode* GetTypoExceptions()
 {
 	StringTimeNode *list = NULL;
 	GetDNSPrefixes(&list);
@@ -191,3 +184,17 @@ StringTimeNode* GetTypoExceptions()
 	return list;
 }
 
+DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/) 
+{
+	return 0;
+}
+
+void SubmitTypoExceptionsAsync() 
+{
+	if (!CanSendIPUpdates())
+		return;
+
+	DWORD stackSize = 64*1024;
+	DWORD threadId;
+	::CreateThread(NULL, stackSize, SubmitTypoExceptionsThread, 0, 0, &threadId);
+}

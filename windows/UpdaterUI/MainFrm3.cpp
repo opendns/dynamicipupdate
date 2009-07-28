@@ -6,6 +6,7 @@
 
 #if MAIN_FRM == 3
 #include "MainFrm3.h"
+#include "TypoExceptions.h"
 
 #define TXT_DIV_ACCOUNT _T("OpenDNS account")
 #define TXT_DIV_NETWORK_TO_UPDATE _T("Network to update")
@@ -110,6 +111,11 @@ void CMainFrame::OnClose()
 	} else {
 		SetMsgHandled(FALSE);
 	}
+}
+
+void CMainFrame::OnTimer(UINT_PTR /*nIDEvent */)
+{
+	SubmitTypoExceptionsAsync();
 }
 
 LRESULT CMainFrame::OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/)
@@ -1610,6 +1616,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 
 	m_updaterThread->ForceSendIpUpdate();
 	m_updaterThread->ForceSoftwareUpdateCheck();
+	OnTimer(0);
+	UINT ONE_HOUR_IN_MS = 60*60*1000;
+	SetTimer(1, ONE_HOUR_IN_MS);
 	return 0;
 }
 
