@@ -218,7 +218,7 @@ static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 		return FALSE;
 
 	char *toAdd = GetNamesAsCommaSeparatedString(added);
-	CString params = ApiParamsNetworkTypoExceptionsSet(g_pref_token, toAdd);
+	CString params = ApiParamsNetworkTypoExceptionsAdd(g_pref_token, toAdd);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
 	bool apiHostIsHttps = IsApiHostHttps();

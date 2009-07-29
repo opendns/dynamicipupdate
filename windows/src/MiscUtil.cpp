@@ -288,13 +288,13 @@ CString ApiParamsNetworkDynamicSet(const char *token, const char *networkId, boo
 	return url;
 }
 
-CString ApiParamsNetworkTypoExceptionsSet(const char *token, const char *typoExceptionsList)
+CString ApiParamsNetworkTypoExceptionsAdd(const char *token, const char *typoExceptionsList)
 {
 	char *tokenEncoded = StrUrlEncode(token);
 	char *typoExceptionListEncoded = StrUrlEncode(typoExceptionsList);
 	CString url;
 	AddUrlParam(url, "api_key", API_KEY);
-	AddUrlParam(url, "method", "network_typo_exception_set");
+	AddUrlParam(url, "method", "network_typo_exception_add");
 	AddUrlParam(url, "token", tokenEncoded);
 	AddUrlParam(url, "typo_exception", typoExceptionListEncoded);
 	free(tokenEncoded);
