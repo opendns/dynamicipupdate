@@ -139,6 +139,7 @@ bool IsLeftAltPressed();
 bool IsLeftCtrlPressed();
 bool IsLeftAltAndCtrlPressed();
 TCHAR *FormatUpdateTime(int minutes);
+void DeleteOldInstallers();
 
 static inline int RectDx(const RECT r)
 {

@@ -745,3 +745,35 @@ TCHAR *FormatUpdateTime(int minutes)
 	return tstrdup(buf);
 }
 
+// Delete installer executables we downloaded for auto-updates.
+// It's called only when there are no updates available on the server, so
+// it's safe to do it by deleting all *.exe files in data directory
+void DeleteOldInstallers()
+{
+	WIN32_FIND_DATA fileData;
+	BOOL ok;
+	HANDLE h;
+
+	CString searchPattern = AppDataDir();
+	searchPattern += PATH_SEP_STR _T("*.exe");
+	const TCHAR *s = searchPattern;
+	h = FindFirstFile(s, &fileData);
+	if (INVALID_HANDLE_VALUE == h)
+		return;
+
+	for (;;) {
+		CString filePath = AppDataDir();
+		filePath += PATH_SEP_STR;
+		filePath += fileData.cFileName;
+		const TCHAR *filePathStr = filePath;
+		ok = DeleteFile(filePathStr);
+		if (!ok)
+			SeeLastError();
+		ok = FindNextFile(h, &fileData);
+		if (!ok)
+			break;
+	}
+
+	FindClose(h);
+}
+

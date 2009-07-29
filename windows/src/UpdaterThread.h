@@ -177,8 +177,10 @@ public:
 		if (simulateUpgrade)
 			version = PROGRAM_VERSION_SIMULATE_UPGRADE;
 		char *url = GetUpdateUrl(version, UpdateCheckVersionCheck);
-		if (!url)
+		if (!url) {
+			DeleteOldInstallers();
 			return;
+		}
 
 		TCHAR *filePath = DownloadUpdateIfNotDownloaded(url);
 		free(url);
