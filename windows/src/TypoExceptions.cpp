@@ -6,6 +6,11 @@
 
 #include "StrUtil.h"
 #include "MiscUtil.h"
+#include "Http.h"
+#include "JsonParser.h"
+#include "Prefs.h"
+#include "JsonApiResponses.h"
+#include "SimpleLog.h"
 
 // single-linked list of string/time values
 typedef struct StringTimeNode {
@@ -186,20 +191,104 @@ static StringTimeNode* GetTypoExceptions()
 	return head;
 }
 
+static char *GetNamesAsCommaSeparatedString(StringTimeNode *head)
+{
+	CString s;
+	StringTimeNode *curr = head;
+	while (curr) {
+		s += curr->s;
+		if (curr->next)
+			s += ",";
+		curr = curr->next;
+	}
+	char *res = TStrToStr(s);
+	return res;
+}
+
 static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 {
+	HttpResult *httpRes = NULL;
+	JsonEl *json = NULL;
+	char *jsonTxt = NULL;
+	BOOL res = TRUE;
+
 	if (!added)
 		return FALSE;
 
-	return TRUE;
+	char *toAdd = GetNamesAsCommaSeparatedString(added);
+	CString params = ApiParamsNetworkTypoExceptionsSet(g_pref_token, toAdd);
+	const char *paramsTxt = TStrToStr(params);
+	const char *apiHost = GetApiHost();
+	bool apiHostIsHttps = IsApiHostHttps();
+	httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
+	free((void*)paramsTxt);
+	if (!httpRes || !httpRes->IsValid())
+		goto Error;
+
+	DWORD dataSize;
+	jsonTxt = (char *)httpRes->data.getData(&dataSize);
+	if (!jsonTxt)
+		goto Error;
+
+	// we log the server's json response if there was an error, but ignore
+	// the error otherwise
+	json = ParseJsonToDoc(jsonTxt);
+	if (!json)
+		goto Exit;
+	WebApiStatus status = GetApiStatus(json);
+	if (WebApiStatusSuccess != status)
+		slog(jsonTxt);
+
+Exit:
+	JsonElFree(json);
+	delete httpRes;
+	return res;
+Error:
+	res = FALSE;
+	goto Exit;
 }
 
 static BOOL SubmitExpiredTypoExceptions(StringTimeNode *expired)
 {
+	HttpResult *httpRes = NULL;
+	JsonEl *json = NULL;
+	char *jsonTxt = NULL;
+	BOOL res = TRUE;
+
 	if (!expired)
 		return FALSE;
 
-	return TRUE;
+	char *toDelete = GetNamesAsCommaSeparatedString(expired);
+	CString params = ApiParamsNetworkTypoExceptionsDelete(g_pref_token, toDelete);
+	const char *paramsTxt = TStrToStr(params);
+	const char *apiHost = GetApiHost();
+	bool apiHostIsHttps = IsApiHostHttps();
+	httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
+	free((void*)paramsTxt);
+	if (!httpRes || !httpRes->IsValid())
+		goto Error;
+
+	DWORD dataSize;
+	jsonTxt = (char *)httpRes->data.getData(&dataSize);
+	if (!jsonTxt)
+		goto Error;
+
+	// we log the server's json response if there was an error, but ignore
+	// the error otherwise
+	json = ParseJsonToDoc(jsonTxt);
+	if (!json)
+		goto Exit;
+	WebApiStatus status = GetApiStatus(json);
+	if (WebApiStatusSuccess != status)
+		slog(jsonTxt);
+
+Exit:
+	JsonElFree(json);
+	delete httpRes;
+	return res;
+Error:
+	res = FALSE;
+	goto Exit;
 }
 
 static BOOL StringTimeNodeExists(StringTimeNode *head, char *s)
