@@ -6,6 +6,7 @@
 #define TYPO_EXCEPTIONS_H__
 
 void SubmitTypoExceptionsAsync();
+int TypoExceptionsCount();
 
 #endif
 

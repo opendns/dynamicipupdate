@@ -9,6 +9,7 @@
 
 #include "Prefs.h"
 #include "StrUtil.h"
+#include "TypoExceptions.h"
 
 UINT g_errorNotifMsg = 0;
 
@@ -179,10 +180,11 @@ static void AddUrlParam(CString& s, const char *name, const char *val)
 	s += val;
 }
 
-
 static CString CommonUrlPart(CString url)
 {
 	CString s = url;
+	char num[32];
+
 	assert(g_pref_unique_id);
 	s += "&i=";
 	s += g_pref_unique_id;
@@ -207,13 +209,19 @@ static CString CommonUrlPart(CString url)
 	osver.dwOSVersionInfoSize = sizeof(osver);
 	if (GetVersionEx(&osver)) {
 		s += "&osver=";
-		char num[32];
 		itoa(osver.dwMajorVersion, num, 10);
 		s += num;
 		s += ".";
 		itoa(osver.dwMinorVersion, num, 10);
 		s += num;
 	}
+
+	// typo exceptions count
+	s += "&tec=";
+	int count = TypoExceptionsCount();
+	itoa(count, num, 10);
+	s += num;
+
 	return s;
 }
 

@@ -19,9 +19,11 @@ typedef struct StringTimeNode {
 	time_t t;
 } StringTimeNode;
 
+// list of all typo exception names seen since starting the program
 static StringTimeNode *g_allTypoExceptions;
+static int g_allTypoExceptionsCount;
 
-static StringTimeNode *AllocStringTimeNode(char *s, time_t t = 0)
+static StringTimeNode *StringTimeNodeAlloc(char *s, time_t t = 0)
 {
 	if (!s)
 		return NULL;
@@ -39,7 +41,7 @@ static StringTimeNode *AllocStringTimeNode(char *s, time_t t = 0)
 	return node;
 }
 
-static void InsertStringTimeNode(StringTimeNode **head, StringTimeNode *node)
+static void StringTimeNodeInsert(StringTimeNode **head, StringTimeNode *node)
 {
 	if (!node)
 		return;
@@ -51,10 +53,10 @@ static void InsertStringTimeNode(StringTimeNode **head, StringTimeNode *node)
 	}
 }
 
-static void AllocAndInsertStringTimeNode(StringTimeNode **head, char *s, time_t t=0)
+static void StringTimeNodeAllocAndInsert(StringTimeNode **head, char *s, time_t t=0)
 {
-	StringTimeNode *node = AllocStringTimeNode(s, t);
-	InsertStringTimeNode(head, node);
+	StringTimeNode *node = StringTimeNodeAlloc(s, t);
+	StringTimeNodeInsert(head, node);
 }
 
 static void AddToListIfServer(StringTimeNode **head, NETRESOURCE *nr)
@@ -70,7 +72,7 @@ static void AddToListIfServer(StringTimeNode **head, NETRESOURCE *nr)
 		return;
 
 	char *name2 = TStrToStr(name);
-	AllocAndInsertStringTimeNode(head, name2);
+	StringTimeNodeAllocAndInsert(head, name2);
 	free(name2);
 }
 
@@ -172,7 +174,7 @@ static void GetDNSPrefixes(StringTimeNode **head)
 			WCHAR *dnsSuffix = pCurrAddresses->DnsSuffix;
 			if (dnsSuffix && *dnsSuffix) {
 				char *dnsSuffix2 = WstrToUtf8(dnsSuffix);
-				AllocAndInsertStringTimeNode(head, dnsSuffix2);
+				StringTimeNodeAllocAndInsert(head, dnsSuffix2);
 				free(dnsSuffix2);
 			}
 			pCurrAddresses = pCurrAddresses->Next;
@@ -310,7 +312,7 @@ static StringTimeNode *StringTimeNodeListGetAdded(StringTimeNode *all, StringTim
 	StringTimeNode *curr = current;
 	while (curr) {
 		if (!StringTimeNodeExists(all, curr->s)) {
-			AllocAndInsertStringTimeNode(&added, curr->s);
+			StringTimeNodeAllocAndInsert(&added, curr->s);
 		}
 		curr = curr->next;
 	}
@@ -334,7 +336,7 @@ static StringTimeNode *StringTimeNodeListGetExpired(StringTimeNode *head)
 	StringTimeNode *curr = head;
 	while (curr) {
 		if (StringTimeNodeIsExpired(curr)) {
-			AllocAndInsertStringTimeNode(&expiredList, curr->s, curr->t);
+			StringTimeNodeAllocAndInsert(&expiredList, curr->s, curr->t);
 		}
 		curr = head->next;
 	}
@@ -345,7 +347,7 @@ static void StringTimeNodeListAdd(StringTimeNode **head, StringTimeNode *toAdd)
 {
 	StringTimeNode *curr = toAdd;
 	while (curr) {
-		AllocAndInsertStringTimeNode(head, curr->s, curr->t);
+		StringTimeNodeAllocAndInsert(head, curr->s, curr->t);
 		curr = curr->next;
 	}
 }
@@ -359,12 +361,22 @@ static void StringTimeNodeListRemoveExpired(StringTimeNode **head)
 	StringTimeNode *curr = *head;
 	while (curr) {
 		if (!StringTimeNodeIsExpired(curr)) {
-			AllocAndInsertStringTimeNode(&newHead, curr->s, curr->t);
+			StringTimeNodeAllocAndInsert(&newHead, curr->s, curr->t);
 		}
 		curr = curr->next;
 	}
 	FreeStringTimeList(*head);
 	*head = newHead;
+}
+
+static void UpdateTypoExceptionsCount() {
+	StringTimeNode *curr = g_allTypoExceptions;
+	int count = 0;
+	while (curr) {
+		++count;
+		curr = curr->next;
+	}
+	g_allTypoExceptionsCount = count;
 }
 
 DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/) 
@@ -384,6 +396,8 @@ DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/)
 		StringTimeNodeListRemoveExpired(&g_allTypoExceptions);
 	}
 
+	UpdateTypoExceptionsCount();
+
 	FreeStringTimeList(currentList);
 	FreeStringTimeList(added);
 	FreeStringTimeList(expired);
@@ -399,3 +413,11 @@ void SubmitTypoExceptionsAsync()
 	DWORD threadId;
 	::CreateThread(NULL, stackSize, SubmitTypoExceptionsThread, 0, 0, &threadId);
 }
+
+// Note: for thread safety this cannot be recalculated from g_allTypoExceptions
+// since g_allTypoExceptions might be being modified in SubmitTypoExceptionsThread()
+int TypoExceptionsCount()
+{
+	return g_allTypoExceptionsCount;
+}
+
