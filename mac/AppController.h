@@ -82,9 +82,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
     IpUpdateResult                      ipUpdateResult_;
     NSString *                          currentIpAddressFromDns_;
     NSString *                          ipAddressFromHttp_;
-    BOOL                                exitIpChangeThread_;
     BOOL                                usingOpenDns_;
-    BOOL                                forceNextUpdate_;
 
     NSDate *                            nextIpUpdate_;
     NSDate *                            lastIpUpdateTime_;
@@ -105,5 +103,6 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)statusWindowAbout:(id)sender;
 
 - (void)showInvaliApiKeyWindow;
+- (void)forceNextIpUpdate;
 
 @end

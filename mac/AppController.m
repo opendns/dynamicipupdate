@@ -45,7 +45,6 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 @interface AppController (Private)
 
 - (NSString *)getMyIp;
-- (void)ipChangeThread;
 - (void)setButtonLoginStatus;
 - (BOOL)isButtonLoginEnabled;
 - (NSString*)apiSignInStringForAccount:(NSString*)userName withPassword:(NSString*)password;
@@ -139,17 +138,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return url;    
 }
 
-- (void)showError:(NSString*)error inWindow:(NSWindow*)window additionalText:(NSString*)s {
-    NSBeginAlertSheet(error, 
-                      @"OK", nil, nil, 
-                      window,
-                      nil, // delegate
-                      nil, //@selector(sheetDidEndShouldDelete:returnCode:contextInfo:),
-                      nil, //@selector(endAlertSheet:returnCode:contextInfo:),
-                      nil, // context info
-                      s);
-}
-
 - (void)showErrorInKeyWindow:(NSString*)error additionalText:(NSString*)s {
     NSWindow *window = [NSApp keyWindow];
     NSBeginAlertSheet(error, 
@@ -198,11 +186,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (BOOL)shouldSendPeriodicUpdate {
     if (![self canSendIPUpdates])
         return NO;
-
-    if (forceNextUpdate_) {
-        forceNextUpdate_ = NO;
-        return YES;
-    }
 
     NSDate *now = [NSDate date];
     if ([now compare:nextIpUpdate_] == NSOrderedAscending)
@@ -296,7 +279,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [self scheduleNextIpUpdate];
 }
 
-- (void)ipAddressCheckAndPeriodicIpUpdate:(id)dummy {
+- (void)ipAddressCheckAndPeriodicIpUpdate:(NSTimer*)timer {
     BOOL updateStatus = NO;
     NSString *newIp = [self getMyIp];
     if (!NSStringsEqual(newIp, currentIpAddressFromDns_)) {
@@ -307,10 +290,10 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         } else {
             usingOpenDns_ = NO;
         }
-        forceNextUpdate_ = YES;
+		[self forceNextIpUpdate];
         updateStatus = YES;
     }
-    
+
     if ([self shouldSendPeriodicUpdate]) {
         [self sendPeriodicUpdate];
     }
@@ -319,25 +302,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     
     if (updateStatus)
         [self updateStatusWindow];
-}
 
-- (void)ipChangeThread {
-    NSAutoreleasePool* myAutoreleasePool = nil;
-    int cyclesBeforeDrain;
-    while (!exitIpChangeThread_) {
-        if (!myAutoreleasePool) {
-            myAutoreleasePool = [[NSAutoreleasePool alloc] init];
-            cyclesBeforeDrain = 10;
-        }
-        [self performSelectorOnMainThread:@selector(ipAddressCheckAndPeriodicIpUpdate:) withObject:nil waitUntilDone:YES];
-        NSDate *inOneMinute = [[NSDate date] addTimeInterval:TIME_INTERVAL_ONE_MINUTE];
-        [NSThread sleepUntilDate:inOneMinute];
-        if (0 == --cyclesBeforeDrain) {
-            [myAutoreleasePool drain];
-            myAutoreleasePool = nil;
-        }
-    }
-    [myAutoreleasePool drain];
+	[NSTimer scheduledTimerWithTimeInterval:TIME_INTERVAL_ONE_MINUTE target:self selector:@selector(ipAddressCheckAndPeriodicIpUpdate:) userInfo:nil repeats:NO];
 }
 
 // equivalent of  echo "${s}" | openssl enc -bf -d -pass pass:"NojkPqnbK8vwmaJWVnwUq" -salt -a
@@ -627,6 +593,13 @@ Exit:
 
 }
 
+// schedule first update as soon as possible
+-(void)forceNextIpUpdate {
+	if (nextIpUpdate_)
+		[nextIpUpdate_ release];
+	nextIpUpdate_ = [[NSDate date] retain];
+}
+
 -(void)applicationDidFinishLaunching:(NSNotification*)aNotification {
 
 	if (![self apiKeyValid]) {
@@ -636,18 +609,11 @@ Exit:
 	
     [self makeStartAtLogin];
     [self importOldSettings];
-	
-    exitIpChangeThread_ = NO;
-    forceNextUpdate_ = NO;
+
     ipUpdateResult_ = IpUpdateOk;
-    // schedule first update as soon as possible
-    nextIpUpdate_ = [[NSDate date] retain];
+	[self forceNextIpUpdate];
     [self forceHideErrorMessage];
-	
-    [NSThread detachNewThreadSelector:@selector(ipChangeThread)
-                             toTarget:(id)self
-                           withObject:(id)nil];
-	
+
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     // observe changing of PREF_SEND_UPDATES so that we can synchronize
     // 'Update now' button (disable/enable depending on the value of PREF_SEND_UPDATES)
@@ -666,6 +632,8 @@ Exit:
         [self downloadNetworks:token suppressUI:YES];
         return;
     }
+
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -1048,11 +1016,6 @@ Exit:
     [windowSelectNetwork_ makeKeyAndOrderFront:self];
 }
 
-// don't bother doing anything, it's not being called by runtime anyway
-- (void)dealloc {
-    [super dealloc];
-}
-
 - (BOOL)isButtonLoginEnabled {
     NSString *account = [editOpenDnsAccount_ stringValue];
     NSString *password = [editOpenDnsPassword_ stringValue];
@@ -1176,6 +1139,8 @@ SetDynamicNetwork:
     [prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
     
 ShowStatusWindow:
+	[self forceNextIpUpdate];
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
     [self updateStatusWindow];
     [self showStatusWindow:nil];
     return;
@@ -1213,12 +1178,7 @@ ShowStatusWindow:
     }
     [self setPref:token forKey:PREF_TOKEN];
     [self setPref:account forKey:PREF_ACCOUNT];
-    forceNextUpdate_ = YES;
     [self downloadNetworks:token suppressUI:YES];
-}
-
-- (void)applicationWillTerminate:(NSNotification*)aNotification {
-    exitIpChangeThread_ = YES;
 }
 
 - (IBAction)loginQuitOrCancel:(id)sender {
@@ -1260,6 +1220,8 @@ ShowStatusWindow:
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     [prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:hostname forKey:PREF_HOSTNAME];
+	[self forceNextIpUpdate];
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
     [self showStatusWindow:self];
 }
 
@@ -1274,9 +1236,8 @@ ShowStatusWindow:
 }
 
 - (IBAction)statusUpdateNow:(id)sender {
-    forceNextUpdate_ = YES;
-    [lastIpUpdateTime_ release];
-    lastIpUpdateTime_ = [[NSDate date] retain];
+	[self forceNextIpUpdate];
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
     if ([self updateLastIpUpdateTime])
         [self updateStatusWindow];
 }
