@@ -605,13 +605,6 @@ Exit:
 }
 
 - (void)awakeFromNib {
-	if (![self apiKeyValid]) {
-		// TODO: do something and exit
-	}
-	
-    [self makeStartAtLogin];
-    [self importOldSettings];
-
     [textError_ setHorizontallyResizable:NO];
     [textError_ setVerticallyResizable:YES];
     
@@ -624,9 +617,7 @@ Exit:
     [statusItem_ setMenu:menu_]; 
 
     NSFont *font = [buttonChangeAccount_ font];
-    //NSFont *font2 = [textError_ font];
     [textError_ setFont:font];
-    //font2 = [textError_ font];
 
     NSBundle *bundle = [NSBundle bundleForClass:[self class]]; 
     NSString *path = [bundle pathForResource:@"menuicon" ofType:@"tif"]; 
@@ -634,17 +625,29 @@ Exit:
     [statusItem_ setImage:menuIcon_]; 
     [menuIcon_ release]; 
 
+}
+
+-(void)applicationDidFinishLaunching:(NSNotification*)aNotification {
+
+	if (![self apiKeyValid]) {
+		[self showInvaliApiKeyWindow];
+		return;
+	}
+	
+    [self makeStartAtLogin];
+    [self importOldSettings];
+	
     exitIpChangeThread_ = NO;
     forceNextUpdate_ = NO;
     ipUpdateResult_ = IpUpdateOk;
     // schedule first update as soon as possible
     nextIpUpdate_ = [[NSDate date] retain];
     [self forceHideErrorMessage];
-
+	
     [NSThread detachNewThreadSelector:@selector(ipChangeThread)
                              toTarget:(id)self
                            withObject:(id)nil];
-
+	
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     // observe changing of PREF_SEND_UPDATES so that we can synchronize
     // 'Update now' button (disable/enable depending on the value of PREF_SEND_UPDATES)
@@ -652,13 +655,13 @@ Exit:
             forKeyPath:PREF_SEND_UPDATES
                options:NSKeyValueObservingOptionNew
                context:nil];
-
+	
     NSString *token = [prefs objectForKey: PREF_TOKEN];
     if (![self isLoggedIn]) {
         [self showLoginWindow];
         return;
     }
-
+	
     if ([self noNetworksConfigured]) {
         [self downloadNetworks:token suppressUI:YES];
         return;
@@ -1002,9 +1005,18 @@ Exit:
     [scrollViewError_ setHidden:NO];
 }
 
+- (void)showInvaliApiKeyWindow {
+    [windowLogin_ orderOut:self];
+    [windowSelectNetwork_ orderOut:self];
+    [windowStatus_ orderOut:self];
+    [NSApp activateIgnoringOtherApps:YES];
+    [windowInvalidApiKey_ makeKeyAndOrderFront:self];
+}
+
 - (void)showStatusWindow:(id)sender {
     [windowLogin_ orderOut:self];
     [windowSelectNetwork_ orderOut:self];
+	[windowInvalidApiKey_ orderOut:self];
     [self updateStatusWindow];
     [NSApp activateIgnoringOtherApps:YES];
     [windowStatus_ makeKeyAndOrderFront:self];
@@ -1021,6 +1033,7 @@ Exit:
 
     [windowSelectNetwork_ orderOut:self];
     [windowStatus_ orderOut:self];
+	[windowInvalidApiKey_ orderOut:self];
     [NSApp activateIgnoringOtherApps:YES];
     [windowLogin_ makeKeyAndOrderFront:self];
     [self setButtonLoginStatus];
@@ -1030,6 +1043,7 @@ Exit:
 - (void)showNetworksWindow {
     [windowLogin_ orderOut:self];
     [windowStatus_ orderOut:self];
+	[windowInvalidApiKey_ orderOut:self];
     [NSApp activateIgnoringOtherApps:YES];
     [windowSelectNetwork_ makeKeyAndOrderFront:self];
 }

@@ -41,6 +41,9 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
 @interface AppController : NSObject {
 
+	// stuff related to 'invalid api key' window
+	IBOutlet NSWindow *			windowInvalidApiKey_;
+
     // stuff related to login window
     IBOutlet NSWindow *			windowLogin_;
 
@@ -100,5 +103,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)statusChangeNetwork:(id)sender;
 - (IBAction)statusUpdateNow:(id)sender;
 - (IBAction)statusWindowAbout:(id)sender;
+
+- (void)showInvaliApiKeyWindow;
 
 @end
