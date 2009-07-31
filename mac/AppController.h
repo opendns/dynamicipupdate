@@ -75,6 +75,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
     // menu-related stuff
     IBOutlet NSMenu *                   menu_;
+	IBOutlet NSMenuItem *				menuItemIpAddr_;
     NSStatusItem *                      statusItem_;
     NSImage *                           menuIcon_;
 

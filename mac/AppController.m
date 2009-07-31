@@ -770,11 +770,15 @@ Exit:
         [buttonChangeNetwork_ setFrame:buttonFrame];
     }
 
-    if (currentIpAddressFromDns_)
+    if (currentIpAddressFromDns_) {
         [textIpAddress_ setTitleWithMnemonic:currentIpAddressFromDns_];
+		NSString *menuTitle = [NSString stringWithFormat:@"IP: %@", currentIpAddressFromDns_];
+		[menuItemIpAddr_ setTitle:menuTitle];
+	}
     else {
-        // TODO: show a different text in red?
+		// TODO: show a different text in red?
         [textIpAddress_ setTitleWithMnemonic:@""];
+		[menuItemIpAddr_ setTitle:@"IP: unavailable"];
     }
 
     if (usingOpenDns_) {
