@@ -400,7 +400,7 @@ static CString LogFileName(const TCHAR *dir)
 
 static bool IsApiKeyCharValid(char c)
 {
-	static char *validKeyChars = "01234566789ABCDEF";
+	static char *validKeyChars = "0123456789ABCDEF";
 	char *tmp = validKeyChars;
 	char c2 = *tmp++;
 	while (c2) {

@@ -594,7 +594,21 @@ Exit:
         CFRelease(loginItems);
 }
 
+- (BOOL) apiKeyValid {
+	NSCharacterSet *validApiKeyChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789ABCDEF"];
+	NSCharacterSet *invalidApiKeyChars = [validApiKeyChars invertedSet];
+	NSString *apiKey = API_KEY;
+	NSRange invalidCharsRange = [apiKey rangeOfCharacterFromSet:invalidApiKeyChars];
+	if (NSNotFound == invalidCharsRange.location)
+		return YES;
+	return NO;
+}
+
 - (void)awakeFromNib {
+	if (![self apiKeyValid]) {
+		// TODO: do something and exit
+	}
+	
     [self makeStartAtLogin];
     [self importOldSettings];
 
