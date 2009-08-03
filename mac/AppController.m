@@ -1251,8 +1251,10 @@ ShowStatusWindow:
 
     NSString *uniqueId = [self uniqueId];
     NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
-                          @"key", @"uniqueId", @"value", uniqueId,
-                          @"displayKey", @"uniqueId", @"displayValue", uniqueId,
+                          @"uniqueId", @"key",
+						  uniqueId, @"value",
+                          @"uniqueId", @"displayKey",
+						  uniqueId, @"displayValue",
                           nil];
     NSArray *arr = [NSArray arrayWithObject:dict];
     return arr;
