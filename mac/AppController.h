@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <Cocoa/Cocoa.h>
+#import <Sparkle/Sparkle.h>
 
 typedef enum {
     IpUpdateOk,
@@ -41,6 +42,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 
 @interface AppController : NSObject {
 
+	IBOutlet SUUpdater *		updater_;
 	// stuff related to 'invalid api key' window
 	IBOutlet NSWindow *			windowInvalidApiKey_;
 
