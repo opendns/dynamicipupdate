@@ -2670,14 +2670,14 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 					<string key="className">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBDocumentRelativeSource</string>
-						<string key="minorKey">../Sparkle/build/Debug/Sparkle.framework/Versions/A/Headers/SUAppcast.h</string>
+						<string key="minorKey">../Sparkle.framework/Versions/A/Headers/SUAppcast.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">NSObject</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="76464830">
+					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="837143493">
 						<string key="majorKey">IBDocumentRelativeSource</string>
-						<string key="minorKey">../Sparkle/build/Debug/Sparkle.framework/Versions/A/Headers/SUUpdater.h</string>
+						<string key="minorKey">../Sparkle.framework/Versions/A/Headers/SUUpdater.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -2691,7 +2691,7 @@ ARcABAAAAAEAAAACARwAAwAAAAEAAQAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<string key="NS.key.0">delegate</string>
 						<string key="NS.object.0">id</string>
 					</object>
-					<reference key="sourceIdentifier" ref="76464830"/>
+					<reference key="sourceIdentifier" ref="837143493"/>
 				</object>
 			</object>
 		</object>
