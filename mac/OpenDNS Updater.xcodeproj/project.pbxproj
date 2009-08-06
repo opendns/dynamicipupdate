@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		7F5E49FA1002C1A30049E0F5 /* NSDictionary+Networks.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F5E49F91002C1A30049E0F5 /* NSDictionary+Networks.m */; };
+		7F610CFB102B53CB009DA816 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F610CFA102B53CB009DA816 /* Sparkle.framework */; };
+		7F610D05102B53EF009DA816 /* Sparkle.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = 7F610CFA102B53CB009DA816 /* Sparkle.framework */; };
 		7FE5F9380FFD421700879CC4 /* LoginItemsAE.c in Sources */ = {isa = PBXBuildFile; fileRef = 7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */; };
 		7FF293010FFC29DD000A1604 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293000FFC29DD000A1604 /* AppController.m */; };
 		7FF293030FFC29F1000A1604 /* notes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7FF293020FFC29F1000A1604 /* notes.txt */; };
@@ -34,6 +36,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				7F610D05102B53EF009DA816 /* Sparkle.framework in Copy Files: Frameworks */,
 			);
 			name = "Copy Files: Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -48,9 +51,9 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		7F301CBE102A345000120746 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = Sparkle/build/Debug/Sparkle.framework; sourceTree = "<group>"; };
 		7F5E49F81002C1A30049E0F5 /* NSDictionary+Networks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+Networks.h"; sourceTree = "<group>"; };
 		7F5E49F91002C1A30049E0F5 /* NSDictionary+Networks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+Networks.m"; sourceTree = "<group>"; };
+		7F610CFA102B53CB009DA816 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LoginItemsAE.c; sourceTree = "<group>"; };
 		7FE5F9360FFD421700879CC4 /* LoginItemsAE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginItemsAE.h; sourceTree = "<group>"; };
 		7FE5F9370FFD421700879CC4 /* OpenDNS Updater_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OpenDNS Updater_Prefix.pch"; sourceTree = "<group>"; };
@@ -88,6 +91,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				7F610CFB102B53CB009DA816 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,6 +113,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7F610CFA102B53CB009DA816 /* Sparkle.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
@@ -173,19 +178,10 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7F301CBD102A33CD00120746 /* Embedded Frameworks */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		7F301CBD102A33CD00120746 /* Embedded Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				7F301CBE102A345000120746 /* Sparkle.framework */,
-			);
-			name = "Embedded Frameworks";
 			sourceTree = "<group>";
 		};
 		7FF293080FFC2A15000A1604 /* json */ = {
