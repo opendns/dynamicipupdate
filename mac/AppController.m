@@ -571,6 +571,11 @@ Exit:
 }
 
 - (void)awakeFromNib {
+	//BOOL sendsSystemProfile = [updater_ sendsSystemProfile];
+	// TODO: should not be necessary, because I do have SUSendProfileInfo
+	// boolean value set to YES in info.plist. For whatever reason, it
+	// doesn't work
+	[updater_ setSendsSystemProfile:YES];
     [textError_ setHorizontallyResizable:NO];
     [textError_ setVerticallyResizable:YES];
     

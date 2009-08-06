@@ -29,10 +29,12 @@
 	<key>SUFeedURL</key>
 	<string>https://opendnsupdate.appspot.com/macupdatecheck/ipupdater/AppCast.xml</string>
 	<key>SUEnableAutomaticChecks</key>
-	<string>YES</string>
+	<true/>
 	<key>SUScheduledCheckInterval</key>
 	<string>86400</string>
 	<key>SUEnableSystemProfiling</key>
-	<string>YES</string>
+	<true/>
+	<key>SUSendProfileInfo</key>
+	<true/>
 </dict>
 </plist>
