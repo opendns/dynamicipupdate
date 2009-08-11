@@ -26,7 +26,7 @@ char* SendIpUpdate()
 		return NULL;
 	assert(g_pref_hostname);
 
-	const char *urlTxt = GetIpUpdateUrl();
+	const char *urlTxt = GetIpUpdateUrl(TRUE);
 	const char *host = GetIpUpdateHost();
 
 	HttpResult *httpResult = HttpGet(host, urlTxt, true);

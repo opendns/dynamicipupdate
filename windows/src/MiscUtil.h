@@ -124,7 +124,7 @@ void UseDevServers(bool useDevServers);
 bool UsingDevServers();
 const char *GetApiHost();
 const char *GetIpUpdateHost();
-const char *GetIpUpdateUrl();
+const char *GetIpUpdateUrl(BOOL addApiKey);
 bool IsApiHostHttps();
 const TCHAR *GetDashboardUrl();
 bool CanSendIPUpdates();

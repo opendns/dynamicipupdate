@@ -529,13 +529,15 @@ const char *GetIpUpdateHost()
 		return IP_UPDATE_HOST;
 }
 
-const char *GetIpUpdateUrl()
+const char *GetIpUpdateUrl(BOOL addApiKey)
 {
 	CString url = "/nic/update?token=";
 	assert(g_pref_token);
 	url += g_pref_token;
-	url += "&api_key=";
-	url += API_KEY;
+	if (addApiKey) {
+		url += "&api_key=";
+		url += API_KEY;
+	}
 	url += "&v=2";
 	url += "&hostname=";
 	if (g_pref_hostname)

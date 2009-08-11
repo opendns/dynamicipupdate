@@ -36,7 +36,7 @@ static void LogIpUpdate(char *resp)
 	if (resp)
 		slog(resp);
 	slog("'\nurl: ");
-	const char *urlTxt = GetIpUpdateUrl();
+	const char *urlTxt = GetIpUpdateUrl(FALSE);
 	if (urlTxt)
 		slog(urlTxt);
 	free((void*)urlTxt);
