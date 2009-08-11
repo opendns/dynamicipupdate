@@ -207,6 +207,17 @@ static char *GetNamesAsCommaSeparatedString(StringTimeNode *head)
 	return res;
 }
 
+static char *GetNetworkId()
+{
+	if (g_pref_network_id)
+		return g_pref_network_id;
+
+	// Clients 2.0b11 and earlier didn't remember network_id so we must get it
+
+	// TODO: implement me
+	return NULL;
+}
+
 static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 {
 	HttpResult *httpRes = NULL;
@@ -217,8 +228,12 @@ static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 	if (!added)
 		return FALSE;
 
+	char *networkId = GetNetworkId();
+	if (!networkId)
+		return FALSE;
+
 	char *toAdd = GetNamesAsCommaSeparatedString(added);
-	CString params = ApiParamsNetworkTypoExceptionsAdd(g_pref_token, g_pref_network_id, toAdd);
+	CString params = ApiParamsNetworkTypoExceptionsAdd(g_pref_token, networkId, toAdd);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
 	bool apiHostIsHttps = IsApiHostHttps();
@@ -260,8 +275,12 @@ static BOOL SubmitExpiredTypoExceptions(StringTimeNode *expired)
 	if (!expired)
 		return FALSE;
 
+	char *networkId = GetNetworkId();
+	if (!networkId)
+		return FALSE;
+
 	char *toDelete = GetNamesAsCommaSeparatedString(expired);
-	CString params = ApiParamsNetworkTypoExceptionsRemove(g_pref_token, g_pref_network_id, toDelete);
+	CString params = ApiParamsNetworkTypoExceptionsRemove(g_pref_token, networkId, toDelete);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
 	bool apiHostIsHttps = IsApiHostHttps();
