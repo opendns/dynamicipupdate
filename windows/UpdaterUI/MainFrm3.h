@@ -239,6 +239,7 @@ public:
 		MSG_WM_GETMINMAXINFO(OnGetMinMaxInfo)
 		MSG_WM_CTLCOLORSTATIC(OnCtlColorStatic)
 		MSG_WM_CLOSE(OnClose)
+		MSG_WM_DESTROY(OnDestroy)
 		MSG_WM_TIMER(OnTimer)
 		MESSAGE_HANDLER_EX(g_errorNotifMsg, OnErrorNotif)
 		MESSAGE_HANDLER_EX(WMAPP_DO_LAYOUT, OnLayout)
@@ -291,6 +292,7 @@ public:
 	void OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
 
 	void OnClose();
+	void OnDestroy();
 	BOOL OnEraseBkgnd(CDCHandle dc);
 	bool IsLink(HWND hwnd);
 	bool IsStatic(HWND /*hwnd*/);

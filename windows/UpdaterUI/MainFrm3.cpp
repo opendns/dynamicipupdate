@@ -8,6 +8,10 @@
 #include "MainFrm3.h"
 #include "TypoExceptions.h"
 
+#define TEN_MINUTES_IN_MS 10*60*1000
+#define TYPO_EXCEPTION_CHECK_PERIOD TEN_MINUTES_IN_MS
+#define TYPO_EXCEPTION_CHECK_TIMER_ID 1
+
 #define TXT_DIV_ACCOUNT _T("OpenDNS account")
 #define TXT_DIV_NETWORK_TO_UPDATE _T("Network to update")
 #define TXT_DIV_IP_ADDRESS _T("IP address")
@@ -1622,9 +1626,23 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_updaterThread->ForceSendIpUpdate();
 	m_updaterThread->ForceSoftwareUpdateCheck();
 	OnTimer(0);
-	UINT ONE_HOUR_IN_MS = 60*60*1000;
-	SetTimer(1, ONE_HOUR_IN_MS);
+	this->SetTimer(TYPO_EXCEPTION_CHECK_TIMER_ID, TYPO_EXCEPTION_CHECK_PERIOD);
 	return 0;
+}
+
+void CMainFrame::OnDestroy()
+{
+	this->KillTimer(TYPO_EXCEPTION_CHECK_TIMER_ID);
+	m_updaterThread->Stop(true);
+	delete m_updaterThread;
+	m_updaterThread = NULL;
+
+	// TODO: we could also kill typo exceptions submition thread (if it's running)
+	// to avoid possible timing issues
+
+	// mark as not handled to get default WM_DESTROY handling which is needed
+	// to really get the window destroyed and quit the app
+	SetMsgHandled(FALSE);
 }
 
 LRESULT CMainFrame::OnUpdateStatus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
