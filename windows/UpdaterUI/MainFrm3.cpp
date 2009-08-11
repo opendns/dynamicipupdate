@@ -1311,7 +1311,7 @@ NetworkInfo *MakeFirstNetworkDynamic(NetworkInfo *ni)
 	assert(!dynamicNetwork);
 	if (dynamicNetwork)
 		return dynamicNetwork;
-	char *networkId = ni->internalId;
+	char *networkId = ni->networkId;
 	CString params = ApiParamsNetworkDynamicSet(g_pref_token, networkId, true);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
@@ -1397,7 +1397,7 @@ LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lPar
 		if (!supressOneNetworkMsg)
 			MessageBox(_T("Only one network configured for dynamic IP updates. Using that network."), MAIN_FRAME_TITLE);
 		PrefSetHostname(dynamicNetwork->label);
-		SetPrefVal(&g_pref_network_id, dynamicNetwork->internalId);
+		SetPrefVal(&g_pref_network_id, dynamicNetwork->networkId);
 		SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 		goto Exit;
 	}
@@ -1420,7 +1420,7 @@ LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lPar
 
 NetworkSelected:
 	PrefSetHostname(selectedNetwork->label);
-	SetPrefVal(&g_pref_network_id, selectedNetwork->internalId);
+	SetPrefVal(&g_pref_network_id, selectedNetwork->networkId);
 	SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 
 Exit:

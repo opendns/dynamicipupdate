@@ -27,7 +27,7 @@ typedef struct NetworkInfo NetworkInfo;
 struct NetworkInfo {
 	// make 'next' the first field for perf
 	NetworkInfo *next;
-	char *internalId;
+	char *networkId;
 	int isDynamic;
 	char *label;
 	char *ipAddress;

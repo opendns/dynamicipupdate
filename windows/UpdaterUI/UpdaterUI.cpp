@@ -154,7 +154,7 @@ static void VerifyHostname(char *hostName)
 	NetworkInfo *network = FindDynamicWithLabel(ni, hostName);
 	if (network) {
 		SetPrefVal(&g_pref_user_networks_state, UNS_OK);
-		SetPrefVal(&g_pref_network_id, network->internalId);
+		SetPrefVal(&g_pref_network_id, network->networkId);
 		PrefSetHostname(network->label);
 		goto Exit;
 	}
@@ -166,7 +166,7 @@ static void VerifyHostname(char *hostName)
 
 	if (1 == dynamicNetworksCount) {
 		PrefSetHostname(dynamicNetwork->label);
-		SetPrefVal(&g_pref_network_id, network->internalId);
+		SetPrefVal(&g_pref_network_id, network->networkId);
 		SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 		goto Exit;
 	}
@@ -184,7 +184,7 @@ NoDynamicNetworks:
 	dynamicNetwork = MakeFirstNetworkDynamic(ni);
 	if (dynamicNetwork != NULL) {
 		PrefSetHostname(dynamicNetwork->label);
-		SetPrefVal(&g_pref_network_id, dynamicNetwork->internalId);
+		SetPrefVal(&g_pref_network_id, dynamicNetwork->networkId);
 		SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 		goto Exit;
 	}

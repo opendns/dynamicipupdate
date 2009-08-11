@@ -51,7 +51,7 @@ static void NetworkInfoFree(NetworkInfo *ni)
 {
 	if (!ni)
 		return;
-	free(ni->internalId);
+	free(ni->networkId);
 	free(ni->ipAddress);
 	free(ni->label);
 	free(ni);
@@ -69,7 +69,7 @@ void NetworkInfoFreeList(NetworkInfo *head)
 
 static NetworkInfo* NetworkInfoFromJson(JsonElMapData *json)
 {
-	char *internalId = json->key;
+	char *networkId = json->key;
 	int isDynamic = FALSE;
 	char *label = NULL;
 	char *ipAddress = NULL;
@@ -103,7 +103,7 @@ static NetworkInfo* NetworkInfoFromJson(JsonElMapData *json)
 	if (!res)
 		return NULL;
 	res->next = NULL;
-	res->internalId = StrDupSafe(internalId);
+	res->networkId = StrDupSafe(networkId);
 	res->ipAddress = StrDupSafe(ipAddress);
 	res->label = StrDupSafe(label);
 	res->isDynamic = isDynamic;

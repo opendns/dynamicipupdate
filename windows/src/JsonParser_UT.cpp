@@ -180,9 +180,9 @@ static void bad_pwd_parsing_ut()
 	JsonElFree(json);
 }
 
-static void check_network_info(NetworkInfo *ni, char *expectedInternalId, char *expectedIpAddress, char *expectedLabel, int expectedIsDynamic)
+static void check_network_info(NetworkInfo *ni, char *expectedNetworkId, char *expectedIpAddress, char *expectedLabel, int expectedIsDynamic)
 {
-	utassert(streq(expectedInternalId, ni->internalId));
+	utassert(streq(expectedNetworkId, ni->networkId));
 	utassert(streq(expectedIpAddress, ni->ipAddress));
 	utassert(streq(expectedLabel, ni->label));
 	utassert(expectedIsDynamic == ni->isDynamic);
