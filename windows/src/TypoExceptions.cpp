@@ -207,15 +207,70 @@ static char *GetNamesAsCommaSeparatedString(StringTimeNode *head)
 	return res;
 }
 
+static char *GetNetworkIdApi()
+{
+	HttpResult *httpRes = NULL;
+	JsonEl *json = NULL;
+	char *jsonTxt = NULL;
+	char *networkId = NULL;
+
+	CString params = ApiParamsNetworkGet(g_pref_token);
+	const char *paramsTxt = TStrToStr(params);
+	const char *apiHost = GetApiHost();
+	bool apiHostIsHttps = IsApiHostHttps();
+	httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
+	free((void*)paramsTxt);
+	if (!httpRes || !httpRes->IsValid())
+		goto Exit;
+
+	DWORD dataSize;
+	jsonTxt = (char *)httpRes->data.getData(&dataSize);
+	if (!jsonTxt)
+		goto Exit;
+
+	// we log the server's json response if there was an error, but ignore
+	// the error otherwise
+	json = ParseJsonToDoc(jsonTxt);
+	if (!json)
+		goto Exit;
+	WebApiStatus status = GetApiStatus(json);
+	if (WebApiStatusSuccess != status) {
+		slog(jsonTxt);
+		slog("\n");
+		goto Exit;
+	}
+
+	JsonEl *resp = GetMapElByName(json, "response");
+	if (!resp)
+		goto Exit;
+
+	JsonEl *networkIdEl = GetMapElByName(resp, "network_id");
+	if (!networkIdEl)
+		goto Exit;
+
+	networkId = JsonElAsStringVal(networkIdEl);
+	if (!networkId)
+		goto Exit;
+	networkId = strdup(networkId);
+
+Exit:
+	JsonElFree(json);
+	delete httpRes;
+	return networkId;
+}
+
 static char *GetNetworkId()
 {
 	if (g_pref_network_id)
 		return g_pref_network_id;
 
 	// Clients 2.0b11 and earlier didn't remember network_id so we must get it
-
-	// TODO: implement me
-	return NULL;
+	char *networkId = GetNetworkIdApi();
+	if (!networkId)
+		return NULL;
+	SetPrefVal(&g_pref_network_id, networkId);
+	free(networkId);
+	return g_pref_network_id;
 }
 
 static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
@@ -233,6 +288,9 @@ static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 		return FALSE;
 
 	char *toAdd = GetNamesAsCommaSeparatedString(added);
+	if (!toAdd)
+	    return FALSE;
+	slogfmt("Adding typo exceptions: %s\n", toAdd);
 	CString params = ApiParamsNetworkTypoExceptionsAdd(g_pref_token, networkId, toAdd);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
@@ -253,8 +311,10 @@ static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 	if (!json)
 		goto Exit;
 	WebApiStatus status = GetApiStatus(json);
-	if (WebApiStatusSuccess != status)
+	if (WebApiStatusSuccess != status) {
 		slog(jsonTxt);
+		slog("\n");
+	}
 
 Exit:
 	JsonElFree(json);
@@ -280,6 +340,9 @@ static BOOL SubmitExpiredTypoExceptions(StringTimeNode *expired)
 		return FALSE;
 
 	char *toDelete = GetNamesAsCommaSeparatedString(expired);
+	if (!toDelete)
+		return FALSE;
+	slogfmt("Removing expired typo exceptions: %s\n", toDelete);
 	CString params = ApiParamsNetworkTypoExceptionsRemove(g_pref_token, networkId, toDelete);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
@@ -300,8 +363,10 @@ static BOOL SubmitExpiredTypoExceptions(StringTimeNode *expired)
 	if (!json)
 		goto Exit;
 	WebApiStatus status = GetApiStatus(json);
-	if (WebApiStatusSuccess != status)
+	if (WebApiStatusSuccess != status) {
 		slog(jsonTxt);
+		slog("\n");
+	}
 
 Exit:
 	JsonElFree(json);

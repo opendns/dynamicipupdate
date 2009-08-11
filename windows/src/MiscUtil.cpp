@@ -331,6 +331,17 @@ CString ApiParamsNetworkTypoExceptionsRemove(const char *token, const char *netw
 	return url;
 }
 
+CString ApiParamsNetworkGet(const char *token)
+{
+	CString url;
+	char *tokenEncoded = StrUrlEncode(token);
+	AddUrlParam(url, "api_key", API_KEY);
+	AddUrlParam(url, "method", "network_get");
+	AddUrlParam(url, "token", tokenEncoded);
+	free(tokenEncoded);
+	return url;
+}
+
 char* LastErrorAsStr(DWORD err)
 {
 	char *msgBuf = NULL;

@@ -109,6 +109,7 @@ CString ApiParamsUpdateIp(const char *ip, const char *network);
 CString ApiParamsNetworkDynamicSet(const char *token, const char *networkId, bool makeDynamic);
 CString ApiParamsNetworkTypoExceptionsAdd(const char *token, const char *network_id, const char *typoExceptionsList);
 CString ApiParamsNetworkTypoExceptionsRemove(const char *token, const char *network_id, const char *typoExceptionsList);
+CString ApiParamsNetworkGet(const char *token);
 
 char* LastErrorAsStr(DWORD err=-1);
 char* WinHttpErrorAsStr(DWORD error);
