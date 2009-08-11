@@ -179,8 +179,8 @@ def main():
     nsis(version)
     ensure_file_exists(installer_path(version))
     sign(version)
-    s3UploadFilePrivate(installer_path(version), s3_installer_key(version))
-    s3UploadFilePublic(exe_path(), s3_exe_key(version))
+    s3UploadFilePublic(installer_path(version), s3_installer_key(version))
+    s3UploadFilePrivate(exe_path(), s3_exe_key(version))
     s3UploadFilePrivate(pdb_path(), s3_pdb_key(version))
 
 if __name__ == "__main__":
