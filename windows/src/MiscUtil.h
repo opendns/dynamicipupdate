@@ -15,9 +15,6 @@
 #define FORGOT_PASSWORD_URL _T("https://www.opendns.com/dashboard/signin/")
 #define CREATE_ACCOUNT_URL _T("https://www.opendns.com/start/create_account/")
 
-#define DASHBOARD_URL_DEV _T("http://website.dev6.sfo.opendns.com/dashboard/networks/")
-#define DASHBOARD_URL _T("http://www.opendns.com/dashboard/networks/")
-
 extern UINT g_errorNotifMsg;
 
 #define PROGRAM_VERSION  _T("2.0b11")
@@ -110,8 +107,8 @@ CString ApiParamsSignIn(const char* userName, const char* password);
 CString ApiParamsNetworksGet(const char *token);
 CString ApiParamsUpdateIp(const char *ip, const char *network);
 CString ApiParamsNetworkDynamicSet(const char *token, const char *networkId, bool makeDynamic);
-CString ApiParamsNetworkTypoExceptionsAdd(const char *token, const char *typoExceptionsList);
-CString ApiParamsNetworkTypoExceptionsDelete(const char *token, const char *typoExceptionsList);
+CString ApiParamsNetworkTypoExceptionsAdd(const char *token, const char *network_id, const char *typoExceptionsList);
+CString ApiParamsNetworkTypoExceptionsRemove(const char *token, const char *network_id, const char *typoExceptionsList);
 
 char* LastErrorAsStr(DWORD err=-1);
 char* WinHttpErrorAsStr(DWORD error);

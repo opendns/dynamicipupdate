@@ -218,7 +218,7 @@ static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 		return FALSE;
 
 	char *toAdd = GetNamesAsCommaSeparatedString(added);
-	CString params = ApiParamsNetworkTypoExceptionsAdd(g_pref_token, toAdd);
+	CString params = ApiParamsNetworkTypoExceptionsAdd(g_pref_token, g_pref_network_id, toAdd);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
 	bool apiHostIsHttps = IsApiHostHttps();
@@ -261,7 +261,7 @@ static BOOL SubmitExpiredTypoExceptions(StringTimeNode *expired)
 		return FALSE;
 
 	char *toDelete = GetNamesAsCommaSeparatedString(expired);
-	CString params = ApiParamsNetworkTypoExceptionsDelete(g_pref_token, toDelete);
+	CString params = ApiParamsNetworkTypoExceptionsRemove(g_pref_token, g_pref_network_id, toDelete);
 	const char *paramsTxt = TStrToStr(params);
 	const char *apiHost = GetApiHost();
 	bool apiHostIsHttps = IsApiHostHttps();

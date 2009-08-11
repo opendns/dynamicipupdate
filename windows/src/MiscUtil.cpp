@@ -11,6 +11,17 @@
 #include "StrUtil.h"
 #include "TypoExceptions.h"
 
+#define DASHBOARD_URL_DEV _T("http://www.dev16.sfo.opendns.com/dashboard/networks/")
+#define DASHBOARD_URL _T("http://www.opendns.com/dashboard/networks/")
+
+#define API_HOST_DEV "api.dev16.sfo.opendns.com"
+#define IP_UPDATE_HOST_DEV "www.dev16.sfo.opendns.com"
+#define API_IS_HTTPS_DEV false
+
+#define API_HOST "api.opendns.com"
+#define IP_UPDATE_HOST "updates.opendns.com"
+#define API_IS_HTTPS true
+
 UINT g_errorNotifMsg = 0;
 
 bool FileOrDirExists(const TCHAR *fileName)
@@ -288,29 +299,33 @@ CString ApiParamsNetworkDynamicSet(const char *token, const char *networkId, boo
 	return url;
 }
 
-CString ApiParamsNetworkTypoExceptionsAdd(const char *token, const char *typoExceptionsList)
+CString ApiParamsNetworkTypoExceptionsAdd(const char *token, const char *network_id, const char *typoExceptionsList)
 {
 	char *tokenEncoded = StrUrlEncode(token);
 	char *typoExceptionListEncoded = StrUrlEncode(typoExceptionsList);
 	CString url;
 	AddUrlParam(url, "api_key", API_KEY);
-	AddUrlParam(url, "method", "network_typo_exception_add");
+	AddUrlParam(url, "method", "typoexceptions_add");
 	AddUrlParam(url, "token", tokenEncoded);
-	AddUrlParam(url, "typo_exception", typoExceptionListEncoded);
+	// assuming network_id doesn't need url encoding
+	AddUrlParam(url, "network_id", network_id);
+	AddUrlParam(url, "domains", typoExceptionListEncoded);
 	free(tokenEncoded);
 	free(typoExceptionListEncoded);
 	return url;
 }
 
-CString ApiParamsNetworkTypoExceptionsDelete(const char *token, const char *typoExceptionsList)
+CString ApiParamsNetworkTypoExceptionsRemove(const char *token, const char *network_id, const char *typoExceptionsList)
 {
 	char *tokenEncoded = StrUrlEncode(token);
 	char *typoExceptionListEncoded = StrUrlEncode(typoExceptionsList);
 	CString url;
 	AddUrlParam(url, "api_key", API_KEY);
-	AddUrlParam(url, "method", "network_typo_exception_delete");
+	AddUrlParam(url, "method", "typoexceptions_remove");
 	AddUrlParam(url, "token", tokenEncoded);
-	AddUrlParam(url, "typo_exception", typoExceptionListEncoded);
+	// assuming network_id doesn't need url encoding
+	AddUrlParam(url, "network_id", network_id);
+	AddUrlParam(url, "domains", typoExceptionListEncoded);
 	free(tokenEncoded);
 	free(typoExceptionListEncoded);
 	return url;
@@ -474,14 +489,6 @@ TCHAR *GetWindowsUserName()
 	return tstrdup(buf);
 }
 #endif
-
-#define API_HOST_DEV "api.dev6.sfo.opendns.com"
-#define IP_UPDATE_HOST_DEV "website.dev6.sfo.opendns.com"
-#define API_IS_HTTPS_DEV false
-
-#define API_HOST "api.opendns.com"
-#define IP_UPDATE_HOST "updates.opendns.com"
-#define API_IS_HTTPS true
 
 static bool g_useDevServers = false;
 

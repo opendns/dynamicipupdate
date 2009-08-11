@@ -1397,6 +1397,7 @@ LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lPar
 		if (!supressOneNetworkMsg)
 			MessageBox(_T("Only one network configured for dynamic IP updates. Using that network."), MAIN_FRAME_TITLE);
 		PrefSetHostname(dynamicNetwork->label);
+		SetPrefVal(&g_pref_network_id, dynamicNetwork->internalId);
 		SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 		goto Exit;
 	}
@@ -1419,6 +1420,7 @@ LRESULT CMainFrame::OnDownloadNetworks(UINT /*uMsg*/, WPARAM wParam, LPARAM lPar
 
 NetworkSelected:
 	PrefSetHostname(selectedNetwork->label);
+	SetPrefVal(&g_pref_network_id, selectedNetwork->internalId);
 	SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 
 Exit:
@@ -1437,6 +1439,7 @@ Exit:
 NoNetworkSelected:
 	//MessageBox(_T("You need to select a network for Dynamic IP Update."), MAIN_FRAME_TITLE);
 	SetPrefVal(&g_pref_user_networks_state, UNS_NO_NETWORK_SELECTED);
+	SetPrefVal(&g_pref_network_id, NULL);
 	SetPrefVal(&g_pref_hostname, NULL);
 	goto Exit;
 
@@ -1447,6 +1450,7 @@ NoDynamicNetworks:
 	if (!suppressNoDynamicIpMsg)
 		MessageBox(_T("You don't have any networks enabled for Dynamic IP Update. Enable Dynamic IP Updates in your OpenDNS account"), MAIN_FRAME_TITLE); 
 	SetPrefVal(&g_pref_user_networks_state, UNS_NO_DYNAMIC_IP_NETWORKS);
+	SetPrefVal(&g_pref_network_id, NULL);
 	SetPrefVal(&g_pref_hostname, NULL);
 	goto Exit;
 
@@ -1454,6 +1458,7 @@ NoNetworks:
 	if (!supressNoNetworks)
 		MessageBox(_T("You don't have any networks configured. You need to configure a network in your OpenDNS account"), MAIN_FRAME_TITLE);
 	SetPrefVal(&g_pref_user_networks_state, UNS_NO_NETWORKS);
+	SetPrefVal(&g_pref_network_id, NULL);
 	SetPrefVal(&g_pref_hostname, NULL);
 	goto Exit;
 
