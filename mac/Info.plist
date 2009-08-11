@@ -21,7 +21,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>CFBundleVersion</key>
-	<string>3.0b4</string>
+	<string>3.0b5</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
@@ -29,10 +29,12 @@
 	<key>SUFeedURL</key>
 	<string>https://opendnsupdate.appspot.com/macupdatecheck/ipupdater/AppCast.xml</string>
 	<key>SUEnableAutomaticChecks</key>
-	<string>YES</string>
+	<true/>
 	<key>SUScheduledCheckInterval</key>
 	<string>86400</string>
 	<key>SUEnableSystemProfiling</key>
-	<string>YES</string>
+	<true/>
+	<key>SUSendProfileInfo</key>
+	<true/>
 </dict>
 </plist>

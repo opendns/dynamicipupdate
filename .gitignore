@@ -11,3 +11,7 @@ windows/opendns-sign.pfx
 *.idc
 windows/Service/Service.vcproj.KJK-X200S.kkowalczyk.user
 windows/UpdaterUI/UpdaterUI.vcproj.KJK-X200S.kkowalczyk.user
+*kkowalczyk.mode1v3
+*kkowalczyk.pbxuser
+*.DS_Store
+mac/build

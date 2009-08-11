@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		7F5E49FA1002C1A30049E0F5 /* NSDictionary+Networks.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F5E49F91002C1A30049E0F5 /* NSDictionary+Networks.m */; };
+		7F610CFB102B53CB009DA816 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F610CFA102B53CB009DA816 /* Sparkle.framework */; };
+		7F610D05102B53EF009DA816 /* Sparkle.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = 7F610CFA102B53CB009DA816 /* Sparkle.framework */; };
 		7FE5F9380FFD421700879CC4 /* LoginItemsAE.c in Sources */ = {isa = PBXBuildFile; fileRef = 7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */; };
 		7FF293010FFC29DD000A1604 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293000FFC29DD000A1604 /* AppController.m */; };
 		7FF293030FFC29F1000A1604 /* notes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7FF293020FFC29F1000A1604 /* notes.txt */; };
@@ -22,22 +24,21 @@
 		7FF2931B0FFC2A15000A1604 /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293150FFC2A15000A1604 /* SBJsonWriter.m */; };
 		7FF293230FFC2A20000A1604 /* GDataHTTPFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293200FFC2A20000A1604 /* GDataHTTPFetcher.m */; };
 		7FF293240FFC2A20000A1604 /* GDataHTTPFetcherLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293220FFC2A20000A1604 /* GDataHTTPFetcherLogging.m */; };
-		7FF293330FFC2AC2000A1604 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FF293320FFC2AC2000A1604 /* Sparkle.framework */; };
-		7FF293400FFC2AF5000A1604 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7FF293320FFC2AC2000A1604 /* Sparkle.framework */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		7FF293390FFC2ADF000A1604 /* CopyFiles */ = {
+		7FF293390FFC2ADF000A1604 /* Copy Files: Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				7FF293400FFC2AF5000A1604 /* Sparkle.framework in CopyFiles */,
+				7F610D05102B53EF009DA816 /* Sparkle.framework in Copy Files: Frameworks */,
 			);
+			name = "Copy Files: Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -52,6 +53,7 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		7F5E49F81002C1A30049E0F5 /* NSDictionary+Networks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+Networks.h"; sourceTree = "<group>"; };
 		7F5E49F91002C1A30049E0F5 /* NSDictionary+Networks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+Networks.m"; sourceTree = "<group>"; };
+		7F610CFA102B53CB009DA816 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LoginItemsAE.c; sourceTree = "<group>"; };
 		7FE5F9360FFD421700879CC4 /* LoginItemsAE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginItemsAE.h; sourceTree = "<group>"; };
 		7FE5F9370FFD421700879CC4 /* OpenDNS Updater_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OpenDNS Updater_Prefix.pch"; sourceTree = "<group>"; };
@@ -79,7 +81,6 @@
 		7FF293200FFC2A20000A1604 /* GDataHTTPFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataHTTPFetcher.m; sourceTree = "<group>"; };
 		7FF293210FFC2A20000A1604 /* GDataHTTPFetcherLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDataHTTPFetcherLogging.h; sourceTree = "<group>"; };
 		7FF293220FFC2A20000A1604 /* GDataHTTPFetcherLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataHTTPFetcherLogging.m; sourceTree = "<group>"; };
-		7FF293320FFC2AC2000A1604 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* OpenDNS Updater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OpenDNS Updater.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -90,7 +91,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				7FF293330FFC2AC2000A1604 /* Sparkle.framework in Frameworks */,
+				7F610CFB102B53CB009DA816 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,7 +113,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7FF293320FFC2AC2000A1604 /* Sparkle.framework */,
+				7F610CFA102B53CB009DA816 /* Sparkle.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
@@ -233,7 +234,7 @@
 				8D1107290486CEB800E47090 /* Resources */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
-				7FF293390FFC2ADF000A1604 /* CopyFiles */,
+				7FF293390FFC2ADF000A1604 /* Copy Files: Frameworks */,
 			);
 			buildRules = (
 			);
@@ -327,6 +328,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/Sparkle/build/Debug\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -348,6 +350,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/Sparkle/build/Debug\"",
 				);
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

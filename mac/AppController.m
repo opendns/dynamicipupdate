@@ -45,7 +45,6 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 @interface AppController (Private)
 
 - (NSString *)getMyIp;
-- (void)ipChangeThread;
 - (void)setButtonLoginStatus;
 - (BOOL)isButtonLoginEnabled;
 - (NSString*)apiSignInStringForAccount:(NSString*)userName withPassword:(NSString*)password;
@@ -139,17 +138,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return url;    
 }
 
-- (void)showError:(NSString*)error inWindow:(NSWindow*)window additionalText:(NSString*)s {
-    NSBeginAlertSheet(error, 
-                      @"OK", nil, nil, 
-                      window,
-                      nil, // delegate
-                      nil, //@selector(sheetDidEndShouldDelete:returnCode:contextInfo:),
-                      nil, //@selector(endAlertSheet:returnCode:contextInfo:),
-                      nil, // context info
-                      s);
-}
-
 - (void)showErrorInKeyWindow:(NSString*)error additionalText:(NSString*)s {
     NSWindow *window = [NSApp keyWindow];
     NSBeginAlertSheet(error, 
@@ -198,11 +186,6 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (BOOL)shouldSendPeriodicUpdate {
     if (![self canSendIPUpdates])
         return NO;
-
-    if (forceNextUpdate_) {
-        forceNextUpdate_ = NO;
-        return YES;
-    }
 
     NSDate *now = [NSDate date];
     if ([now compare:nextIpUpdate_] == NSOrderedAscending)
@@ -296,7 +279,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     [self scheduleNextIpUpdate];
 }
 
-- (void)ipAddressCheckAndPeriodicIpUpdate:(id)dummy {
+- (void)ipAddressCheckAndPeriodicIpUpdate:(NSTimer*)timer {
     BOOL updateStatus = NO;
     NSString *newIp = [self getMyIp];
     if (!NSStringsEqual(newIp, currentIpAddressFromDns_)) {
@@ -307,10 +290,10 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
         } else {
             usingOpenDns_ = NO;
         }
-        forceNextUpdate_ = YES;
+		[self forceNextIpUpdate];
         updateStatus = YES;
     }
-    
+
     if ([self shouldSendPeriodicUpdate]) {
         [self sendPeriodicUpdate];
     }
@@ -319,25 +302,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     
     if (updateStatus)
         [self updateStatusWindow];
-}
 
-- (void)ipChangeThread {
-    NSAutoreleasePool* myAutoreleasePool = nil;
-    int cyclesBeforeDrain;
-    while (!exitIpChangeThread_) {
-        if (!myAutoreleasePool) {
-            myAutoreleasePool = [[NSAutoreleasePool alloc] init];
-            cyclesBeforeDrain = 10;
-        }
-        [self performSelectorOnMainThread:@selector(ipAddressCheckAndPeriodicIpUpdate:) withObject:nil waitUntilDone:YES];
-        NSDate *inOneMinute = [[NSDate date] addTimeInterval:TIME_INTERVAL_ONE_MINUTE];
-        [NSThread sleepUntilDate:inOneMinute];
-        if (0 == --cyclesBeforeDrain) {
-            [myAutoreleasePool drain];
-            myAutoreleasePool = nil;
-        }
-    }
-    [myAutoreleasePool drain];
+	[NSTimer scheduledTimerWithTimeInterval:TIME_INTERVAL_ONE_MINUTE target:self selector:@selector(ipAddressCheckAndPeriodicIpUpdate:) userInfo:nil repeats:NO];
 }
 
 // equivalent of  echo "${s}" | openssl enc -bf -d -pass pass:"NojkPqnbK8vwmaJWVnwUq" -salt -a
@@ -594,10 +560,22 @@ Exit:
         CFRelease(loginItems);
 }
 
-- (void)awakeFromNib {
-    [self makeStartAtLogin];
-    [self importOldSettings];
+- (BOOL) apiKeyValid {
+	NSCharacterSet *validApiKeyChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789ABCDEF"];
+	NSCharacterSet *invalidApiKeyChars = [validApiKeyChars invertedSet];
+	NSString *apiKey = API_KEY;
+	NSRange invalidCharsRange = [apiKey rangeOfCharacterFromSet:invalidApiKeyChars];
+	if (NSNotFound == invalidCharsRange.location)
+		return YES;
+	return NO;
+}
 
+- (void)awakeFromNib {
+	//BOOL sendsSystemProfile = [updater_ sendsSystemProfile];
+	// TODO: should not be necessary, because I do have SUSendProfileInfo
+	// boolean value set to YES in info.plist. For whatever reason, it
+	// doesn't work
+	[updater_ setSendsSystemProfile:YES];
     [textError_ setHorizontallyResizable:NO];
     [textError_ setVerticallyResizable:YES];
     
@@ -610,9 +588,7 @@ Exit:
     [statusItem_ setMenu:menu_]; 
 
     NSFont *font = [buttonChangeAccount_ font];
-    //NSFont *font2 = [textError_ font];
     [textError_ setFont:font];
-    //font2 = [textError_ font];
 
     NSBundle *bundle = [NSBundle bundleForClass:[self class]]; 
     NSString *path = [bundle pathForResource:@"menuicon" ofType:@"tif"]; 
@@ -620,16 +596,28 @@ Exit:
     [statusItem_ setImage:menuIcon_]; 
     [menuIcon_ release]; 
 
-    exitIpChangeThread_ = NO;
-    forceNextUpdate_ = NO;
-    ipUpdateResult_ = IpUpdateOk;
-    // schedule first update as soon as possible
-    nextIpUpdate_ = [[NSDate date] retain];
-    [self forceHideErrorMessage];
+}
 
-    [NSThread detachNewThreadSelector:@selector(ipChangeThread)
-                             toTarget:(id)self
-                           withObject:(id)nil];
+// schedule first update as soon as possible
+-(void)forceNextIpUpdate {
+	if (nextIpUpdate_)
+		[nextIpUpdate_ release];
+	nextIpUpdate_ = [[NSDate date] retain];
+}
+
+-(void)applicationDidFinishLaunching:(NSNotification*)aNotification {
+
+	if (![self apiKeyValid]) {
+		[self showInvaliApiKeyWindow];
+		return;
+	}
+	
+    [self makeStartAtLogin];
+    [self importOldSettings];
+
+    ipUpdateResult_ = IpUpdateOk;
+	[self forceNextIpUpdate];
+    [self forceHideErrorMessage];
 
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     // observe changing of PREF_SEND_UPDATES so that we can synchronize
@@ -638,17 +626,19 @@ Exit:
             forKeyPath:PREF_SEND_UPDATES
                options:NSKeyValueObservingOptionNew
                context:nil];
-
+	
     NSString *token = [prefs objectForKey: PREF_TOKEN];
     if (![self isLoggedIn]) {
         [self showLoginWindow];
         return;
     }
-
+	
     if ([self noNetworksConfigured]) {
         [self downloadNetworks:token suppressUI:YES];
         return;
     }
+
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -785,11 +775,15 @@ Exit:
         [buttonChangeNetwork_ setFrame:buttonFrame];
     }
 
-    if (currentIpAddressFromDns_)
+    if (currentIpAddressFromDns_) {
         [textIpAddress_ setTitleWithMnemonic:currentIpAddressFromDns_];
+		NSString *menuTitle = [NSString stringWithFormat:@"IP: %@", currentIpAddressFromDns_];
+		[menuItemIpAddr_ setTitle:menuTitle];
+	}
     else {
-        // TODO: show a different text in red?
+		// TODO: show a different text in red?
         [textIpAddress_ setTitleWithMnemonic:@""];
+		[menuItemIpAddr_ setTitle:@"IP: unavailable"];
     }
 
     if (usingOpenDns_) {
@@ -988,9 +982,18 @@ Exit:
     [scrollViewError_ setHidden:NO];
 }
 
+- (void)showInvaliApiKeyWindow {
+    [windowLogin_ orderOut:self];
+    [windowSelectNetwork_ orderOut:self];
+    [windowStatus_ orderOut:self];
+    [NSApp activateIgnoringOtherApps:YES];
+    [windowInvalidApiKey_ makeKeyAndOrderFront:self];
+}
+
 - (void)showStatusWindow:(id)sender {
     [windowLogin_ orderOut:self];
     [windowSelectNetwork_ orderOut:self];
+	[windowInvalidApiKey_ orderOut:self];
     [self updateStatusWindow];
     [NSApp activateIgnoringOtherApps:YES];
     [windowStatus_ makeKeyAndOrderFront:self];
@@ -1007,6 +1010,7 @@ Exit:
 
     [windowSelectNetwork_ orderOut:self];
     [windowStatus_ orderOut:self];
+	[windowInvalidApiKey_ orderOut:self];
     [NSApp activateIgnoringOtherApps:YES];
     [windowLogin_ makeKeyAndOrderFront:self];
     [self setButtonLoginStatus];
@@ -1016,13 +1020,9 @@ Exit:
 - (void)showNetworksWindow {
     [windowLogin_ orderOut:self];
     [windowStatus_ orderOut:self];
+	[windowInvalidApiKey_ orderOut:self];
     [NSApp activateIgnoringOtherApps:YES];
     [windowSelectNetwork_ makeKeyAndOrderFront:self];
-}
-
-// don't bother doing anything, it's not being called by runtime anyway
-- (void)dealloc {
-    [super dealloc];
 }
 
 - (BOOL)isButtonLoginEnabled {
@@ -1148,6 +1148,8 @@ SetDynamicNetwork:
     [prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
     
 ShowStatusWindow:
+	[self forceNextIpUpdate];
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
     [self updateStatusWindow];
     [self showStatusWindow:nil];
     return;
@@ -1185,12 +1187,7 @@ ShowStatusWindow:
     }
     [self setPref:token forKey:PREF_TOKEN];
     [self setPref:account forKey:PREF_ACCOUNT];
-    forceNextUpdate_ = YES;
     [self downloadNetworks:token suppressUI:YES];
-}
-
-- (void)applicationWillTerminate:(NSNotification*)aNotification {
-    exitIpChangeThread_ = YES;
 }
 
 - (IBAction)loginQuitOrCancel:(id)sender {
@@ -1232,6 +1229,8 @@ ShowStatusWindow:
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     [prefs setObject:UNS_OK forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:hostname forKey:PREF_HOSTNAME];
+	[self forceNextIpUpdate];
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
     [self showStatusWindow:self];
 }
 
@@ -1246,9 +1245,8 @@ ShowStatusWindow:
 }
 
 - (IBAction)statusUpdateNow:(id)sender {
-    forceNextUpdate_ = YES;
-    [lastIpUpdateTime_ release];
-    lastIpUpdateTime_ = [[NSDate date] retain];
+	[self forceNextIpUpdate];
+	[self ipAddressCheckAndPeriodicIpUpdate:nil];
     if ([self updateLastIpUpdateTime])
         [self updateStatusWindow];
 }
@@ -1258,8 +1256,10 @@ ShowStatusWindow:
 
     NSString *uniqueId = [self uniqueId];
     NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
-                          @"key", @"uniqueId", @"value", uniqueId,
-                          @"displayKey", @"uniqueId", @"displayValue", uniqueId,
+                          @"uniqueId", @"key",
+						  uniqueId, @"value",
+                          @"uniqueId", @"displayKey",
+						  uniqueId, @"displayValue",
                           nil];
     NSArray *arr = [NSArray arrayWithObject:dict];
     return arr;
