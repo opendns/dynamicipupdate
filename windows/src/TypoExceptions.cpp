@@ -23,6 +23,8 @@ typedef struct StringTimeNode {
 static StringTimeNode *g_allTypoExceptions;
 static int g_allTypoExceptionsCount;
 
+static BOOL g_inTypoExceptionThread = FALSE;
+
 static StringTimeNode *StringTimeNodeAlloc(char *s, time_t t = 0)
 {
 	if (!s)
@@ -465,6 +467,8 @@ static void UpdateTypoExceptionsCount() {
 
 DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/) 
 {
+	g_inTypoExceptionThread = TRUE;
+
 	StringTimeNode *currentList = GetTypoExceptions();
 	StringTimeNode *added = StringTimeNodeListGetAdded(g_allTypoExceptions, currentList);
 	StringTimeNode *expired = StringTimeNodeListGetExpired(g_allTypoExceptions);
@@ -485,12 +489,21 @@ DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/)
 	FreeStringTimeList(currentList);
 	FreeStringTimeList(added);
 	FreeStringTimeList(expired);
+	g_inTypoExceptionThread = FALSE;
 	return 0;
 }
 
 void SubmitTypoExceptionsAsync() 
 {
 	if (!CanSendIPUpdates())
+		return;
+
+	// This function is blindly invoked every 10 minutes.
+	// Running multiple SubmitTypoExceptionsThread threads will cause problems
+	// since they operate on the same data. This check prevents running multiple
+	// threads. Not using more sophisticated exclusion mechanizm (like a lock)
+	// because this is simple and in this context works just as well.
+	if (g_inTypoExceptionThread)
 		return;
 
 	DWORD stackSize = 64*1024;
