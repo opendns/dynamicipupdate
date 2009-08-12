@@ -422,7 +422,7 @@ static StringTimeNode *StringTimeNodeListGetExpired(StringTimeNode *head)
 		if (StringTimeNodeIsExpired(curr)) {
 			StringTimeNodeAllocAndInsert(&expiredList, curr->s, curr->t);
 		}
-		curr = head->next;
+		curr = curr->next;
 	}
 	return expiredList;
 }
