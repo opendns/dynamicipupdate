@@ -166,7 +166,7 @@ static void VerifyHostname(char *hostName)
 
 	if (1 == dynamicNetworksCount) {
 		PrefSetHostname(dynamicNetwork->label);
-		SetPrefVal(&g_pref_network_id, network->networkId);
+		SetPrefVal(&g_pref_network_id, dynamicNetwork->networkId);
 		SetPrefVal(&g_pref_user_networks_state, UNS_OK);
 		goto Exit;
 	}
