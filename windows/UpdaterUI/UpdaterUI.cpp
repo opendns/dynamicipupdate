@@ -35,7 +35,7 @@ static void AddToAutoStart()
 		return;
 	}
 	TCHAR *s = TStrCat(_T("\""), exePath, _T("\""), _T(" /autostart"));
-	WriteRegStr(HKEY_CURRENT_USER, AUTO_START_KEY_PATH, AUTO_START_KEY_NAME, s);
+	WriteRegStr(HKEY_CURRENT_USER, AUTO_START_KEY_PATH, AUTO_START_KEY_NAME, s, TRUE /* overwrite */);
 	free(s);
 }
 
