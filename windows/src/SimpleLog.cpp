@@ -66,10 +66,10 @@ void slogfmt(const char *fmt, ...)
 {
     char        bufStatic[256];
     char  *     buf;
-    int			bufCchSize;
+    int         bufCchSize;
 
-	va_list args;
-	va_start(args, fmt);
+    va_list args;
+    va_start(args, fmt);
 
     buf = &(bufStatic[0]);
     bufCchSize = sizeof(bufStatic);
@@ -84,13 +84,12 @@ void slogfmt(const char *fmt, ...)
         
         len = vsnprintf(buf, bufCchSize, fmt, args);
     }
-
-	slog(buf);
-    if (len < 0)
-        goto Exit;
+    slog(buf);
 
 Exit:
-	if (buf != &(bufStatic[0]))
-		free(buf);
-	va_end(args);
+    if (buf != &(bufStatic[0]))
+        free(buf);
+
+    va_end(args);
 }
+
