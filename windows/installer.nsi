@@ -135,7 +135,7 @@ Section "Install" SecInstall
     ; our current name
     StrCpy $0 "${UI_EXE_NAME}"
     KillProc::KillProcesses
-    Sleep 1000
+    Sleep 2000
 
     File /oname=${UI_EXE_NAME} UpdaterUI\Release\OpenDNSUpdater.exe
 
