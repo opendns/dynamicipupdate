@@ -49,39 +49,6 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Icon
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_DIALOG_SIGNIN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 254
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 135
-    END
-
-    IDD_DIALOG_SELECT_NETWORK, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 206
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 175
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Version
 //
 
@@ -103,45 +70,19 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "OpenDNS, LLC"
-            VALUE "FileDescription", "OpenDNS Updater"
+            VALUE "FileDescription", "OpenDNS 13 Updater"
             VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "OpenDNS Updater"
+            VALUE "InternalName", "OpenDNS 13 Updater"
             VALUE "LegalCopyright", "Copyright OpenDNS 2009"
-            VALUE "OriginalFilename", "OpenDNS Updater.exe"
-            VALUE "ProductName", "OpenDNS Updater"
+            VALUE "OriginalFilename", "13Updater.exe"
+            VALUE "ProductName", "OpenDNS 13 Updater"
             VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
-END
-
-IDR_MENU1 MENU 
-BEGIN
-    POPUP ""
+    BLOCK "VarFileInfo"
     BEGIN
-        MENUITEM "Run hidden",        IDM_RUN_HIDDEN
-        MENUITEM "Show window",       IDM_TOGGLE_WINDOW
-        MENUITEM "Exit",       		  IDM_EXIT
+        VALUE "Translation", 0x409, 1200
     END
-END
-
-IDR_MENU2 MENU 
-BEGIN
-    POPUP ""
-    BEGIN
-        MENUITEM "Run hidden",        IDM_RUN_HIDDEN
-        MENUITEM "Hide window",       IDM_TOGGLE_WINDOW
-        MENUITEM "Exit",       		  IDM_EXIT
-    END
-END
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE 
-BEGIN
-    IDR_MAINFRAME           "OpenDNS Dynamic IP Client"
 END
 
 #endif    // English (U.S.) resources

@@ -1,20 +1,12 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by OpenDNSUpdater.rc
+// Used by 13Updater.rc
 //
 #define IDR_MAINFRAME                   128
 #define IDR_MAINFRAME_OLD               129
 #define IDR_SYSTRAY_OK                  130
 #define IDR_SYSTRAY_ERR                 131
 #define IDR_UPDATE_BMP                  132
-
-#define IDR_MENU1                       1500
-#define IDR_MENU2                       1501
-
-#define IDM_EXIT                        2000
-#define IDM_TOGGLE_WINDOW               2001
-#define IDM_RUN_HIDDEN                  2002
-
 #define IDD_DIALOG1                     201
 #define IDD_DIALOG_SIGNIN               201
 #define IDD_DIALOG_SELECT_NETWORK       202
@@ -28,6 +20,11 @@
 #define IDC_LIST1                       1007
 #define IDC_LIST_NETWORKS               1007
 #define IDC_STATIC_SELECT_NETWORK       1008
+#define IDR_MENU1                       1500
+#define IDR_MENU2                       1501
+#define IDM_EXIT                        2000
+#define IDM_TOGGLE_WINDOW               2001
+#define IDM_RUN_HIDDEN                  2002
 
 // Next default values for new objects
 // 
