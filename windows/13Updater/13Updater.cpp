@@ -226,19 +226,28 @@ void LaunchUrl(const TCHAR *url)
 	res = ShellExecuteEx(&sei);
 }
 
+#define DIRECT_URL "http://www.opendns.com/download/windows/dynamicip"
+
 int WINAPI _tWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /*cmdLine*/, int /* nCmdShow */)
 {
     char *url = NULL;
     TCHAR *filePath = NULL;
+    int res;
 
     url = GetUpdateUrl("1.3", UpdateCheckVersionCheck);
     if (!url) {
-	// Show error message in a message box
+	res = ::MessageBox(NULL, _T("Couldn't determine the download. You can install upgrade directly by downloading http://www.opendns.com/download/windows/dynamicip. Upgrade?"), _T("Error"), MB_YESNO);
+	if (IDYES == res) {
+	    LaunchUrl(DIRECT_URL);
+	}
 	goto Exit;
     }
     filePath = DownloadUpdateIfNotDownloaded(url);
     if (!filePath) {
-	// TODO: show error message
+	res = ::MessageBox(NULL, _T("Couldn't download the upgrade. You can install upgrade directly by downloading http://www.opendns.com/download/windows/dynamicip. Upgrade?"), _T("Error"), MB_YESNO);
+	if (IDYES == res) {
+	    LaunchUrl(DIRECT_URL);
+	}
 	goto Exit;
     }
 
