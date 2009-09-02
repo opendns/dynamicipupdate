@@ -7,6 +7,8 @@
 #include "Http.h"
 #include "StrUtil.h"
 
+#define PROGRAM_VERSION  _T("1.0")
+
 #define AUTO_UPDATE_HOST _T("opendnsupdate.appspot.com")
 #define AUTO_UPDATE_URL "/updatecheck/dynamicipwin"
 
