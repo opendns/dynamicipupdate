@@ -210,6 +210,12 @@ public:
 	virtual void GetIdealSize(int& dxOut, int& dyOut)
 	{
 		TCHAR *s = MyGetWindowText(m_window);
+		if (!s) {
+			// seen crashes where s was NULL
+			dxOut = 0;
+			dyOut = 0;
+			return;
+		}
 		TStrRemoveAnchorTags(s);
 		SetText(s);
 		free(s);
