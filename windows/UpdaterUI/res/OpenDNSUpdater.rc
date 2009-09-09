@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "..\src\ProgramVersion.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -128,8 +129,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION VERSION_RC
+ PRODUCTVERSION VERSION_RC
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -144,14 +145,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "OpenDNS, LLC"
+            VALUE "CompanyName", "OpenDNS Inc."
             VALUE "FileDescription", "OpenDNS Updater"
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", VERSION_RC_STR
             VALUE "InternalName", "OpenDNS Updater"
             VALUE "LegalCopyright", "Copyright OpenDNS 2009"
             VALUE "OriginalFilename", "OpenDNSUpdater.exe"
             VALUE "ProductName", "OpenDNS Updater"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "ProductVersion", VERSION_RC_STR
         END
     END
 END

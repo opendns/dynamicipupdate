@@ -1,4 +1,4 @@
-// Copyright (c) 2009 OpenDNS, LLC. All rights reserved.
+// Copyright (c) 2009 OpenDNS Inc. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@
 #define MISC_UTIL_H__
 
 #include "ApiKey.h"
+#include "ProgramVersion.h"
 
 #define ABOUT_URL _T("http://www.opendns.com/software/windows/dynip/about/")
 #define LEARN_MORE_IP_ADDRESS_TAKEN_URL _T("http://www.opendns.com/software/windows/dynip/ip-taken/")
@@ -16,11 +17,6 @@
 #define CREATE_ACCOUNT_URL _T("https://www.opendns.com/start/create_account/")
 
 extern UINT g_errorNotifMsg;
-
-#define PROGRAM_VERSION  _T("2.0")
-
-// PROGRAM_VERSION_SIMULATE_UPGRADE must be lower than PROGRAM_VERSION
-#define PROGRAM_VERSION_SIMULATE_UPGRADE _T("0.8")
 
 #define MAIN_WINDOWS_CLASS_NAME _T("OpenDNS_IP_Update_Client_Wnd_Class")
 
