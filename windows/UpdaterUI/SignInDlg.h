@@ -175,7 +175,7 @@ Exit:
 		return 0;
 
 Error:
-		MessageBox(_T("There was an error veryfing username and password"), MAIN_FRAME_TITLE);
+		MessageBox(_T("There was an error verifying username and password"), MAIN_FRAME_TITLE);
 		goto Exit;
 
 BadUsernamePwd:
