@@ -26,7 +26,7 @@ except:
     sys.exit(1)
 
 SRC_DIR = os.path.dirname(os.path.realpath(__file__))
-MISC_UTIL_H_PATH = os.path.join(SRC_DIR, "src", "MiscUtil.h")
+VERSION_H_PATH = os.path.join(SRC_DIR, "src", "ProgramVersion.h")
 
 S3_BUCKET = "opendns"
 g_s3conn = None
@@ -108,7 +108,7 @@ def ensure_file_doesnt_exist(path):
 # version number is in MiscUtil.h, in the following form:
 # PROGRAM_VERSION  _T("2.0b7")
 def extract_version():
-    data = file(MISC_UTIL_H_PATH).read()
+    data = file(VERSION_H_PATH).read()
     regex = re.compile("PROGRAM_VERSION\s+_T\(\"([^\"]+)\"\)", re.DOTALL | re.MULTILINE)
     m = regex.search(data)
     return m.group(1)
