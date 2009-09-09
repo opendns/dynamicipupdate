@@ -1288,6 +1288,10 @@ void CMainFrame::OnSize(UINT nType, CSize /*size*/)
 
 void CMainFrame::StartDownloadNetworks(char *token, int supressFlags)
 {
+	// shouldn't happen but crashdumps indicate it might
+	if (!token)
+		return;
+
 	CString params = ApiParamsNetworksGet(token);
 	const char *paramsTxt = TStrToStr(params);
 	// TODO: could do it async but probably not worth it
