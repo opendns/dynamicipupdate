@@ -103,7 +103,7 @@ public:
 		if (currTimeInMs < m_lastIpUpdateTimeInMs) {
 			// going backwards in time - it must be wrap around
 			m_lastIpUpdateTimeInMs = currTimeInMs;
-			slog("Detected GetTickCount() wrap-around\n");
+			slognl("Detected GetTickCount() wrap-around");
 		}
 
 		ULONGLONG timePassedInMs =  currTimeInMs - m_lastIpUpdateTimeInMs;
@@ -127,7 +127,7 @@ public:
 		if (currTimeInMs < m_lastIpUpdateTimeInMs) {
 			// going backwards in time - it must be wrap around
 			m_lastIpUpdateTimeInMs = GetTickCount();
-			slog("Detected GetTickCount() wrap-around\n");
+			slognl("Detected GetTickCount() wrap-around");
 		}
 
 		ULONGLONG nextUpdateTimeInMs = m_lastIpUpdateTimeInMs + THREE_HRS_IN_MS;
@@ -159,7 +159,7 @@ public:
 		if (currTimeInMs < m_lastSoftwareUpgradeTimeInMs) {
 			// going backwards in time - it must be wrap around
 			m_lastSoftwareUpgradeTimeInMs = GetTickCount();
-			slog("Detected GetTickCount() wrap-around\n");
+			slognl("Detected GetTickCount() wrap-around");
 		}
 
 		ULONGLONG nextUpdateTimeInMs = m_lastSoftwareUpgradeTimeInMs + ONE_DAY_IN_MS;
@@ -171,7 +171,7 @@ public:
 	void CheckForSoftwareUpgrade(bool simulateUpgrade=false)
 	{
 		m_lastSoftwareUpgradeTimeInMs = GetTickCount();
-		slog("CheckForSoftwareUpgrade()\n");
+		slognl("CheckForSoftwareUpgrade()");
 
 		const TCHAR *version = PROGRAM_VERSION;
 		if (simulateUpgrade)

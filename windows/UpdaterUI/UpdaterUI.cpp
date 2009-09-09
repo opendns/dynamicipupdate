@@ -274,16 +274,14 @@ static void ParseSettingsFromOldClient(char *data)
 		if (streq(name, "username") && !strempty(val)) {
 			g_imported_user_name = strdup(val);
 			slog("imported username='");
-			slog(val);
-			slog("'\n");
+			slognl(val);
 		} else if (streq(name, "password") && !strempty(val)) {
 			g_imported_password = strdup(val);
 			slog("imported password\n");
 		} else if (streq(name, "hostname") && !strempty(val)) {
 			g_imported_hostname = strdup(val);
 			slog("imported hostname='");
-			slog(val);
-			slog("'\n");
+			slognl(val);
 		}
 		free(line);
 	}
@@ -357,8 +355,7 @@ void SubmitAndDeleteCrashDump(const TCHAR *filePath)
 	if (httpResult && httpResult->IsValid()) {
 		char *res = (char*)httpResult->data.getData(NULL);
 		slog("Sent crashdump. Response: ");
-		slog(res);
-		slog("\n");
+		slognl(res);
 		free(res);
 	}
 	free(url2);
@@ -448,7 +445,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	InstallCrashHandler(appDataDir, GUI_EXE_NAME_WITHOUT_EXE);
 
 	SLogInit(LogFileName(appDataDir));
-	slog("-------- starting\n");
+	slognl("-------- starting");
 
 	if (-1 != TStrFind(cmdLine, _T("/devserver"))) {
 		UseDevServers(true);
@@ -493,7 +490,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	if (isAlreadyRunning && (SPECIAL_CMD_NONE == specialCmd)) {
 		HWND hwndExisting = FindWindow(MAIN_WINDOWS_CLASS_NAME, NULL);
 		if (!hwndExisting) {
-			slog("Didn't find a window\n");
+			slognl("Didn't find a window");
 			goto Exit;
 		}
 		SendErrorNotifMsg(SPECIAL_CMD_SHOW);
@@ -535,7 +532,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	PreferencesSave();
 Exit:
 	PreferencesFree();
-	slog("finished\n");
+	slognl("finished");
 	SLogStop();
 
 	::FreeLibrary(hInstRich);

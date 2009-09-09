@@ -32,21 +32,20 @@ static bool HasDynamicNetworkWithLabel(NetworkInfo *head, const char *label)
 
 static void LogIpUpdate(char *resp)
 {
-	slog("sent ip update for\nuser '");
+	slog("sent ip update for user '");
 	assert(g_pref_user_name);
 	if (g_pref_user_name)
 		slog(g_pref_user_name);
-	slog("', \nresponse: '");
+	slog("', response: '");
 	if (resp)
 		slog(resp);
-	slog("'\nurl: ");
+	slog("' url: ");
 	const char *urlTxt = GetIpUpdateUrl(FALSE);
 	if (urlTxt)
 		slog(urlTxt);
 	free((void*)urlTxt);
-	slog("\nhost: ");
-	slog(GetIpUpdateHost());
-	slog("\n");
+	slog(" host: ");
+	slognl(GetIpUpdateHost());
 }
 
 static TCHAR *GetNetworkName()
@@ -1696,14 +1695,10 @@ LRESULT CMainFrame::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lPar
 	slog("CMainFrame::OnErrorNotif(): "); 
 	if (SPECIAL_CMD_SHOW == specialCmd) {
 		SwitchToVisibleState();
-		slog("SPECIAL_CMD_SHOW\n");
+		slognl("SPECIAL_CMD_SHOW");
 	}
 	else {
-		char buf[32];
-		slog("unknown specialCmd=");
-		itoa((int)specialCmd, buf, 10);
-		slog(buf);
-		slog("\n");
+		slogfmt("unknown specialCmd=%d\n", (int)specialCmd);
 		assert(0);
 	}
 	return 0;

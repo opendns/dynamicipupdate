@@ -133,14 +133,22 @@ public:
 		JsonEl *json = NULL;
 		HttpResult *ctx = (HttpResult*)wParam;
 		assert(ctx);
-		if (!ctx || !ctx->IsValid())
+		if (!ctx || !ctx->IsValid()) {
+			slognl("OnSignIn() - ctx not valid");
 			goto Error;
+		}
 
 		DWORD dataSize;
 		jsonTxt = (char*)ctx->data.getData(&dataSize);
 		json = ParseJsonToDoc(jsonTxt);
-		if (!json)
+		if (!json) {
+			if (jsonTxt) {
+				slogfmt("OnSignIn() failed to parse json: '%s'\n", jsonTxt);
+			} else {
+				slognl("OnSignIn() failed to parse json: <NULL>");
+			}
 			goto Error;
+		}
 
 		WebApiStatus status = GetApiStatus(json);
 		if (WebApiStatusSuccess != status) {
@@ -150,12 +158,15 @@ public:
 				if (ok && (ERR_BAD_USERNAME_PWD == err))
 					goto BadUsernamePwd;
 			}
+			slogfmt("OnSignIn() bad json status: %d, json: '%s'\n", (int)status, jsonTxt);
 			goto Error;
 		}
 
 		char *tokenTxt = GetApiResponseToken(json);
-		if (!tokenTxt)
+		if (!tokenTxt) {
+			slogfmt("OnSignIn() no token, json: '%s'\n", jsonTxt);
 			goto Error;
+		}
 
 		// we got the token, so username and password are good
 		// so save the info in preferences

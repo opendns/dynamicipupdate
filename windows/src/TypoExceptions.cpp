@@ -237,8 +237,8 @@ static char *GetNetworkIdApi()
 		goto Exit;
 	WebApiStatus status = GetApiStatus(json);
 	if (WebApiStatusSuccess != status) {
-		slog(jsonTxt);
-		slog("\n");
+		slog("GetNetworkIdApi() bad api status. json: ");
+		slognl(jsonTxt);
 		goto Exit;
 	}
 
@@ -314,8 +314,8 @@ static BOOL SubmitAddedTypoExceptions(StringTimeNode *added)
 		goto Exit;
 	WebApiStatus status = GetApiStatus(json);
 	if (WebApiStatusSuccess != status) {
-		slog(jsonTxt);
-		slog("\n");
+		slog("SubmitAddedTypoExceptions(): bad api status. json: ");
+		slognl(jsonTxt);
 	}
 
 Exit:
@@ -366,8 +366,8 @@ static BOOL SubmitExpiredTypoExceptions(StringTimeNode *expired)
 		goto Exit;
 	WebApiStatus status = GetApiStatus(json);
 	if (WebApiStatusSuccess != status) {
-		slog(jsonTxt);
-		slog("\n");
+		slog("SubmitExpiredTypoExceptions() bad api status. json: ");
+		slognl(jsonTxt);
 	}
 
 Exit:

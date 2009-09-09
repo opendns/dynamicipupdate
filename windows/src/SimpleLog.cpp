@@ -49,8 +49,14 @@ void slog(const char *s)
 	LeaveCriticalSection(&gLogCs);
 }
 
+void slognl(const char *s)
+{
+	slog(s);
+	slog("\n");
+}
+
 #ifdef UNICODE
-void slog(const TCHAR *s)
+void slog(const WCHAR *s)
 {
 	if (!s)
 		return;
@@ -60,6 +66,13 @@ void slog(const TCHAR *s)
 	slog(s2);
 	free(s2);
 }
+
+void slognl(const WCHAR *s)
+{
+	slog(s);
+	slog("\n");
+}
+
 #endif
 
 void slogfmt(const char *fmt, ...)
