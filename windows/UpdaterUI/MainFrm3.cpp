@@ -1634,8 +1634,13 @@ void CMainFrame::OnDestroy()
 {
 	this->KillTimer(TYPO_EXCEPTION_CHECK_TIMER_ID);
 	m_updaterThread->Stop(true);
-	delete m_updaterThread;
-	m_updaterThread = NULL;
+
+	// seen in crash report: apparently we get WM_DESTROY before
+	// m_updaterThread is created
+	if (m_updaterThread) {
+		delete m_updaterThread;
+		m_updaterThread = NULL;
+	}
 
 	// TODO: we could also kill typo exceptions submition thread (if it's running)
 	// to avoid possible timing issues
