@@ -1433,7 +1433,12 @@ Exit:
 	delete ctx;
 	// prefs changed so save them
 	PreferencesSave();
-	m_updaterThread->ForceSendIpUpdate();
+
+	// we might get here during first-time signin,
+	// in which case updater thread isn't created yet
+	if (m_updaterThread)
+		m_updaterThread->ForceSendIpUpdate();
+
 	// hack: sometimes cursor gets hidden so set
 	// it to standard cursor to ensure it's visible
 	HCURSOR curs = LoadCursor(NULL, IDC_ARROW);
