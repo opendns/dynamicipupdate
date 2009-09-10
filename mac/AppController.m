@@ -164,14 +164,14 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     if (4 != he->h_length)
             return nil;
     addrs = he->h_addr_list;
-    while (*addrs) {
-        unsigned char *a = (unsigned char*)*addrs++;
-        // TODO: could by more efficient by comparing old vs. new as bytes
-        // and only creating NSString when are different
-        NSString *addrTxt = [NSString stringWithFormat:@"%d.%d.%d.%d", a[0], a[1], a[2], a[3]];
-        return addrTxt;
-    }
-    return nil;
+    // only return the first result
+    unsigned char *a = (unsigned char*)*addrs;
+    if (!a)
+	return nil;
+    // TODO: could by more efficient by comparing old vs. new as bytes
+    // and only creating NSString when are different
+    NSString *addrTxt = [NSString stringWithFormat:@"%d.%d.%d.%d", a[0], a[1], a[2], a[3]];
+    return addrTxt;
 }
 
 - (BOOL)canSendIPUpdates {
