@@ -359,7 +359,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (NSDictionary*)dictionaryFromJson:(NSData*)jsonData {
     if (!jsonData)
         return nil;
-    NSString *s = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    NSString *s = [[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] autorelease];
     SBJSON *parser = [[[SBJSON alloc] init] autorelease];
     id json = [parser objectWithString:s];
     if (![json isKindOfClass:[NSDictionary class]])
