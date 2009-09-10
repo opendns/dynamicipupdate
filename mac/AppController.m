@@ -321,8 +321,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSFileHandle *file = [pipe fileHandleForReading];
     [task launch];
     NSData *data = [file readDataToEndOfFile];
-    NSString *string = [[NSString alloc] initWithData: data
-                                   encoding: NSUTF8StringEncoding];
+    NSString *string = [[[NSString alloc] initWithData: data
+                                   encoding: NSUTF8StringEncoding] autorelease];
     string = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     return string;
 }
