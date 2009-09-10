@@ -920,6 +920,7 @@ Exit:
                                     attributes:nil];
     [ts setAttributedString:attrString];
     [ts endEditing];
+    [attrString release];
     [self hiliteAndActivateURLs:textView];
 }
 
