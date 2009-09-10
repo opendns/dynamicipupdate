@@ -309,8 +309,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 // equivalent of  echo "${s}" | openssl enc -bf -d -pass pass:"NojkPqnbK8vwmaJWVnwUq" -salt -a
 - (NSString*)decryptString:(NSString*)s {
-    NSTask *task;
-    task = [[NSTask alloc] init];
+    NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath: @"/bin/sh"];
     NSString *shellArg = [NSString stringWithFormat:@"echo \"%@\" | openssl enc -bf -d -pass pass:\"NojkPqnbK8vwmaJWVnwUq\" -salt -a", s];
     NSArray *arguments;
@@ -321,6 +320,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSFileHandle *file = [pipe fileHandleForReading];
     [task launch];
     NSData *data = [file readDataToEndOfFile];
+    [task release];
     NSString *string = [[[NSString alloc] initWithData: data
                                    encoding: NSUTF8StringEncoding] autorelease];
     string = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
