@@ -139,7 +139,8 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (void)showErrorInKeyWindow:(NSString*)error additionalText:(NSString*)s {
-    NSWindow *window = [NSApp keyWindow];
+    //NSWindow *window = [NSApp keyWindow];
+	NSWindow *window = windowStatus_;
     NSBeginAlertSheet(error, 
                       @"OK", nil, nil, 
                       window,
@@ -608,7 +609,7 @@ Exit:
 -(void)applicationDidFinishLaunching:(NSNotification*)aNotification {
 
 	if (![self apiKeyValid]) {
-		[self showInvaliApiKeyWindow];
+		[self showInvalidApiKeyWindow];
 		return;
 	}
 	
@@ -982,21 +983,31 @@ Exit:
     [scrollViewError_ setHidden:NO];
 }
 
-- (void)showInvaliApiKeyWindow {
-    [windowLogin_ orderOut:self];
-    [windowSelectNetwork_ orderOut:self];
-    [windowStatus_ orderOut:self];
-    [NSApp activateIgnoringOtherApps:YES];
-    [windowInvalidApiKey_ makeKeyAndOrderFront:self];
+- (void)showInvalidApiKeyWindow {
+	[NSApp beginSheet:windowInvalidApiKey_ modalForWindow:windowStatus_ 
+		modalDelegate:self
+	   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:nil];	
 }
 
 - (void)showStatusWindow:(id)sender {
-    [windowLogin_ orderOut:self];
-    [windowSelectNetwork_ orderOut:self];
-	[windowInvalidApiKey_ orderOut:self];
     [self updateStatusWindow];
     [NSApp activateIgnoringOtherApps:YES];
     [windowStatus_ makeKeyAndOrderFront:self];
+}
+
+- (void)sheetDidEnd:(NSWindow*)sheet returnCode:(int)returnCode contextInfo:(void*)contextInfo {
+	[sheet orderOut:self];
+#if 0
+	NSString *window = @"unknown window";
+	if (sheet == windowLogin_) {
+		window = @"windowLogin_";
+	} else if (sheet == windowSelectNetwork_) {
+		window = @"windowSelectNetwork_";
+	} else if (sheet == windowInvalidApiKey_) {
+		window = @"windowInvalidApiKey_";
+	}
+	NSLog(@"loginSheetDidEnd:returnCode:contextInfo: for window %@", window);
+#endif
 }
 
 - (void)showLoginWindow {
@@ -1008,21 +1019,20 @@ Exit:
     [editOpenDnsAccount_ setTitleWithMnemonic:@""];
     [editOpenDnsPassword_ setTitleWithMnemonic:@""];
 
-    [windowSelectNetwork_ orderOut:self];
-    [windowStatus_ orderOut:self];
-	[windowInvalidApiKey_ orderOut:self];
     [NSApp activateIgnoringOtherApps:YES];
-    [windowLogin_ makeKeyAndOrderFront:self];
+    [windowStatus_ makeKeyAndOrderFront:self];
     [self setButtonLoginStatus];
     [windowLogin_ makeFirstResponder:editOpenDnsAccount_];
+
+	[NSApp beginSheet:windowLogin_ modalForWindow:windowStatus_ 
+		modalDelegate:self
+	   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
 }
 
 - (void)showNetworksWindow {
-    [windowLogin_ orderOut:self];
-    [windowStatus_ orderOut:self];
-	[windowInvalidApiKey_ orderOut:self];
-    [NSApp activateIgnoringOtherApps:YES];
-    [windowSelectNetwork_ makeKeyAndOrderFront:self];
+	[NSApp beginSheet:windowSelectNetwork_ modalForWindow:windowStatus_ 
+		modalDelegate:self
+	   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
 }
 
 - (BOOL)isButtonLoginEnabled {
@@ -1151,7 +1161,6 @@ ShowStatusWindow:
 	[self forceNextIpUpdate];
 	[self ipAddressCheckAndPeriodicIpUpdate:nil];
     [self updateStatusWindow];
-    [self showStatusWindow:nil];
     return;
 }
 
@@ -1168,6 +1177,7 @@ ShowStatusWindow:
 }
 
 - (IBAction)login:(id)sender {
+	[NSApp endSheet:windowLogin_];
     if (![self isButtonLoginEnabled])
         return;
     [buttonLogin_ setEnabled: NO];
@@ -1192,7 +1202,7 @@ ShowStatusWindow:
 
 - (IBAction)loginQuitOrCancel:(id)sender {
     if ([self isLoggedIn])
-        [self showStatusWindow:self];
+		[NSApp endSheet:windowLogin_];
     else
         [NSApp terminate:self];
 }
@@ -1213,6 +1223,7 @@ ShowStatusWindow:
 }
 
 - (IBAction)selectNetworkCancel:(id)sender {
+	[NSApp endSheet:windowSelectNetwork_];
     [self updateStatusWindow];
     [self showStatusWindow:self];
 }
@@ -1222,6 +1233,7 @@ ShowStatusWindow:
 }
 
 - (IBAction)selectNetworkDoubleClick:(id)sender {
+	[NSApp endSheet:windowSelectNetwork_];
     NSTableDataSourceDynamicNetworks *dataSource = [tableNetworksList_ dataSource];
     int row = [tableNetworksList_ selectedRow];
     NSTableColumn *tableColumn = [tableNetworksList_ tableColumnWithIdentifier:@"1"];

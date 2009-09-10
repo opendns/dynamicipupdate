@@ -105,7 +105,7 @@ extern NSString * UNS_NO_NETWORK_SELECTED;
 - (IBAction)statusUpdateNow:(id)sender;
 - (IBAction)statusWindowAbout:(id)sender;
 
-- (void)showInvaliApiKeyWindow;
+- (void)showInvalidApiKeyWindow;
 - (void)forceNextIpUpdate;
 
 @end
