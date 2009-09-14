@@ -226,7 +226,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     if ([s hasPrefix:@"badauth"])
         return IpUpdateBadAuth;
     if ([s hasPrefix:@"nohost"])
-        return IpUpdateBadAuth;
+        return IpUpdateNoHost;
     assert(0);
     return IpUpdateOk;
 }
