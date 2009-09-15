@@ -164,14 +164,14 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     if (4 != he->h_length)
             return nil;
     addrs = he->h_addr_list;
-    while (*addrs) {
-        unsigned char *a = (unsigned char*)*addrs++;
-        // TODO: could by more efficient by comparing old vs. new as bytes
-        // and only creating NSString when are different
-        NSString *addrTxt = [NSString stringWithFormat:@"%d.%d.%d.%d", a[0], a[1], a[2], a[3]];
-        return addrTxt;
-    }
-    return nil;
+    // only return the first result
+    unsigned char *a = (unsigned char*)*addrs;
+    if (!a)
+	return nil;
+    // TODO: could by more efficient by comparing old vs. new as bytes
+    // and only creating NSString when are different
+    NSString *addrTxt = [NSString stringWithFormat:@"%d.%d.%d.%d", a[0], a[1], a[2], a[3]];
+    return addrTxt;
 }
 
 - (BOOL)canSendIPUpdates {
@@ -309,8 +309,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 
 // equivalent of  echo "${s}" | openssl enc -bf -d -pass pass:"NojkPqnbK8vwmaJWVnwUq" -salt -a
 - (NSString*)decryptString:(NSString*)s {
-    NSTask *task;
-    task = [[NSTask alloc] init];
+    NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath: @"/bin/sh"];
     NSString *shellArg = [NSString stringWithFormat:@"echo \"%@\" | openssl enc -bf -d -pass pass:\"NojkPqnbK8vwmaJWVnwUq\" -salt -a", s];
     NSArray *arguments;
@@ -321,8 +320,9 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSFileHandle *file = [pipe fileHandleForReading];
     [task launch];
     NSData *data = [file readDataToEndOfFile];
-    NSString *string = [[NSString alloc] initWithData: data
-                                   encoding: NSUTF8StringEncoding];
+    [task release];
+    NSString *string = [[[NSString alloc] initWithData: data
+                                   encoding: NSUTF8StringEncoding] autorelease];
     string = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     return string;
 }
@@ -359,7 +359,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 - (NSDictionary*)dictionaryFromJson:(NSData*)jsonData {
     if (!jsonData)
         return nil;
-    NSString *s = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    NSString *s = [[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] autorelease];
     SBJSON *parser = [[[SBJSON alloc] init] autorelease];
     id json = [parser objectWithString:s];
     if (![json isKindOfClass:[NSDictionary class]])
@@ -920,6 +920,7 @@ Exit:
                                     attributes:nil];
     [ts setAttributedString:attrString];
     [ts endEditing];
+    [attrString release];
     [self hiliteAndActivateURLs:textView];
 }
 
@@ -1107,7 +1108,7 @@ Exit:
         // TODO: not sure if updates will work for that case.
         goto SetDynamicNetwork;
     }
-    NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks];
+    NSTableDataSourceDynamicNetworks *dataSource = [[[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks] autorelease];
     [tableNetworksList_ setDataSource:dataSource];
     [tableNetworksList_ setTarget:self];
     [tableNetworksList_ setAction:@selector(selectNetworkClick:)];
