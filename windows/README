@@ -5,7 +5,7 @@ The purpose of the client is to detect IP change on your network
 communicate this change to OpenDNS, so that OpenDNS can apply
 filtering settings associated with a given OpenDNS account.
 
-Limitations:
+Gotchas when building this by yourself:
 * this application makes API calls to OpenDNS website, which
   requires an API key. API key in src/ApiKey.h is not a valid
   key - you need to contact OpenDNS to obtain valid API key.
