@@ -109,7 +109,7 @@ void CMainFrame::OnClose()
 {
 	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
 	if (CanSendIPUpdates() && sendingUpdates && !IsLeftAltAndCtrlPressed() && !m_forceExitOnClose) {
-		SwitchToHiddenState();
+		ShowWindow(SW_MINIMIZE);
 		SetMsgHandled(TRUE);
 	} else {
 		SetMsgHandled(FALSE);
@@ -493,7 +493,9 @@ bool CMainFrame::DnsVsHttpIpMismatch()
 {
 	if (!RealIpAddress(m_ipFromDns) || !m_ipFromHttp)
 		return false;
-	return (0 != m_ipFromDnsStr.Compare(m_ipFromHttp));
+	if (0 != m_ipFromDnsStr.Compare(m_ipFromHttp))
+	    return true;
+	return false;
 }
 
 TCHAR *CMainFrame::LastUpdateTxt()
@@ -1272,7 +1274,10 @@ void CMainFrame::OnNewVersionAvailable(TCHAR *setupFilePath)
 void CMainFrame::OnSize(UINT nType, CSize /*size*/)
 {
 	if (SIZE_MINIMIZED == nType)
+	{
+		SwitchToHiddenState();
 		return;
+	}
 	RECT clientRect;
 	BOOL ok = GetClientRect(&clientRect);
 	if (!ok) return;
@@ -1641,11 +1646,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 void CMainFrame::OnDestroy()
 {
 	this->KillTimer(TYPO_EXCEPTION_CHECK_TIMER_ID);
-	m_updaterThread->Stop(true);
 
 	// seen in crash report: apparently we get WM_DESTROY before
 	// m_updaterThread is created
 	if (m_updaterThread) {
+		m_updaterThread->Stop(true);
 		delete m_updaterThread;
 		m_updaterThread = NULL;
 	}
@@ -1666,7 +1671,14 @@ LRESULT CMainFrame::OnUpdateStatus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
 
 void CMainFrame::SwitchToVisibleState()
 {
-	ShowWindow(SW_SHOW);
+	WINDOWPLACEMENT wp;
+	GetWindowPlacement(&wp);
+
+	if (wp.showCmd == SW_SHOWMINIMIZED)
+		ShowWindow(SW_RESTORE);
+	else
+		ShowWindow(SW_SHOW);
+
 	m_uiState = UI_STATE_VISIBLE;
 	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU2));
 	m_notifyIcon.SetMenu(menu);
