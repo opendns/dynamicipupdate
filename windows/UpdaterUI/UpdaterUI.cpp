@@ -25,7 +25,7 @@ CAppModule _Module;
 
 #define AUTO_START_KEY_PATH _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
 #define AUTO_START_KEY_NAME _T("OpenDNS Updater")
-#define UNINSTALL_FEEDBACK_URL _T("http://www.opendns.com/software/winupdateruninstallfeedback")
+#define UNINSTALL_FEEDBACK_URL _T("http://opendns.com/feedback/windows-updater-uninstall")
 
 static void AddToAutoStart()
 {
