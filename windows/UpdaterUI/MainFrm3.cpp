@@ -1245,6 +1245,8 @@ void CMainFrame::OnToggleWindow(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 {
 	m_hiddenMode = !m_hiddenMode;
+	SetPrefValBool(&g_pref_run_hidden, m_hiddenMode);
+	PreferencesSave();
 	// when enabling hidden mode, it acts as a command and hides the window
 	// when disabling hidden mode, it acts as an off button. It's a bit weird
 	if (m_hiddenMode)

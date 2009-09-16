@@ -68,6 +68,11 @@ int Run(bool show)
 	if (wndMain.CreateEx(NULL, r) == NULL)
 		return 0;
 
+	if (TRUE == GetPrefValBool(g_pref_run_hidden)) {
+		wndMain.m_hiddenMode = true;
+		show = false;
+	}
+
 	wndMain.m_simulatedError = (SimulatedError)simulatedError;
 	if (show)
 		wndMain.SwitchToVisibleState();
@@ -530,6 +535,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	bool showWindow = true;
 	if (wasAutoStart)
 		showWindow = false;
+
 	nRet = Run(showWindow);
 
 	PreferencesSave();
