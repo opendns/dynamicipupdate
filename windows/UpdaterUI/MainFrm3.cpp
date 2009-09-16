@@ -89,6 +89,7 @@ CMainFrame::CMainFrame()
 	m_newVersionSetupFilepath = NULL;
 	m_forceExitOnClose = false;
 	m_hiddenMode = false;
+	m_hadFirstLayout = false;
 }
 
 CMainFrame::~CMainFrame()
@@ -328,6 +329,9 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 		//rc.MoveToY(TOP_BAR_DY);
 		rc.MoveToY(0);
 		dc2.FillSolidRect(rc, colWinBg);
+
+		if (!m_hadFirstLayout)
+			return 1;
 
 		DrawDivider(dc2, TXT_DIV_ACCOUNT, m_txtAccountRect);
 		if (IsLoggedIn())
@@ -1135,6 +1139,8 @@ void CMainFrame::DoLayout()
 	BOOL hasMenu = FALSE;
 	::AdjustWindowRect(&r, winStyle, hasMenu);
 	m_minWinDy = RectDy(r);
+
+	m_hadFirstLayout = true;
 }
 
 LRESULT CMainFrame::OnLayout(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -1543,7 +1549,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_topBarFont = m_defaultFont;
 
 	// values inside r don't matter - things get positioned in DoLayout()
-	RECT r = {10, 10, 20, 20};
+	RECT r = {100, 1000, 0, 0};
 
 	m_defaultGuiFont = AtlGetDefaultGuiFont();
 

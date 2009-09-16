@@ -225,7 +225,7 @@ public:
 	SimulatedError		m_simulatedError;
 	bool				m_forceExitOnClose;
 	bool				m_hiddenMode;
-
+	bool				m_hadFirstLayout;
 
 	BEGIN_UPDATE_UI_MAP(CMainFrame)
 		UPDATE_ELEMENT(IDM_RUN_HIDDEN, UPDUI_MENUPOPUP)

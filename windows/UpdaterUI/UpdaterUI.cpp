@@ -61,7 +61,10 @@ int Run(bool show)
 
 	CMainFrame wndMain;
 	CString appDataDir = AppDataDir();
-	RECT r = { CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT };
+	// to avoid jarring resizing of the window at startup, create a window with
+	// a size close to what the calculated size will be in most frequent case.
+	// 328x290 was chosen empirically by measuring the window on XP
+	RECT r = { CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT+328, CW_USEDEFAULT+290 };
 	if (wndMain.CreateEx(NULL, r) == NULL)
 		return 0;
 
