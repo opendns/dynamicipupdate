@@ -224,6 +224,14 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\IpUpdatesLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IpUpdatesLog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MainFrm.cpp"
 				>
 			</File>
@@ -321,19 +329,19 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\res\systray-err.ico"
-				>
-			</File>
-			<File
 				RelativePath=".\res\res\systray-err.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\systray-ok.ico"
+				RelativePath=".\res\systray-err.ico"
 				>
 			</File>
 			<File
 				RelativePath=".\res\res\systray-ok.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\systray-ok.ico"
 				>
 			</File>
 			<File

@@ -19,7 +19,6 @@ bool SLogInit(const TCHAR *logFileName)
 #endif
 	InitializeCriticalSection(&gLogCs);
 	gLogFileName = tstrdup(logFileName);
-	//gLogFile = _tfopen(logFileName, _T("wb"));
 	gLogFile = _tfopen(logFileName, _T("ab"));
 	return true;
 }
