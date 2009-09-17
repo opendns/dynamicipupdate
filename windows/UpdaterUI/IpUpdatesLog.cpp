@@ -4,11 +4,6 @@
 #include "MiscUtil.h"
 #include "StrUtil.h"
 
-/*
-TODO:
-* finish writing out the truncated log
-*/
-
 // When we reach that many updates, we'll trim the ip updates log
 #define IP_UPDATES_PURGE_LIMIT 1000
 
@@ -152,12 +147,6 @@ static void LogIpUpdateEntry(FILE *log, const char *ipAddress, const char *time)
 #if 0
 // overwrite the history log file with the current history in g_ipUpdates
 // The assumption is that we've limited 
-static void WriteIpLogHistory(const TCHAR *logFileName)
-{
-	FILE *log = _tfopen(logFileName, _T("wb"));
-
-	fclose(log);
-}
 
 static void RemoveLogEntries(int max)
 {
@@ -209,18 +198,75 @@ void LogIpUpdate(const char *ipAddress)
 
 static void CloseIpUpdatesLog()
 {
-	TStrFree(&gIpUpdatesLogFileName);
 	if (gIpUpdatesLogFile) {
 		fclose(gIpUpdatesLogFile);
 		gIpUpdatesLogFile = NULL;
 	}
 }
 
+static inline void FreeIpUpdatesLogName()
+{
+	TStrFree(&gIpUpdatesLogFileName);
+}
+
+// reverse g_ipUpdates and return size of the list
+size_t ReverseIpUpdateList()
+{
+	size_t size = 0;
+	IpUpdate *newHead = NULL;
+	IpUpdate *curr = g_ipUpdates;
+	while (curr) {
+		IpUpdate *next = curr->next;
+		curr->next = newHead;
+		newHead = curr;
+		curr = next;
+		size++;
+	}
+	g_ipUpdates = newHead;
+	return size;
+}
+
+static void WriteIpLogHistory(const TCHAR *logFileName, IpUpdate *head)
+{
+	FILE *log = _tfopen(logFileName, _T("wb"));
+	IpUpdate *curr = head;
+	while (curr) {
+		LogIpUpdateEntry(log, curr->ipAddress, curr->time);
+		curr = curr->next;
+	}
+	fclose(log);
+}
+
+// if we have more than IP_UPDATES_HISTORY_MAX entries, over-write
+// the log with only the recent entries
+static void OverwriteLogIfReachedLimit()
+{
+	// in order to (possibly) write out log entries, we have to write from
+	// the end, so we need to reverse the list. We combine this with
+	// calculating the size because we need to know the size to decide
+	// if we need to overwrite the log
+	size_t size = ReverseIpUpdateList();
+	if (size < IP_UPDATES_PURGE_LIMIT)
+		return;
+
+	// skip the entries we don't want to write out
+	assert(size > IP_UPDATES_SIZE_AFTER_PURGE);
+	size_t toSkip = size - IP_UPDATES_SIZE_AFTER_PURGE;
+	IpUpdate *curr = g_ipUpdates;
+	while (curr && (toSkip != 0)) {
+		curr = curr->next;
+		toSkip--;
+	}
+
+	// write the rest to the new log
+	WriteIpLogHistory(gIpUpdatesLogFileName, curr);
+}
+
 void FreeIpUpdatesHistory()
 {
 	CloseIpUpdatesLog();
-	// TODO: if we have more than IP_UPDATES_HISTORY_MAX entries, over-write
-	// the log with only the recent entries
+	OverwriteLogIfReachedLimit();
+	FreeIpUpdatesLogName();
 	FreeIpUpdatesFromElement(g_ipUpdates);
 	g_ipUpdates = NULL;
 }
