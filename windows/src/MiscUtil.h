@@ -147,4 +147,8 @@ static inline int RectDy(const RECT r)
 	return dy;
 }
 
+static inline void memzero(void *mem, size_t size) {
+	memset(mem, 0, size);
+}
+
 #endif
