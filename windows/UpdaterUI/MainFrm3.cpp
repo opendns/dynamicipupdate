@@ -1700,7 +1700,7 @@ void CMainFrame::SwitchToVisibleState()
 	m_uiState = UI_STATE_VISIBLE;
 	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU2));
 	m_notifyIcon.SetMenu(menu);
-	m_notifyIcon.SetDefaultMenuItem(1, TRUE);
+	m_notifyIcon.SetDefaultMenuItem(2, TRUE);
 	if (m_notifyIcon.IsHidden())
 		m_notifyIcon.Show();
 	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
@@ -1714,7 +1714,7 @@ void CMainFrame::SwitchToHiddenState()
 	m_uiState = UI_STATE_HIDDEN;
 	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU1));
 	m_notifyIcon.SetMenu(menu);
-	m_notifyIcon.SetDefaultMenuItem(1, TRUE);
+	m_notifyIcon.SetDefaultMenuItem(2, TRUE);
 	if (m_hiddenMode && !m_notifyIcon.IsHidden())
 		m_notifyIcon.Hide();
 	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
