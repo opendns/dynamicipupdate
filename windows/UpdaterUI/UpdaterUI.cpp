@@ -411,13 +411,6 @@ static CString LogFileName(const TCHAR *dir)
 	return fileName;
 }
 
-static CString IpUpdatesLogFileName(const TCHAR *dir)
-{
-	CString fileName = dir;
-	fileName += "\\ipupdateslog.txt";
-	return fileName;
-}
-
 static bool IsApiKeyCharValid(char c)
 {
 	static char *validKeyChars = "0123456789ABCDEF";
@@ -462,7 +455,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	CString appDataDir = AppDataDir();
 	InstallCrashHandler(appDataDir, GUI_EXE_NAME_WITHOUT_EXE);
 
-	LoadIpUpdatesHistory(IpUpdatesLogFileName(appDataDir));
+	LoadIpUpdatesHistory(IpUpdatesLogFileName());
 
 	SLogInit(LogFileName(appDataDir));
 	slognl("-------- starting");

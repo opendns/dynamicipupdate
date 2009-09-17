@@ -60,9 +60,50 @@ public:
 		return 0;
 	};
 
-	LRESULT OnButtonCopyToClipboard(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+	LRESULT OnButtonCopyToClipboard(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 	{
-		EndDialog(wID);
+		size_t		sLen;
+		char *		s = NULL;
+		WCHAR *		unicode = NULL;
+		void *		tmp;
+		HGLOBAL		handle = NULL;
+
+		if (!OpenClipboard())
+			return 0;
+
+		s = IpUpdatesAsText(m_ipUpdates, &sLen);
+		if (!s)
+			goto Exit;
+
+		::EmptyClipboard();
+		handle = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, sLen);
+		if (!handle)
+			goto Exit;
+		tmp = GlobalLock(handle);
+		memcpy(tmp, s, sLen);
+		GlobalUnlock(handle);
+		::SetClipboardData(CF_TEXT, handle);
+		// clipboard takes ownership of the handle => no need to GlobalFree() it
+
+#if 0
+		unicode = StrToWstrSimple(s);
+		if (!unicode)
+			goto Exit;
+		size_t cbUnicodeSize = (wcslen(unicode)) * sizeof(WCHAR);
+		handle = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, cbUnicodeSize);
+		if (!handle)
+			goto Exit;
+		tmp = GlobalLock(handle);
+		memcpy(tmp, unicode, cbUnicodeSize);
+		GlobalUnlock(handle);
+		::SetClipboardData(CF_UNICODETEXT, handle);
+		// clipboard takes ownership of the handle => no need to GlobalFree() it
+#endif
+
+Exit:
+		::CloseClipboard();
+		free(s);
+		free(unicode);
 		return 0;
 	};
 

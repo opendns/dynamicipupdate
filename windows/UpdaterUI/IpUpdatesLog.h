@@ -13,9 +13,11 @@ typedef struct IpUpdate {
 
 extern IpUpdate *g_ipUpdates;
 
+CString IpUpdatesLogFileName();
 void LoadIpUpdatesHistory(const TCHAR *logFileName);
 void LogIpUpdate(const char *ipAddress);
 void FreeIpUpdatesHistory();
+char *IpUpdatesAsText(IpUpdate *head, size_t *sizeOut);
 
 #endif
 

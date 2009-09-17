@@ -19,6 +19,56 @@ IpUpdate *				g_ipUpdates = NULL;
 static const TCHAR *	gIpUpdatesLogFileName;
 static FILE *			gIpUpdatesLogFile;
 
+CString IpUpdatesLogFileName()
+{
+	CString fileName = AppDataDir();
+	fileName += _T("\\ipupdateslog.txt");
+	return fileName;
+}
+
+static void str_append(char **dstInOut, char *s)
+{
+	char *dst = *dstInOut;
+	size_t len = strlen(s);
+	memcpy(dst, s, len);
+	dst += len;
+	*dstInOut = dst;
+}
+
+char *IpUpdatesAsText(IpUpdate *head, size_t *sizeOut)
+{
+	IpUpdate *curr = head;
+	char *s = NULL;
+	size_t sizeNeeded = 0;
+
+	while (curr) {
+		if (curr->ipAddress && curr->time) {
+			sizeNeeded += strlen(curr->ipAddress);
+			sizeNeeded += strlen(curr->time);
+			sizeNeeded += 3; // space + '\r\n'
+		}
+		curr = curr->next;
+	}
+
+	s = (char*)malloc(sizeNeeded+1); // +1 for terminating zero
+
+	char *tmp = s;
+	curr = head;
+	while (curr) {
+		if (curr->ipAddress && curr->time) {
+			str_append(&tmp, curr->ipAddress);
+			str_append(&tmp, " ");
+			str_append(&tmp, curr->time);
+			str_append(&tmp, "\r\n");
+		}
+		curr = curr->next;
+	}
+	*tmp = 0;
+
+	*sizeOut = sizeNeeded + 1;
+	return s;
+}
+
 static void FreeIpUpdate(IpUpdate *ipUpdate)
 {
 	assert(ipUpdate);
@@ -143,26 +193,6 @@ static void LogIpUpdateEntry(FILE *log, const char *ipAddress, const char *time)
 	fwrite("\r\n", 2, 1, log);
 	fflush(log);
 }
-
-#if 0
-// overwrite the history log file with the current history in g_ipUpdates
-// The assumption is that we've limited 
-
-static void RemoveLogEntries(int max)
-{
-	IpUpdate *curr = g_ipUpdates;
-	IpUpdate **currPtr = NULL;
-	while (curr && max > 0) {
-		currPtr = &curr->next;
-		curr = curr->next;
-		--max;
-	}
-	if (!curr || !currPtr)
-		return;
-	FreeIpUpdatesFromElement(*currPtr);
-	*currPtr = NULL;
-}
-#endif
 
 static void LoadAndParseHistory(const TCHAR *logFileName)
 {
