@@ -455,7 +455,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	CString appDataDir = AppDataDir();
 	InstallCrashHandler(appDataDir, GUI_EXE_NAME_WITHOUT_EXE);
 
-	LoadIpUpdatesHistory(IpUpdatesLogFileName());
+	LoadIpUpdatesHistory();
 
 	SLogInit(LogFileName(appDataDir));
 	slognl("-------- starting");

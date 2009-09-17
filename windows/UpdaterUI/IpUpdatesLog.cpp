@@ -15,8 +15,6 @@
 // Linked list of ip updates. Newest are at the front.
 IpUpdate *				g_ipUpdates = NULL;
 
-// name of the file where we persist ip updates history
-static const TCHAR *	gIpUpdatesLogFileName;
 static FILE *			gIpUpdatesLogFile;
 
 CString IpUpdatesLogFileName()
@@ -204,14 +202,12 @@ static void LoadAndParseHistory(const TCHAR *logFileName)
 	free(data);
 }
 
-void LoadIpUpdatesHistory(const TCHAR *logFileName)
+void LoadIpUpdatesHistory()
 {
-	assert(!gIpUpdatesLogFileName);
 	assert(!gIpUpdatesLogFile);
 
+	CString logFileName = IpUpdatesLogFileName();
 	LoadAndParseHistory(logFileName);
-
-	gIpUpdatesLogFileName = tstrdup(logFileName);
 	gIpUpdatesLogFile = _tfopen(logFileName, _T("ab"));
 }
 
@@ -236,11 +232,6 @@ static void CloseIpUpdatesLog()
 	}
 }
 
-static inline void FreeIpUpdatesLogName()
-{
-	TStrFree(&gIpUpdatesLogFileName);
-}
-
 // reverse g_ipUpdates and return size of the list
 size_t ReverseIpUpdateList()
 {
@@ -258,8 +249,9 @@ size_t ReverseIpUpdateList()
 	return size;
 }
 
-static void WriteIpLogHistory(const TCHAR *logFileName, IpUpdate *head)
+static void WriteIpLogHistory(IpUpdate *head)
 {
+	CString logFileName = IpUpdatesLogFileName();
 	FILE *log = _tfopen(logFileName, _T("wb"));
 	IpUpdate *curr = head;
 	while (curr) {
@@ -291,14 +283,13 @@ static void OverwriteLogIfReachedLimit()
 	}
 
 	// write the rest to the new log
-	WriteIpLogHistory(gIpUpdatesLogFileName, curr);
+	WriteIpLogHistory(curr);
 }
 
 void FreeIpUpdatesHistory()
 {
 	CloseIpUpdatesLog();
 	OverwriteLogIfReachedLimit();
-	FreeIpUpdatesLogName();
 	FreeIpUpdatesFromElement(g_ipUpdates);
 	g_ipUpdates = NULL;
 }
