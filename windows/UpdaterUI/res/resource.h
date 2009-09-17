@@ -18,11 +18,9 @@
 #define IDC_STATIC_SIGNIN               1004
 #define IDC_STATIC_USERNAME             1005
 #define IDC_STATIC_PASSWORD             1006
-#define IDC_LIST1                       1007
 #define IDC_LIST_NETWORKS               1007
-#define IDC_STATIC_SELECT_NETWORK       1008
-#define IDC_LIST2                       1009
-#define IDC_LIST_IP_UPDATES_HISTORY     1009
+#define IDC_LIST_IP_UPDATES_HISTORY     1008
+#define IDC_STATIC_SELECT_NETWORK       1009
 #define IDC_COPY_TO_CLIPBOARD           1010
 #define IDC_BUTTON_COPY_TO_CLIPBOARD    1010
 #define IDR_MENU1                       1500
