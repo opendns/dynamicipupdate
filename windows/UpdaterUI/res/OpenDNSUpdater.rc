@@ -1,7 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
-#include "..\src\ProgramVersion.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -56,10 +55,15 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\OpenDNSUpdater.ico"
-IDR_SYSTRAY_OK			ICON					"res\\systray-ok.ico"
-IDR_SYSTRAY_ERR			ICON					"res\\systray-err.ico"
+IDR_SYSTRAY_OK          ICON                    "res\\systray-ok.ico"
+IDR_SYSTRAY_ERR         ICON                    "res\\systray-err.ico"
 
-IDR_UPDATE_BMP			BITMAP					"res\\windows_update_icon.bmp"
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_UPDATE_BMP          BITMAP                  "res\\windows_update_icon.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -95,6 +99,16 @@ BEGIN
     LTEXT           "Select network for Dynamic IP Updates:",IDC_STATIC_SELECT_NETWORK,22,15,128,8
 END
 
+IDD_DIALOG_IP_UPDATES_HISTORY DIALOGEX 0, 0, 194, 182
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "IP Updates History"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,137,161,50,14
+    PUSHBUTTON      "Copy history to clipboard",IDC_BUTTON_COPY_TO_CLIPBOARD,36,161,94,14
+    LISTBOX         IDC_LIST_IP_UPDATES_HISTORY,7,7,180,150,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -119,6 +133,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 175
     END
+
+    IDD_DIALOG_IP_UPDATES_HISTORY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 187
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -129,8 +151,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION VERSION_RC
- PRODUCTVERSION VERSION_RC
+ FILEVERSION 2,1,0,0
+ PRODUCTVERSION 2,1,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -147,23 +169,30 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "OpenDNS Inc."
             VALUE "FileDescription", "OpenDNS Updater"
-            VALUE "FileVersion", VERSION_RC_STR
+            VALUE "FileVersion", "2.1.0.0"
             VALUE "InternalName", "OpenDNS Updater"
             VALUE "LegalCopyright", "Copyright OpenDNS 2009"
             VALUE "OriginalFilename", "OpenDNSUpdater.exe"
             VALUE "ProductName", "OpenDNS Updater"
-            VALUE "ProductVersion", VERSION_RC_STR
+            VALUE "ProductVersion", "2.1.0.0"
         END
     END
 END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
 
 IDR_MENU1 MENU 
 BEGIN
     POPUP ""
     BEGIN
-        MENUITEM "Run hidden",        IDM_RUN_HIDDEN
-        MENUITEM "Show window",       IDM_TOGGLE_WINDOW
-        MENUITEM "Exit",       		  IDM_EXIT
+        MENUITEM "IP updates history",          IDM_IP_UPDATES_HISTORY
+        MENUITEM "Run hidden",                  IDM_RUN_HIDDEN
+        MENUITEM "Show window",                 IDM_TOGGLE_WINDOW
+        MENUITEM "Exit",                        IDM_EXIT
     END
 END
 
@@ -171,11 +200,13 @@ IDR_MENU2 MENU
 BEGIN
     POPUP ""
     BEGIN
-        MENUITEM "Run hidden",        IDM_RUN_HIDDEN
-        MENUITEM "Hide window",       IDM_TOGGLE_WINDOW
-        MENUITEM "Exit",       		  IDM_EXIT
+        MENUITEM "IP updates history",          IDM_IP_UPDATES_HISTORY
+        MENUITEM "Run hidden",                  IDM_RUN_HIDDEN
+        MENUITEM "Hide window",                 IDM_TOGGLE_WINDOW
+        MENUITEM "Exit",                        IDM_EXIT
     END
 END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

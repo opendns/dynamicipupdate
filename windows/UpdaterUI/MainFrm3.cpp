@@ -6,7 +6,9 @@
 
 #if MAIN_FRM == 3
 #include "MainFrm3.h"
+#include "IpUpdatesLog.h"
 #include "TypoExceptions.h"
+#include "IpUpdatesHistoryDlg.h"
 
 #define TEN_MINUTES_IN_MS 10*60*1000
 #define TYPO_EXCEPTION_CHECK_PERIOD TEN_MINUTES_IN_MS
@@ -1215,8 +1217,10 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 
 	if ((IpUpdateOk == ipUpdateResult) || (IpUpdateNotYours == ipUpdateResult)) {
 		const char *ip = StrFindChar(ipUpdateRes, ' ');
-		if (ip)
+		if (ip) {
 			m_ipFromHttp = StrToTStr(ip+1);
+			LogIpUpdate(ip+1);
+		}
 	}
 
 	if (ipUpdateResult == m_ipUpdateResult)
@@ -1253,6 +1257,12 @@ void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 		SwitchToHiddenState();
 	else
 		UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
+}
+
+void CMainFrame::OnIpUpdatesHistory(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
+{
+	CIpUpdatesHistoryDlg dlg(g_ipUpdates);
+	dlg.DoModal();
 }
 
 LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/)

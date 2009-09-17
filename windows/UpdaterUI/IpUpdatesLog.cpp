@@ -190,10 +190,12 @@ void LogIpUpdate(const char *ipAddress)
 	char timeBuf[256];
 	__time64_t ltime;
 	struct tm *today;
+	_time64(&ltime);
 	today = _localtime64(&ltime);
 	strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M", today);
 	assert(gIpUpdatesLogFile);
 	LogIpUpdateEntry(gIpUpdatesLogFile, ipAddress, timeBuf);
+	InsertIpUpdate(ipAddress, timeBuf);
 }
 
 static void CloseIpUpdatesLog()

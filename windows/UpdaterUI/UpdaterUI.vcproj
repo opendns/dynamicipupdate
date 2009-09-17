@@ -313,6 +313,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\res\OpenDNSUpdater.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\res\OpenDNSUpdater.ico"
 				>
 			</File>
@@ -342,6 +346,10 @@
 			</File>
 			<File
 				RelativePath=".\res\systray-ok.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\res\windows_update_icon.bmp"
 				>
 			</File>
 			<File
