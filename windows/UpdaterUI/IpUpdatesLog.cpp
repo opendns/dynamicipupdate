@@ -126,9 +126,11 @@ static bool ExtractIpAddrAndTime(char **dataStartInOut, uint64_t *dataSizeLeftIn
 
 	if (0 == dataSizeLeft)
 		return false;
+
 	if (*curr == '!') {
 		ok = false;
 		--dataSizeLeft;
+		++ipAddr;
 		++curr;
 	}
 
