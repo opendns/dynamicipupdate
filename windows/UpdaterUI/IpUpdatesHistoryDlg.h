@@ -40,7 +40,7 @@ public:
 		m_ipUpdatesList.SetColumnWidth(1, TOTAL_WIDTH - DATE_COLUMN_WIDTH);
 		IpUpdate *curr = m_ipUpdates;
 		int i = 0;
-		while (curr) {
+		while (curr && (i < IP_UPDATES_HISTORY_MAX)) {
 			TCHAR *ipAddr = StrToTStr(curr->ipAddress);
 			TCHAR *time = StrToTStr(curr->time);
 			if (time && ipAddr) {
@@ -50,6 +50,7 @@ public:
 			free(ipAddr);
 			free(time);
 			curr = curr->next;
+			i++;
 		}
 		return FALSE;
 	}
