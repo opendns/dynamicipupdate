@@ -86,7 +86,7 @@ static void FreeIpUpdatesFromElement(IpUpdate *curr)
 	}
 }
 
-static void InsertIpUpdate(const char *ipAddress, const char *time)
+static void InsertIpUpdate(const char *ipAddress, const char *time, bool ok)
 {
 	assert(ipAddress);
 	assert(time);
@@ -98,6 +98,7 @@ static void InsertIpUpdate(const char *ipAddress, const char *time)
 
 	ipUpdate->ipAddress = strdup(ipAddress);
 	ipUpdate->time = strdup(time);
+	ipUpdate->ok = ok;
 	if (!ipUpdate->ipAddress || !ipUpdate->time) {
 		FreeIpUpdate(ipUpdate);
 		return;
@@ -115,12 +116,21 @@ static inline bool is_newline_char(char c)
 // at this point <*dataStartInOut> points at the beginning of the log file,
 // which consists of lines in format:
 // $ipaddr $time\r\n
-static bool ExtractIpAddrAndTime(char **dataStartInOut, uint64_t *dataSizeLeftInOut, char **ipAddrOut, char **timeOut)
+static bool ExtractIpAddrAndTime(char **dataStartInOut, uint64_t *dataSizeLeftInOut, char **ipAddrOut, char **timeOut, bool *okOut)
 {
 	char *curr = *dataStartInOut;
 	uint64_t dataSizeLeft = *dataSizeLeftInOut;
 	char *time = NULL;
 	char *ipAddr = curr;
+	bool ok = true;
+
+	if (0 == dataSizeLeft)
+		return false;
+	if (*curr == '!') {
+		ok = false;
+		--dataSizeLeft;
+		++curr;
+	}
 
 	// first space separates $ipaddr from $time
 	while ((dataSizeLeft > 0) && (*curr != ' ')) {
@@ -156,6 +166,7 @@ static bool ExtractIpAddrAndTime(char **dataStartInOut, uint64_t *dataSizeLeftIn
 	*timeOut = time;
 	*dataSizeLeftInOut = dataSizeLeft;
 	*dataStartInOut = curr;
+	*okOut = ok;
 	return true;
 }
 
@@ -166,23 +177,27 @@ static void ParseIpLogHistory(char *data, uint64_t dataSize)
 {
 	char *ipAddr = NULL;
 	char *time = NULL;
+	bool updateOk;
 	while (dataSize != 0) {
-		bool ok = ExtractIpAddrAndTime(&data, &dataSize, &ipAddr, &time);
+		bool ok = ExtractIpAddrAndTime(&data, &dataSize, &ipAddr, &time, &updateOk);
 		if (!ok) {
 			assert(0);
 			break;
 		}
-		InsertIpUpdate(ipAddr, time);
+		InsertIpUpdate(ipAddr, time, updateOk);
 	}
 }
 
-static void LogIpUpdateEntry(FILE *log, const char *ipAddress, const char *time)
+static void LogIpUpdateEntry(FILE *log, const char *ipAddress, const char *time, bool ok)
 {
 	assert(log && ipAddress && time);
 	if (!log || !ipAddress || !time)
 		return;
 
 	size_t slen = strlen(ipAddress);
+	if (!ok) {
+		fwrite("!", 1, 1, log);
+	}
 	fwrite(ipAddress, slen, 1, log);
 	fwrite(" ", 1, 1, log);
 
@@ -211,7 +226,7 @@ void LoadIpUpdatesHistory()
 	gIpUpdatesLogFile = _tfopen(logFileName, _T("ab"));
 }
 
-void LogIpUpdate(const char *ipAddress)
+static void LogIpUpdate(const char *ipAddress, bool ok)
 {
 	char timeBuf[256];
 	__time64_t ltime;
@@ -220,8 +235,18 @@ void LogIpUpdate(const char *ipAddress)
 	today = _localtime64(&ltime);
 	strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M", today);
 	assert(gIpUpdatesLogFile);
-	LogIpUpdateEntry(gIpUpdatesLogFile, ipAddress, timeBuf);
-	InsertIpUpdate(ipAddress, timeBuf);
+	LogIpUpdateEntry(gIpUpdatesLogFile, ipAddress, timeBuf, ok);
+	InsertIpUpdate(ipAddress, timeBuf, ok);
+}
+
+void LogIpUpdateOk(const char *ipAddress)
+{
+	LogIpUpdate(ipAddress, true);
+}
+
+void LogIpUpdateNotYours(const char *ipAddress)
+{
+	LogIpUpdate(ipAddress, false);
 }
 
 static void CloseIpUpdatesLog()
@@ -255,7 +280,7 @@ static void WriteIpLogHistory(IpUpdate *head)
 	FILE *log = _tfopen(logFileName, _T("wb"));
 	IpUpdate *curr = head;
 	while (curr) {
-		LogIpUpdateEntry(log, curr->ipAddress, curr->time);
+		LogIpUpdateEntry(log, curr->ipAddress, curr->time, curr->ok);
 		curr = curr->next;
 	}
 	fclose(log);

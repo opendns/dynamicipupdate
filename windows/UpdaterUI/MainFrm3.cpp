@@ -32,7 +32,7 @@ static bool HasDynamicNetworkWithLabel(NetworkInfo *head, const char *label)
 	return false;
 }
 
-static void LogIpUpdate(char *resp)
+static void LogIpUpdate(const char *resp)
 {
 	slog("sent ip update for user '");
 	assert(g_pref_user_name);
@@ -1219,7 +1219,12 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 		const char *ip = StrFindChar(ipUpdateRes, ' ');
 		if (ip) {
 			m_ipFromHttp = StrToTStr(ip+1);
-			LogIpUpdate(ip+1);
+			if (IpUpdateOk == ipUpdateResult) {
+				LogIpUpdate(ip+1);
+			} else {
+				assert(IpUpdateNotYours == ipUpdateResult);
+				LogIpUpdateNotYours(ip+1);
+			}
 		}
 	}
 

@@ -9,13 +9,16 @@ typedef struct IpUpdate {
 	struct IpUpdate *	next;
 	char *				time;
 	char *				ipAddress;
+	// true if update was successful, false if server returned !yours
+	bool				ok;
 } IpUpdate;
 
 extern IpUpdate *g_ipUpdates;
 
 CString IpUpdatesLogFileName();
 void LoadIpUpdatesHistory();
-void LogIpUpdate(const char *ipAddress);
+void LogIpUpdateOk(const char *ipAddress);
+void LogIpUpdateNotYours(const char *ipAddress);
 void FreeIpUpdatesHistory();
 char *IpUpdatesAsText(IpUpdate *head, size_t *sizeOut);
 

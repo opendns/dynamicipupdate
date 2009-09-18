@@ -45,7 +45,15 @@ public:
 			TCHAR *time = StrToTStr(curr->time);
 			if (time && ipAddr) {
 				m_ipUpdatesList.AddItem(i, 0, time);
-				m_ipUpdatesList.AddItem(i, 1, ipAddr);
+				if (curr->ok) {
+					m_ipUpdatesList.AddItem(i, 1, ipAddr);
+				} else {
+					TCHAR *s = TStrCat(_T("!"), ipAddr);
+					if (s) {
+						m_ipUpdatesList.AddItem(i, 1, s);
+						free(s);
+					}
+				}
 			}
 			free(ipAddr);
 			free(time);
