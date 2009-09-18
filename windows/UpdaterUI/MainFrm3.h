@@ -68,8 +68,14 @@ enum {
 	WMAPP_DO_LAYOUT = WM_APP + 33
 	, WMAPP_UPDATE_STATUS
 	, WMAPP_NEW_VERSION
-	, WMAPP_SWITCH_TO_VISIBLE
+	, WMAPP_NOTIFY_ABOUT_ERROR
 	, WMAPP_NOTIFY_ICON
+};
+
+// why are we posting WMAPP_NOTIFY_ABOUT_ERROR message
+enum NotifyErrorReason {
+	NER_NOT_USING_OPENDNS = 0,
+	NER_UPDATE_FAILED
 };
 
 static void CrashMe()
@@ -245,7 +251,7 @@ public:
 		MESSAGE_HANDLER_EX(WMAPP_DO_LAYOUT, OnLayout)
 		MESSAGE_HANDLER_EX(WMAPP_UPDATE_STATUS, OnUpdateStatus)
 		MESSAGE_HANDLER_EX(WMAPP_NEW_VERSION, OnNewVersion)
-		MESSAGE_HANDLER_EX(WMAPP_SWITCH_TO_VISIBLE, OnSwitchToVisible)
+		MESSAGE_HANDLER_EX(WMAPP_NOTIFY_ABOUT_ERROR, OnNotifyAboutError)
 		MESSAGE_HANDLER_EX(WMAPP_NOTIFY_ICON, OnNotifyIcon)
 		COMMAND_HANDLER_EX(IDC_CHECK_SEND_UPDATES, BN_CLICKED, OnSendUpdatesButtonClicked)
 		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_ACCOUNT, BN_CLICKED, OnChangeAccount)
@@ -285,7 +291,7 @@ public:
 	void OnTimer(UINT_PTR nIDEvent);
 
 	LRESULT OnNewVersion(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
-	LRESULT OnSwitchToVisible(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/);
+	LRESULT OnNotifyAboutError(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/);
 	LRESULT OnNotifyIcon(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam);
 
 	void OnExit(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
@@ -354,6 +360,8 @@ public:
 	void SizeButtons(int& dxOut, int& dyOut);
 	void SwitchToVisibleState();
 	void SwitchToHiddenState();
+
+	void ToggleNagging();
 
 	int OnCreate(LPCREATESTRUCT /* lpCreateStruct */);
 };

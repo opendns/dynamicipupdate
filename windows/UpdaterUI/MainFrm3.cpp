@@ -10,6 +10,10 @@
 #include "TypoExceptions.h"
 #include "IpUpdatesHistoryDlg.h"
 
+// should we show errors via baloon messages in systray?
+// the code is there but we don't show at this moment
+#define SHOW_SYSTRAY_BALOON_FOR_ERRORS 0
+
 #define TEN_MINUTES_IN_MS 10*60*1000
 #define TYPO_EXCEPTION_CHECK_PERIOD TEN_MINUTES_IN_MS
 #define TYPO_EXCEPTION_CHECK_TIMER_ID 1
@@ -655,6 +659,14 @@ void CMainFrame::BuildStatusEditRtf(RtfTextInfo& ti)
 		ti.AddParasIfNeeded();
 		ti.AddTxt(_T("Your IP address is taken by another user. "));
 		ti.AddLink(_T("Learn more."), LINK_LEARN_MORE_IP_TAKEN);
+
+		BOOL nagging_disabled = GetPrefValBool(g_pref_disable_nagging);
+		ti.AddParasIfNeeded();
+		if (nagging_disabled) {
+			ti.AddLink(_T("Start nagging me."), LINK_TOGGLE_NAGGING);
+		} else {
+			ti.AddLink(_T("Stop nagging me."), LINK_TOGGLE_NAGGING);
+		}
 	}
 
 	if ((IpUpdateBadAuth == m_ipUpdateResult) || (SE_BAD_AUTH == m_simulatedError)) {
@@ -806,10 +818,21 @@ LRESULT CMainFrame::OnLinkStatusEdit(LPNMHDR pnmh)
 		LaunchUrl(LEARN_MORE_IP_MISMATCH_URL);
 	} else if (LINK_LEARN_MORE_IP_TAKEN == linkId) {
 		LaunchUrl(LEARN_MORE_IP_ADDRESS_TAKEN_URL);
+	} else if (LINK_TOGGLE_NAGGING == linkId) {
+		ToggleNagging();
 	} else
 		assert(0);
 	SetFocus();
 	return 0;
+}
+
+void CMainFrame::ToggleNagging()
+{
+	BOOL nagging_disabled = GetPrefValBool(g_pref_disable_nagging);
+	SetPrefValBool(&g_pref_disable_nagging, !nagging_disabled);
+	PreferencesSave();
+	UpdateUpdateEdit();
+	UpdateErrorEdit();
 }
 
 void CMainFrame::ChangeAccount()
@@ -1174,7 +1197,7 @@ void CMainFrame::OnIpCheckResult(IP4_ADDRESS myIp)
 		m_updaterThread->ForceSendIpUpdate();
 	} else {
 		if (IP_NOT_USING_OPENDNS == myIp) {
-			PostMessage(WMAPP_SWITCH_TO_VISIBLE);
+			PostMessage(WMAPP_NOTIFY_ABOUT_ERROR, NER_NOT_USING_OPENDNS);
 		}
 	}
 }
@@ -1200,6 +1223,8 @@ LRESULT CMainFrame::OnLinkLearnSetupOpenDns(LPNMHDR /*pnmh*/)
 	return 0;
 }
 
+// Note: this is called in the context of updater thread, so don't do
+// any direct gui calls
 void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 {
 	IpUpdateResult ipUpdateResult =	IpUpdateResultFromString(ipUpdateRes);
@@ -1207,6 +1232,7 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 	free(m_ipFromHttp);
 	m_ipFromHttp = NULL;
 
+	// if it was a problem with our service, silently ignore it
 	if (IpUpdateNotAvailable == ipUpdateResult)
 		return;
 
@@ -1233,7 +1259,7 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 
 	m_ipUpdateResult = ipUpdateResult;
 	if (ipUpdateResult != IpUpdateOk)
-		PostMessage(WMAPP_SWITCH_TO_VISIBLE);
+		PostMessage(WMAPP_NOTIFY_ABOUT_ERROR, NER_UPDATE_FAILED);
 	PostMessage(WMAPP_UPDATE_STATUS);
 }
 
@@ -1277,15 +1303,49 @@ LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/
 	return 0;
 }
 
-LRESULT CMainFrame::OnSwitchToVisible(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
+LRESULT CMainFrame::OnNotifyAboutError(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	SwitchToVisibleState();
+	BOOL visible = IsWindowVisible();
+	// if the window is already visible, it doesn't matter what error happend
+	if (visible) {
+		UpdateUpdateEdit();
+		UpdateErrorEdit();
+		BringWindowToTop();
+		return 0;
+	}
+
+#if SHOW_SYSTRAY_BALOON_FOR_ERRORS
+	// ignore m_hiddenMode and force showing notifyIcon, so that balloon
+	// tips is shown
+	if (m_notifyIcon.IsHidden())
+		m_notifyIcon.Show();
+
+	NotifyErrorReason reason = (NotifyErrorReason)wParam;
+
+	UINT timeout = 0; // 0 means default minimum timeout, is deprecated in Vista anyway
+	if (reason == NER_NOT_USING_OPENDNS) {
+		m_notifyIcon.SetBalloonDetails(_T("You're not using OpenDNS"), _T("Warning"), CTrayNotifyIcon::Warning, timeout);
+	} else if (reason == NER_UPDATE_FAILED) {
+		m_notifyIcon.SetBalloonDetails(_T("IP update failed"), _T("Warning"), CTrayNotifyIcon::Warning, timeout);
+	} else {
+		assert(0);
+		SwitchToVisibleState();
+	}
+#endif
+
+	BOOL nagging_disabled = GetPrefValBool(g_pref_disable_nagging);
+	if (!nagging_disabled) {
+		SwitchToVisibleState();
+	}
 	return 0;
 }
 
 LRESULT CMainFrame::OnNotifyIcon(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam)
 {
 	m_notifyIcon.OnTrayNotification(wParam, lParam);
+	if (NIN_BALLOONUSERCLICK == lParam) {
+		SwitchToVisibleState();
+	}
 	return 0;
 }
 
@@ -1649,6 +1709,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 
 	m_notifyIcon.Create(this, IDR_MENU1, _T(""), m_hIconOk, WMAPP_NOTIFY_ICON);
 	m_notifyIcon.SetTooltipText(_T("OpenDNS Updater v") PROGRAM_VERSION);
+	m_notifyIcon.SetNotificationWnd(this);
 
 	m_updaterThread = new UpdaterThread(this);
 	if (IsLoggedIn() && strempty(g_pref_user_networks_state))
