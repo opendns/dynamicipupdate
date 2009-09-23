@@ -346,7 +346,16 @@ static void DoUninstallStep()
 {
 	RemoveFromAutoStart();
 	SendAutoUpdateCheck(UpdateCheckUninstall);
-	LaunchUrl(UNINSTALL_FEEDBACK_URL);
+	if (g_pref_user_name) {
+		char *usernameEncoded = StrUrlEncode(g_pref_user_name);
+		CString url = UNINSTALL_FEEDBACK_URL;
+		url += "?account=";
+		url += usernameEncoded;
+		LaunchUrl(url);
+		free(usernameEncoded);
+	} else {
+		LaunchUrl(UNINSTALL_FEEDBACK_URL);
+	}
 }
 
 void SubmitAndDeleteCrashDump(const TCHAR *filePath)
