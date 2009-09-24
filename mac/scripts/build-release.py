@@ -28,21 +28,22 @@ except:
 Release build script designed to automate as much of the proces as possible
 and minimize errors.
 
-Pushing an update to mac client is involved. Files that must be changed:
+Pushing an update to mac client is involved. Files that must be changed manuall
+before running this script:
 
 * Info.plist
-* conf.php and mac-ipupdater-relnotes-$ver.html 
-* IpUpdaterAppCast.xml
-  (update pubDate, sparkle:version and sparkle:shortVersionString)
+* mac-ipupdater-relnotes-$ver.html
+
+Files that must be changed manually after running this script:
+* conf.php
 
 Checklist for pushing a new release:
 * edit Info.plist to set new version
-* create mac-ipupdater-relnotes-$ver.html, check it in and deploy it
+* create mac-ipupdater-relnotes-$ver.html, check it in
 * run this script
 * verify it made the right changes to IpUpdaterAppCast.xml
-* checkin and deploy the binary to the website
 * update conf.php to account for new version, check it in and deploy to website
-* checkin and deploy IpUpdaterCast.xml
+* checkin and deploy IpUpdaterCast.xml to appengine
 """
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -63,14 +64,14 @@ def s3connection():
         g_s3conn = boto.s3.connection.S3Connection(awscreds.access, awscreds.secret, True)
     return g_s3conn
 
-def s3PubBucket(): return s3connection().get_bucket(S3_BUCKET)
+def s3Bucket(): return s3connection().get_bucket(S3_BUCKET)
 
 def ul_cb(sofar, total):
     print("So far: %d, total: %d" % (sofar , total))
 
 def s3UploadFilePublic(local_file_name, remote_file_name):
     print("Uploading public '%s' as '%s'" % (local_file_name, remote_file_name))
-    bucket = s3PubBucket()
+    bucket = s3Bucket()
     k = Key(bucket)
     k.key = remote_file_name
     k.set_contents_from_filename(local_file_name, cb=ul_cb)
@@ -78,20 +79,20 @@ def s3UploadFilePublic(local_file_name, remote_file_name):
 
 def s3UploadFilePrivate(local_file_name, remote_file_name):
     print("Uploading private '%s' as '%s'" % (local_file_name, remote_file_name))
-    bucket = s3PubBucket()
+    bucket = s3Bucket()
     k = Key(bucket)
     k.key = remote_file_name
     k.set_contents_from_filename(local_file_name, cb=ul_cb)
 
 def s3UploadDataPublic(data, remote_file_name):
-    bucket = s3PubBucket()
+    bucket = s3Bucket()
     k = Key(bucket)
     k.key = remote_file_name
     k.set_contents_from_string(data)
     k.make_public()
 
 def s3KeyExists(key):
-    k = Key(s3PubBucket(), key)
+    k = Key(s3Bucket(), key)
     return k.exists()
 
 def ensure_s3_doesnt_exist(key):
