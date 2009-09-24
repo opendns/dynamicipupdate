@@ -24,6 +24,8 @@
 		7FF2931B0FFC2A15000A1604 /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293150FFC2A15000A1604 /* SBJsonWriter.m */; };
 		7FF293230FFC2A20000A1604 /* GDataHTTPFetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293200FFC2A20000A1604 /* GDataHTTPFetcher.m */; };
 		7FF293240FFC2A20000A1604 /* GDataHTTPFetcherLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293220FFC2A20000A1604 /* GDataHTTPFetcherLogging.m */; };
+		7FF34A54106C300A00B0433B /* PFMoveApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF34A53106C300A00B0433B /* PFMoveApplication.m */; };
+		7FF34A6E106C310100B0433B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FF34A6D106C310100B0433B /* Security.framework */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -81,6 +83,9 @@
 		7FF293200FFC2A20000A1604 /* GDataHTTPFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataHTTPFetcher.m; sourceTree = "<group>"; };
 		7FF293210FFC2A20000A1604 /* GDataHTTPFetcherLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDataHTTPFetcherLogging.h; sourceTree = "<group>"; };
 		7FF293220FFC2A20000A1604 /* GDataHTTPFetcherLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDataHTTPFetcherLogging.m; sourceTree = "<group>"; };
+		7FF34A52106C300A00B0433B /* PFMoveApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PFMoveApplication.h; sourceTree = "<group>"; };
+		7FF34A53106C300A00B0433B /* PFMoveApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PFMoveApplication.m; sourceTree = "<group>"; };
+		7FF34A6D106C310100B0433B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* OpenDNS Updater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OpenDNS Updater.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -92,6 +97,7 @@
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				7F610CFB102B53CB009DA816 /* Sparkle.framework in Frameworks */,
+				7FF34A6E106C310100B0433B /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +107,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				7FF34A52106C300A00B0433B /* PFMoveApplication.h */,
+				7FF34A53106C300A00B0433B /* PFMoveApplication.m */,
 				7F5E49F81002C1A30049E0F5 /* NSDictionary+Networks.h */,
 				7F5E49F91002C1A30049E0F5 /* NSDictionary+Networks.m */,
 				7FF292FE0FFC29DD000A1604 /* ApiKey.h */,
@@ -125,6 +133,7 @@
 				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
 				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
 				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+				7FF34A6D106C310100B0433B /* Security.framework */,
 			);
 			name = "Other Frameworks";
 			sourceTree = "<group>";
@@ -295,6 +304,7 @@
 				7FF293240FFC2A20000A1604 /* GDataHTTPFetcherLogging.m in Sources */,
 				7FE5F9380FFD421700879CC4 /* LoginItemsAE.c in Sources */,
 				7F5E49FA1002C1A30049E0F5 /* NSDictionary+Networks.m in Sources */,
+				7FF34A54106C300A00B0433B /* PFMoveApplication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

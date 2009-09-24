@@ -10,6 +10,7 @@
 #import "NSDictionary+Networks.h"
 #import <Sparkle/Sparkle.h>
 #include <netdb.h>
+#import "PFMoveApplication.h"
 
 #define LOGIN_ABOUT_URL @"http://www.opendns.com/software/mac/dynip/about/"
 #define STATUS_ABOUT_URL LOGIN_ABOUT_URL
@@ -569,6 +570,21 @@ Exit:
 	if (NSNotFound == invalidCharsRange.location)
 		return YES;
 	return NO;
+}
+
+// only defined in SDK 10.6
+#ifndef NSAppKitVersionNumber10_5
+#define NSAppKitVersionNumber10_5 949
+#endif
+
+- (void)applicationWillFinishLaunching:(NSNotification *)aNotification {
+	// If not in /Applications, offer to move it there
+	BOOL isOn105OrHigher = floor(NSAppKitVersionNumber) >= NSAppKitVersionNumber10_5;
+	if (isOn105OrHigher) {
+		// I suspect PFMoveToApplicationsFolderIfNecessary() doesn't work on 10.4
+		// because it uses 10.5-only file copy function, so only do it on 10.5+
+		PFMoveToApplicationsFolderIfNecessary();
+	}
 }
 
 - (void)awakeFromNib {
