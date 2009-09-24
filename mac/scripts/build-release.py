@@ -5,9 +5,9 @@ import os
 import os.path
 import re
 import time
+import shutil
 import subprocess
 import stat 
-import shutil
 
 try:
     import boto.s3
@@ -48,15 +48,64 @@ Checklist for pushing a new release:
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, ".."))
-RELEASE_BUILD_DIR = os.path.join(SRC_DIR, "build", "Release")
+BUILD_DIR = os.path.join(SRC_DIR, "build")
+RELEASE_BUILD_DIR = os.path.join(BUILD_DIR, "Release")
 BUNDLE_DIR = os.path.join(RELEASE_BUILD_DIR, "OpenDNS Updater.app")
 INFO_PLIST_PATH = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "Info.plist"))
-WEBSITE_DESKTOP_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "website", "desktop"))
+#WEBSITE_DESKTOP_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "website", "desktop"))
 APPENGINE_SRC_DIR = os.path.realpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "appengine-opendnsupdate"))
 APP_CAST_PATH = os.path.join(APPENGINE_SRC_DIR, "IpUpdaterAppCast.xml")
 
 S3_BUCKET = "opendns"
 g_s3conn = None
+
+def zip_name(version):
+    return "OpenDNS-Updater-Mac-%s.zip" % version
+
+def zip_path(version):
+    return os.path.join(RELEASE_BUILD_DIR, zip_name(version))
+
+def zip_path_on_s3(version):
+    return "software/mac/dynamicupdate/" + version + "/" + zip_name(version)
+
+def relnotes_name(version):
+    return "mac-ipupdater-relnotes-%s.html" % version
+
+def relnotes_path(version):
+    return os.path.join(SCRIPT_DIR, "relnotes", relnotes_name(version))
+
+def relnotes_path_on_s3(version):
+    return "software/mac/dynamicupdate/%s/%s" % (version, relnotes_name(version))
+
+def relnotes_url_on_s3(version):
+    return "https://opendns.s3.amazonaws.com/" + relnotes_path_on_s3(version)
+
+"""
+def dmg_name(version):
+    return "OpenDNS-Updater-Mac-%s.dmg" % version
+
+def dmg_path(version):
+    return os.path.join(SCRIPT_DIR, dmg_name(version))
+
+def dmg_path_on_website(version):
+    return os.path.join(WEBSITE_DESKTOP_DIR, dmg_name(version))
+
+def dmg_path_on_s3(version):
+    return "software/mac/dynamicupdate/" + version + "/" + dmg_name(version)
+"""
+
+SYMS_NAME = "OpenDNS Updater.app.dSYM"
+
+def syms_path():
+    return os.path.join(RELEASE_BUILD_DIR, SYMS_NAME)
+
+SYMS_ZIP_NAME = "OpenDNS Updater.app.dSYM.zip"
+
+def syms_zip_path():
+    return os.path.join(RELEASE_BUILD_DIR, SYMS_ZIP_NAME)
+
+def syms_zip_path_on_s3(version):
+    return "software/mac/dynamicupdate/" + version + "/" + SYMS_ZIP_NAME
 
 def s3connection():
     global g_s3conn
@@ -170,43 +219,6 @@ def ensure_valid_version(version):
     print("version ('%s') should be in format: x.y or x.y.z" % version)
     sys.exit(1)
 
-def zip_name(version):
-    return "OpenDNS-Updater-Mac-%s.zip" % version
-
-def zip_path(version):
-    return os.path.join(RELEASE_BUILD_DIR, zip_name(version))
-
-def zip_path_on_website(version):
-    return os.path.join(WEBSITE_DESKTOP_DIR, zip_name(version))
-
-def dmg_name(version):
-    return "OpenDNS-Updater-Mac-%s.dmg" % version
-
-def dmg_path(version):
-    return os.path.join(SCRIPT_DIR, dmg_name(version))
-
-def dmg_path_on_website(version):
-    return os.path.join(WEBSITE_DESKTOP_DIR, dmg_name(version))
-
-def dmg_path_on_s3(version):
-    return "software/mac/dynamicupdate/" + version + "/" + dmg_name(version)
-
-SYMS_NAME = "OpenDNS Updater.app.dSYM"
-
-def syms_path():
-    return os.path.join(RELEASE_BUILD_DIR, SYMS_NAME)
-
-SYMS_ZIP_NAME = "OpenDNS Updater.app.dSYM.zip"
-
-def syms_zip_path():
-    return os.path.join(RELEASE_BUILD_DIR, SYMS_ZIP_NAME)
-
-def syms_zip_path_on_s3(version):
-    return "software/mac/dynamicupdate/" + version + "/" + SYMS_ZIP_NAME
-
-def relnotes_path(version):
-    return os.path.join(WEBSITE_DESKTOP_DIR, "mac-ipupdater-relnotes-%s.html" % version)
-
 # update sparkle:releaseNotesLink, sparkle:version and pubDate element
 def update_app_cast(path, version, length):
     appcast = readfile(path)
@@ -217,7 +229,7 @@ def update_app_cast(path, version, length):
     newpubdate = "<pubDate>%s</pubDate>" % pubdate
     appcast = re.sub('<pubDate>.*</pubDate>', newpubdate, appcast)
 
-    url = "http://www.opendns.com/desktop/mac-ipupdater-relnotes-%s.html" % version
+    url = relnotes_url_on_s3(version)
     newrelnotes = "<sparkle:releaseNotesLink>%s</sparkle:releaseNotesLink>" % url
     appcast = re.sub('<sparkle:releaseNotesLink>.*</sparkle:releaseNotesLink>', newrelnotes, appcast)
 
@@ -237,9 +249,9 @@ def build_and_zip(version):
     os.chdir(RELEASE_BUILD_DIR)
     (out, err) = run_cmd_throw("zip", "-9", "-r", zip_name(version), "OpenDNS Updater.app")
 
-# hdiutil attach returns to stdout sth. that looks like:
 """
-/dev/disk1        	                      	/Volumes/OpenDNS Updater"""
+# hdiutil attach returns to stdout sth. that looks like:
+/dev/disk1        	                      	/Volumes/OpenDNS Updater
 # This function parses this output and returns dev_file (/dev/disk1) and vol_path
 # (/Volumes/OpenDNS Updater)
 def parse_hdiutil_attach_out(txt):
@@ -287,10 +299,6 @@ def create_dmg(version):
     run_cmd_throw("hdiutil", "convert", "-quiet", sparse_tmp, "-format", "UDZO", "-imagekey", "zlib-level=9", "-o", dmg_path(version))
     #run_cmd_throw("hdiutil", "unflatten", dmg_path())
 
-def create_syms_zip():
-    os.chdir(RELEASE_BUILD_DIR)
-    (out, err) = run_cmd_throw("zip", "-9", "-r", SYMS_ZIP_NAME, SYMS_NAME)
-
 def build_and_dmg(version):
     os.chdir(SRC_DIR)
     print("Cleaning release target...")
@@ -300,6 +308,11 @@ def build_and_dmg(version):
     (out, err) = run_cmd_throw("xcodebuild", "-project", xcodeproj, "-configuration", "Release", "-target", "OpenDNS Updater")
     ensure_dir_exists(RELEASE_BUILD_DIR)
     create_dmg(version)
+"""
+
+def create_syms_zip():
+    os.chdir(RELEASE_BUILD_DIR)
+    (out, err) = run_cmd_throw("zip", "-9", "-r", SYMS_ZIP_NAME, SYMS_NAME)
 
 def valid_api_key(key):
     valid_chars = "0123456789ABCDEF"
@@ -318,37 +331,38 @@ def ensure_valid_api_key():
         exit_with_error("NOT A VALID API KEY: '%s'" % apikey)
 
 def main():
-    test = "-test" in sys.argv or "--test" in sys.argv
-    if test: print("Running in test mode. Will build but not upload")
+    deploy = "-deploy" in sys.argv or "--deploy" in sys.argv
+    if not deploy: print("Running in non-deploy mode. Will build but not upload")
     ensure_valid_api_key()
-    ensure_dir_exists(WEBSITE_DESKTOP_DIR)
+    shutil.rmtree(BUILD_DIR)
     ensure_dir_exists(APPENGINE_SRC_DIR)
     ensure_file_exists(INFO_PLIST_PATH)
     ensure_file_exists(APP_CAST_PATH)
     version = extract_version_from_plist(INFO_PLIST_PATH)
     print("Building mac updater version '%s'" % version)
     ensure_valid_version(version)
-    if not test:
-        ensure_file_doesnt_exist(dmg_path_on_website(version))
-        ensure_s3_doesnt_exist(dmg_path_on_s3(version))
     ensure_file_exists(relnotes_path(version))
 
-    build_and_dmg(version)
+    if deploy:
+        ensure_s3_doesnt_exist(zip_path_on_s3(version))
+        ensure_s3_doesnt_exist(syms_zip_path_on_s3(version))
+        ensure_s3_doesnt_exist(relnotes_path_on_s3(version))
+
+    build_and_zip(version)
     create_syms_zip()
-    ensure_file_exists(dmg_path(version))
+    ensure_file_exists(zip_path(version))
     ensure_file_exists(syms_zip_path())
 
     # don't upload in test mode
-    if test: return
+    if not deploy:
+        print("Did not deploy. Use -deploy to actually deploy")
+        return
 
-    s3UploadFilePublic(dmg_path(version), dmg_path_on_s3(version))
+    s3UploadFilePublic(zip_path(version), zip_path_on_s3(version))
     s3UploadFilePrivate(syms_zip_path(), syms_zip_path_on_s3(version))
+    s3UploadFilePublic(relnotes_path(version), relnotes_path_on_s3(version))
 
-    src = dmg_path(version)
-    dst = dmg_path_on_website(version)
-    shutil.copyfile(src, dst)
-    print("Don't forget to checkin and deploy '%s'" % dst)
-    length = get_file_size(dmg_path(version))
+    length = get_file_size(zip_path(version))
     update_app_cast(APP_CAST_PATH, version, length)
     print("Don't forget to checkin and deploy '%s'" % APP_CAST_PATH)
 
