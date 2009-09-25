@@ -68,6 +68,9 @@ def zip_path(version):
 def zip_path_on_s3(version):
     return "software/mac/dynamicupdate/" + version + "/" + zip_name(version)
 
+def zip_url_on_s3(version):
+    return "https://opendns.s3.amazonaws.com/" + zip_path_on_s3(version)
+
 def relnotes_name(version):
     return "mac-ipupdater-relnotes-%s.html" % version
 
@@ -78,7 +81,7 @@ def relnotes_path_on_s3(version):
     return "software/mac/dynamicupdate/%s/%s" % (version, relnotes_name(version))
 
 def relnotes_url_on_s3(version):
-    return "https://opendns.s3.amazonaws.com/" + relnotes_path_on_s3(version)
+    return "http://opendns.s3.amazonaws.com/" + relnotes_path_on_s3(version)
 
 """
 def dmg_name(version):
@@ -229,9 +232,13 @@ def update_app_cast(path, version, length):
     newpubdate = "<pubDate>%s</pubDate>" % pubdate
     appcast = re.sub('<pubDate>.*</pubDate>', newpubdate, appcast)
 
-    url = relnotes_url_on_s3(version)
-    newrelnotes = "<sparkle:releaseNotesLink>%s</sparkle:releaseNotesLink>" % url
+    relnotes_url = relnotes_url_on_s3(version)
+    newrelnotes = "<sparkle:releaseNotesLink>%s</sparkle:releaseNotesLink>" % relnotes_url
     appcast = re.sub('<sparkle:releaseNotesLink>.*</sparkle:releaseNotesLink>', newrelnotes, appcast)
+
+    zip_url = zip_url_on_s3(version)
+    newurl = 'url="%s"' % zip_url
+    appcast = re.sub('url=".*"', newurl, appcast)
 
     newlen = 'length="%d"' % length
     appcast = re.sub("length=\"[^\"]*\"", newlen, appcast)
@@ -334,7 +341,7 @@ def main():
     deploy = "-deploy" in sys.argv or "--deploy" in sys.argv
     if not deploy: print("Running in non-deploy mode. Will build but not upload")
     ensure_valid_api_key()
-    shutil.rmtree(BUILD_DIR)
+    if os.path.exists(BUILD_DIR): shutil.rmtree(BUILD_DIR)
     ensure_dir_exists(APPENGINE_SRC_DIR)
     ensure_file_exists(INFO_PLIST_PATH)
     ensure_file_exists(APP_CAST_PATH)
@@ -365,6 +372,7 @@ def main():
     length = get_file_size(zip_path(version))
     update_app_cast(APP_CAST_PATH, version, length)
     print("Don't forget to checkin and deploy '%s'" % APP_CAST_PATH)
+    print("Don't forget to update/checkin/deploy conf.php")
 
 if __name__ == "__main__":
     main()
