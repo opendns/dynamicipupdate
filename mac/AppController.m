@@ -1124,7 +1124,7 @@ Exit:
         // TODO: not sure if updates will work for that case.
         goto SetDynamicNetwork;
     }
-    NSTableDataSourceDynamicNetworks *dataSource = [[[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks] autorelease];
+    NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks];
     [tableNetworksList_ setDataSource:dataSource];
     [tableNetworksList_ setTarget:self];
     [tableNetworksList_ setAction:@selector(selectNetworkClick:)];
