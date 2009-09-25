@@ -69,6 +69,11 @@ static NSString *SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaultsObserv
         [sharedUpdaters setObject:self forKey:[NSValue valueWithNonretainedObject:bundle]];
         host = [[SUHost alloc] initWithBundle:bundle];
         [self registerAsObserver];
+		
+		// Saving-the-developer-from-a-stupid-mistake-check:
+		if (![[[self feedURL] scheme] isEqualToString:@"https"] && ![host publicDSAKey])
+			NSRunAlertPanel(@"Insecure update error!", @"For security reasons, you need to distribute your appcast over SSL or sign your updates. See Sparkle's documentation for more information.", @"OK", nil, nil);
+		
         // This runs the permission prompt if needed, but never before the app has finished launching because the runloop won't run before that
         [self performSelector:@selector(startUpdateCycle) withObject:nil afterDelay:0];
 	}
@@ -113,8 +118,9 @@ static NSString *SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaultsObserv
     if (shouldPrompt)
     {
 		NSArray *profileInfo = [host systemProfile];
-		if ([delegate respondsToSelector:@selector(feedParametersForUpdater:sendingSystemProfile:)])
-			profileInfo = [profileInfo arrayByAddingObjectsFromArray:[delegate feedParametersForUpdater:self sendingSystemProfile:[self sendsSystemProfile]]];		
+		// Always say we're sending the system profile here so that the delegate displays the parameters it would send.
+		if ([delegate respondsToSelector:@selector(feedParametersForUpdater:sendingSystemProfile:)]) 
+			profileInfo = [profileInfo arrayByAddingObjectsFromArray:[delegate feedParametersForUpdater:self sendingSystemProfile:YES]];
         [SUUpdatePermissionPrompt promptWithHost:host systemProfile:profileInfo delegate:self];
         // We start the update checks and register as observer for changes after the prompt finishes
 	}
@@ -173,6 +179,8 @@ static NSString *SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaultsObserv
 
 - (void)checkForUpdatesInBackground
 {
+	checkTimer = nil; // Timer doesn't repeat, so it's invalid, just needs to be set to nil.
+	
 	[self checkForUpdatesWithDriver:[[[([self automaticallyDownloadsUpdates] ? [SUAutomaticUpdateDriver class] : [SUScheduledUpdateDriver class]) alloc] initWithUpdater:self] autorelease]];
 }
 
@@ -286,9 +294,28 @@ static NSString *SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaultsObserv
 	// A value in the user defaults overrides one in the Info.plist (so preferences panels can be created wherein users choose between beta / release feeds).
 	NSString *appcastString = [host objectForKey:SUFeedURLKey];
 	if (!appcastString) // Can't find an appcast string!
-		[NSException raise:@"SUNoFeedURL" format:@"You must specify the URL of the appcast as the SUFeedURLKey in either the Info.plist or the user defaults!"];
+		[NSException raise:@"SUNoFeedURL" format:@"You must specify the URL of the appcast as the SUFeedURL key in either the Info.plist or the user defaults!"];
 	NSCharacterSet* quoteSet = [NSCharacterSet characterSetWithCharactersInString: @"\"\'"]; // Some feed publishers add quotes; strip 'em.
 	return [NSURL URLWithString:[appcastString stringByTrimmingCharactersInSet:quoteSet]];
+}
+
+- (void)setUserAgentString:(NSString *)userAgent
+{
+	if (customUserAgentString == userAgent)
+		return;
+
+	[customUserAgentString release];
+	customUserAgentString = [userAgent copy];
+}
+
+- (NSString *)userAgentString
+{
+	if (customUserAgentString)
+		return customUserAgentString;
+
+	NSString *userAgent = [NSString stringWithFormat:@"%@/%@ Sparkle/%@", [host name], [host displayVersion], [SPARKLE_BUNDLE objectForInfoDictionaryKey:@"CFBundleVersion"] ?: nil];
+	NSData *cleanedAgent = [userAgent dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+	return [[[NSString alloc] initWithData:cleanedAgent encoding:NSASCIIStringEncoding] autorelease];
 }
 
 - (void)setSendsSystemProfile:(BOOL)sendsSystemProfile
@@ -308,12 +335,24 @@ static NSString *SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaultsObserv
 	// Determine all the parameters we're attaching to the base feed URL.
 	BOOL sendingSystemProfile = [self sendsSystemProfile];
 
+#if 0 /* opendns: disabled because I always want to send system profile */
+	// Let's only send the system profiling information once per week at most, so we normalize daily-checkers vs. biweekly-checkers and the such.
+	NSDate *lastSubmitDate = [host objectForUserDefaultsKey:SULastProfileSubmitDateKey];
+	if(!lastSubmitDate)
+	    lastSubmitDate = [NSDate distantPast];
+	const NSTimeInterval oneWeek = 60 * 60 * 24 * 7;
+	sendingSystemProfile &= (-[lastSubmitDate timeIntervalSinceNow] >= oneWeek);
+#endif
+
 	NSArray *parameters = [NSArray array];
 	if ([delegate respondsToSelector:@selector(feedParametersForUpdater:sendingSystemProfile:)])
 		parameters = [parameters arrayByAddingObjectsFromArray:[delegate feedParametersForUpdater:self sendingSystemProfile:sendingSystemProfile]];
 	if (sendingSystemProfile)
 	{
 		parameters = [parameters arrayByAddingObjectsFromArray:[host systemProfile]];
+#if 0 /* opendns: disabled because I always want to send system profile */
+		[host setObject:[NSDate date] forUserDefaultsKey:SULastProfileSubmitDateKey];
+#endif
 	}
 	if (parameters == nil || [parameters count] == 0) { return baseFeedURL; }
 	

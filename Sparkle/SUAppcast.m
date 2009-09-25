@@ -59,7 +59,7 @@
 	BOOL failed = NO;
 	NSArray *xmlItems = nil;
 	NSMutableArray *appcastItems = [NSMutableArray array];
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
     [[NSFileManager defaultManager] removeFileAtPath:downloadFilename handler:nil];
 #else
     [[NSFileManager defaultManager] removeItemAtPath:downloadFilename error:NULL];
@@ -142,7 +142,8 @@
 				}
             }
             
-			SUAppcastItem *anItem = [[SUAppcastItem alloc] initWithDictionary:dict];
+			NSString *errString;
+			SUAppcastItem *anItem = [[SUAppcastItem alloc] initWithDictionary:dict failureReason:&errString];
             if (anItem)
             {
                 [appcastItems addObject:anItem];
@@ -150,7 +151,7 @@
 			}
             else
             {
-				NSLog(@"Sparkle Updater: Failed to parse appcast item with appcast dictionary %@!", dict);
+				NSLog(@"Sparkle Updater: Failed to parse appcast item: %@.\nAppcast dictionary was: %@", errString, dict);
             }
             [nodesDict removeAllObjects];
             [dict removeAllObjects];
@@ -179,7 +180,7 @@
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
 {
 	CFRelease(download);
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
     [[NSFileManager defaultManager] removeFileAtPath:downloadFilename handler:nil];
 #else
     [[NSFileManager defaultManager] removeItemAtPath:downloadFilename error:NULL];

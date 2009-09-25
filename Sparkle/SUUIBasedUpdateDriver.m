@@ -122,7 +122,7 @@
 {
 	// We do this here instead of in extractUpdate so that we only have a determinate progress bar for archives with progress.
 	if ([statusController maxProgressValue] == 0)
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_4
         [statusController setMaxProgressValue:[[[[NSFileManager defaultManager] fileAttributesAtPath:downloadPath traverseLink:NO] objectForKey:NSFileSize] doubleValue]];
 #else
 		[statusController setMaxProgressValue:[[[[NSFileManager defaultManager] attributesOfItemAtPath:downloadPath error:NULL] objectForKey:NSFileSize] doubleValue]];
@@ -145,7 +145,20 @@
 {
 	[statusController beginActionWithTitle:SULocalizedString(@"Installing update...", @"Take care not to overflow the status window.") maxProgressValue:0 statusText:nil];
 	[statusController setButtonEnabled:NO];
-	[super installUpdate];	
+	[super installUpdate];
+	
+	
+	// if a user chooses to NOT relaunch the app (as is the case with WebKit
+	// when it asks you if you are sure you want to close the app with multiple
+	// tabs open), the status window still stays on the screen and obscures
+	// other windows; with this fix, it doesn't
+	
+	if (statusController)
+	{
+		[statusController close];
+		[statusController autorelease];
+		statusController = nil;
+	}
 }
 
 - (void)abortUpdateWithError:(NSError *)error
@@ -161,6 +174,7 @@
 	{
 		[statusController close];
 		[statusController autorelease];
+		statusController = nil;
 	}
 	[super abortUpdate];
 }
