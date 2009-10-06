@@ -9,6 +9,7 @@
 #include "IpUpdatesLog.h"
 #include "TypoExceptions.h"
 #include "IpUpdatesHistoryDlg.h"
+#include "PreferencesDlg.h"
 
 // should we show errors via baloon messages in systray?
 // the code is there but we don't show at this moment
@@ -1277,6 +1278,16 @@ void CMainFrame::OnToggleWindow(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 		SwitchToHiddenState();
 }
 
+void CMainFrame::OnPreferences(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
+{
+	CPreferencesDlg dlg;
+	INT_PTR nRet = dlg.DoModal();
+	if (IDCANCEL == nRet) {
+		// nothing has changed
+		return;
+	}
+}
+
 void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 {
 	m_hiddenMode = !m_hiddenMode;
@@ -1766,7 +1777,7 @@ void CMainFrame::SwitchToVisibleState()
 	m_uiState = UI_STATE_VISIBLE;
 	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU2));
 	m_notifyIcon.SetMenu(menu);
-	m_notifyIcon.SetDefaultMenuItem(2, TRUE);
+	m_notifyIcon.SetDefaultMenuItem(3, TRUE);
 	if (m_notifyIcon.IsHidden())
 		m_notifyIcon.Show();
 	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
@@ -1780,7 +1791,7 @@ void CMainFrame::SwitchToHiddenState()
 	m_uiState = UI_STATE_HIDDEN;
 	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU1));
 	m_notifyIcon.SetMenu(menu);
-	m_notifyIcon.SetDefaultMenuItem(2, TRUE);
+	m_notifyIcon.SetDefaultMenuItem(3, TRUE);
 	if (m_hiddenMode && !m_notifyIcon.IsHidden())
 		m_notifyIcon.Hide();
 	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);

@@ -109,6 +109,20 @@ BEGIN
     CONTROL         "",IDC_LIST_IP_UPDATES_HISTORY,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,180,150
 END
 
+IDD_DIALOG_PREFERENCES DIALOGEX 0, 0, 229, 183
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Preferences"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,116,162,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,167,162,50,14
+    CONTROL         "Send Dns-o-matic updates",IDC_CHECK_SEND_DNS_OMATIC,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,15,184,10
+    CONTROL         "Run hidden",IDC_CHECK_RUN_HIDDEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,31,196,10
+    CONTROL         "Disable sending IP updates",IDC_CHECK_DISABLE_IP_UPDATES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,47,186,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -140,6 +154,14 @@ BEGIN
         RIGHTMARGIN, 187
         TOPMARGIN, 7
         BOTTOMMARGIN, 175
+    END
+
+    IDD_DIALOG_PREFERENCES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 222
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 176
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -189,6 +211,7 @@ IDR_MENU1 MENU
 BEGIN
     POPUP ""
     BEGIN
+    	MENUITEM "Preferences",					IDM_PREFERENCES
         MENUITEM "IP updates history",          IDM_IP_UPDATES_HISTORY
         MENUITEM "Run hidden",                  IDM_RUN_HIDDEN
         MENUITEM "Show window",                 IDM_TOGGLE_WINDOW
@@ -200,6 +223,7 @@ IDR_MENU2 MENU
 BEGIN
     POPUP ""
     BEGIN
+    	MENUITEM "Preferences",					IDM_PREFERENCES
         MENUITEM "IP updates history",          IDM_IP_UPDATES_HISTORY
         MENUITEM "Run hidden",                  IDM_RUN_HIDDEN
         MENUITEM "Hide window",                 IDM_TOGGLE_WINDOW

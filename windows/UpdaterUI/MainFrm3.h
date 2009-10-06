@@ -262,6 +262,7 @@ public:
 		COMMAND_ID_HANDLER_EX(IDM_TOGGLE_WINDOW, OnToggleWindow)
 		COMMAND_ID_HANDLER_EX(IDM_RUN_HIDDEN, OnRunHidden)
 		COMMAND_ID_HANDLER_EX(IDM_IP_UPDATES_HISTORY, OnIpUpdatesHistory)
+		COMMAND_ID_HANDLER_EX(IDM_PREFERENCES, OnPreferences)
 
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_LINK, OnLinkStatusEdit)
 		NOTIFY_HANDLER_EX(IDC_EDIT_STATUS, EN_REQUESTRESIZE, OnRequestResize)
@@ -298,6 +299,7 @@ public:
 	void OnToggleWindow(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
 	void OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
 	void OnIpUpdatesHistory(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
+	void OnPreferences(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/);
 
 	void OnClose();
 	void OnDestroy();
