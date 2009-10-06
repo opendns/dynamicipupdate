@@ -12,6 +12,11 @@
 #include "JsonApiResponses.h"
 #include "SimpleLog.h"
 
+// We limit the number of typo exceptions submitted from the client
+// in order to not overload the database (some networks can have
+// more than 10000 typo exceptions). 25 cover 98% of the users
+#define MAX_TYPO_EXCEPTIONS 25
+
 // single-linked list of string/time values
 typedef struct StringTimeNode {
 	struct StringTimeNode *next;
@@ -455,26 +460,45 @@ static void StringTimeNodeListRemoveExpired(StringTimeNode **head)
 	*head = newHead;
 }
 
-static void UpdateTypoExceptionsCount() {
-	StringTimeNode *curr = g_allTypoExceptions;
+static int StringTimeListLen(StringTimeNode *head)
+{
 	int count = 0;
+	StringTimeNode *curr = head;
 	while (curr) {
 		++count;
 		curr = curr->next;
 	}
+	return count;
+}
+
+static void UpdateTypoExceptionsCount() {
+	int count = StringTimeListLen(g_allTypoExceptions);
 	g_allTypoExceptionsCount = count;
 }
 
 DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/) 
 {
 	g_inTypoExceptionThread = TRUE;
+	StringTimeNode *added = NULL;
+	StringTimeNode *expired = NULL;
 
 	StringTimeNode *currentList = GetTypoExceptions();
-	StringTimeNode *added = StringTimeNodeListGetAdded(g_allTypoExceptions, currentList);
-	StringTimeNode *expired = StringTimeNodeListGetExpired(g_allTypoExceptions);
+	int typoExceptionsCount = StringTimeListLen(currentList);
+	// if we found more than MAX_TYPO_EXCEPTIONS names, we don't
+	// submit it at all, so that we don't clog user's typo exceptions
+	// list with essentially random names and preventing him from
+	// adding names he really cares about
+	if (typoExceptionsCount > MAX_TYPO_EXCEPTIONS) {
+		// set g_allTypoExceptionsCount for analytics purposes
+		g_allTypoExceptionsCount = typoExceptionsCount;
+		goto Exit;
+	}
 
-	BOOL addedOk = SubmitAddedTypoExceptions(added);
+	added = StringTimeNodeListGetAdded(g_allTypoExceptions, currentList);
+	expired = StringTimeNodeListGetExpired(g_allTypoExceptions);
+
 	BOOL expiredOk = SubmitExpiredTypoExceptions(expired);
+	BOOL addedOk = SubmitAddedTypoExceptions(added);
 
 	if (addedOk) {
 		StringTimeNodeListAdd(&g_allTypoExceptions, added);
@@ -486,6 +510,7 @@ DWORD WINAPI SubmitTypoExceptionsThread(LPVOID /*lpParam*/)
 
 	UpdateTypoExceptionsCount();
 
+Exit:
 	FreeStringTimeList(currentList);
 	FreeStringTimeList(added);
 	FreeStringTimeList(expired);
