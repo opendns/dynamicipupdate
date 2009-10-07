@@ -95,7 +95,7 @@ CMainFrame::CMainFrame()
 	m_updaterThread = NULL;
 	m_newVersionSetupFilepath = NULL;
 	m_forceExitOnClose = false;
-	m_hiddenMode = false;
+	m_hiddenMode = FALSE;
 	m_hadFirstLayout = false;
 }
 
@@ -1283,9 +1283,15 @@ void CMainFrame::OnPreferences(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 	CPreferencesDlg dlg;
 	INT_PTR nRet = dlg.DoModal();
 	if (IDCANCEL == nRet) {
-		// nothing has changed
 		return;
 	}
+	// if preferences (potentially) changed, save them and update UI to match
+	PreferencesSave();
+	m_hiddenMode = GetPrefValBool(g_pref_run_hidden);
+	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
+	UpdateUpdateEdit();
+	UpdateErrorEdit();
+	DoLayout();
 }
 
 void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)

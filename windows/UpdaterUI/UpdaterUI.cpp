@@ -71,7 +71,7 @@ int Run(bool show)
 		return 0;
 
 	if (TRUE == GetPrefValBool(g_pref_run_hidden)) {
-		wndMain.m_hiddenMode = true;
+		wndMain.m_hiddenMode = TRUE;
 		show = false;
 	}
 

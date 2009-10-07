@@ -230,7 +230,7 @@ public:
 	IpUpdateResult		m_ipUpdateResult;
 	SimulatedError		m_simulatedError;
 	bool				m_forceExitOnClose;
-	bool				m_hiddenMode;
+	BOOL				m_hiddenMode;
 	bool				m_hadFirstLayout;
 
 	BEGIN_UPDATE_UI_MAP(CMainFrame)
