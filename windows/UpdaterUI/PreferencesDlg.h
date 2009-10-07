@@ -9,45 +9,66 @@
 
 class CPreferencesDlg : public CDialogImpl<CPreferencesDlg>
 {
-
 public:
 	enum { IDD = IDD_DIALOG_PREFERENCES };
 
 	BEGIN_MSG_MAP(CPreferencesDlg)
 		MSG_WM_INITDIALOG(OnInitDialog)
-		COMMAND_HANDLER_EX(IDC_CHECK_SEND_DNS_OMATIC, BN_CLICKED, OnSendDnsOmaticButtonClicked)
-		COMMAND_HANDLER_EX(IDC_CHECK_RUN_HIDDEN, BN_CLICKED, OnRunHiddenButtonClicked)
-		COMMAND_HANDLER_EX(IDC_CHECK_DISABLE_IP_UPDATES, BN_CLICKED, OnDisableIpUpdatesButtonClicked)
 		COMMAND_ID_HANDLER(IDOK, OnButtonOk)
 		COMMAND_ID_HANDLER(IDCANCEL, OnButtonCancel)
 	END_MSG_MAP()
 
 	~CPreferencesDlg() {}
 
+	void SetCheckValue(int ctrlId, char *prefName)
+	{
+		BOOL val = GetPrefValBool(prefName);
+		CButton b = GetDlgItem(ctrlId);
+		b.SetCheck(val);
+	}
+
+	void SetCheckValueInverted(int ctrlId, char *prefName)
+	{
+		BOOL val = !GetPrefValBool(prefName);
+		CButton b = GetDlgItem(ctrlId);
+		b.SetCheck(val);
+	}
+
+	void SetPrefFromCheckValue(int ctrlId, char **prefName)
+	{
+		CButton b =  GetDlgItem(ctrlId);
+		BOOL checked = b.GetCheck();
+		SetPrefValBool(prefName, checked);
+	}
+
+	void SetPrefFromCheckValueInverted(int ctrlId, char **prefName)
+	{
+		CButton b =  GetDlgItem(ctrlId);
+		BOOL checked = b.GetCheck();
+		SetPrefValBool(prefName, !checked);
+	}
+
 	BOOL OnInitDialog(CWindow /* wndFocus */, LPARAM /* lInitParam */)
 	{
 		CenterWindow(GetParent());
-
+		SetCheckValue(IDC_CHECK_SEND_DNS_OMATIC, g_pref_dns_o_matic);
+		SetCheckValue(IDC_CHECK_RUN_HIDDEN, g_pref_run_hidden);
+		SetCheckValue(IDC_CHECK_DONT_NOTIFY_ABOUT_ERRORS, g_pref_disable_nagging);
+		SetCheckValueInverted(IDC_CHECK_DISABLE_IP_UPDATES, g_pref_send_updates);
 		return FALSE;
 	}
 
-	void OnSendDnsOmaticButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /* wndCtl */)
+	void UpdatePrefsValues()
 	{
-		//CButton b = wndCtl;
-		//BOOL checked = b.GetCheck();
-		//SetPrefValBool(&g_pref_send_updates, checked);
-	}
-
-	void OnRunHiddenButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /* wndCtl */)
-	{
-	}
-
-	void OnDisableIpUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /* wndCtl */)
-	{
+		SetPrefFromCheckValue(IDC_CHECK_SEND_DNS_OMATIC, &g_pref_dns_o_matic);
+		SetPrefFromCheckValue(IDC_CHECK_RUN_HIDDEN, &g_pref_run_hidden);
+		SetPrefFromCheckValue(IDC_CHECK_DONT_NOTIFY_ABOUT_ERRORS, &g_pref_disable_nagging);
+		SetPrefFromCheckValueInverted(IDC_CHECK_DISABLE_IP_UPDATES, &g_pref_send_updates);
 	}
 
 	LRESULT OnButtonOk(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 	{
+		UpdatePrefsValues();
 		EndDialog(wID);
 		return 0;
 	}
