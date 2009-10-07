@@ -131,15 +131,18 @@ public:
 		bool endDialog = false;
 		char *jsonTxt = NULL;
 		JsonEl *json = NULL;
-		HttpResult *ctx = (HttpResult*)wParam;
-		assert(ctx);
-		if (!ctx || !ctx->IsValid()) {
-			slognl("OnSignIn() - ctx not valid");
+		HttpResult *httpResult = (HttpResult*)wParam;
+		assert(httpResult);
+		if (!httpResult) {
+			slognl("OnSignIn() - httpResult is NULL");
 			goto Error;
 		}
-
+		if (!httpResult->IsValid()) {
+			slogfmt("OnSignIn() - httpResult->error is %d\n", (int)httpResult->error);
+			goto Error;
+		}
 		DWORD dataSize;
-		jsonTxt = (char*)ctx->data.getData(&dataSize);
+		jsonTxt = (char*)httpResult->data.getData(&dataSize);
 		json = ParseJsonToDoc(jsonTxt);
 		if (!json) {
 			if (jsonTxt) {
@@ -176,7 +179,7 @@ public:
 		endDialog = true;
 Exit:
 		m_checkingUsernamePassword = false;
-		delete ctx;
+		delete httpResult;
 		free(jsonTxt);
 		JsonElFree(json);
 		if (endDialog)
