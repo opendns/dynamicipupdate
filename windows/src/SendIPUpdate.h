@@ -12,7 +12,9 @@ enum IpUpdateResult {
 	IpUpdateNotYours,
 	IpUpdateBadAuth,
 	IpUpdateNotAvailable,
-	IpUpdateNoHost
+	IpUpdateNoHost,
+	IpUpdateDnsErr,
+	IpUpdateMiscErr
 };
 
 char* SendIpUpdate();

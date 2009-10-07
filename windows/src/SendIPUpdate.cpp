@@ -38,6 +38,7 @@ char* SendIpUpdate()
 	return res;
 }
 
+// TODO: write me
 char *SendDnsOmaticUpdate()
 {
 	char *res = NULL;
@@ -58,12 +59,37 @@ IpUpdateResult IpUpdateResultFromString(const char *s)
 		return IpUpdateNotAvailable;
 	if (StrStartsWithI(s, "good"))
 		return IpUpdateOk;
+	if (StrStartsWithI(s, "nochg"))
+		return IpUpdateOk;
 	if (StrStartsWithI(s, "!yours"))
 		return IpUpdateNotYours;
 	if (StrStartsWithI(s, "badauth"))
 		return IpUpdateBadAuth;
 	if (StrStartsWithI(s, "nohost"))
 		return IpUpdateNoHost;
+
+	// not sure if those really happen, they're supported by 1.3 client
+	if (StrStartsWithI(s, "dnserr"))
+		return IpUpdateDnsErr;
+
+	if (StrStartsWithI(s, "911"))
+		return IpUpdateDnsErr;
+
+	if (StrStartsWithI(s, "abuse"))
+		return IpUpdateMiscErr;
+
+	if (StrStartsWithI(s, "notfqdn"))
+		return IpUpdateMiscErr;
+
+	if (StrStartsWithI(s, "numhost"))
+		return IpUpdateMiscErr;
+
+	if (StrStartsWithI(s, "badagent"))
+		return IpUpdateMiscErr;
+
+	if (StrStartsWithI(s, "!donator"))
+		return IpUpdateMiscErr;
+
 	assert(0);
 	return IpUpdateOk;
 }

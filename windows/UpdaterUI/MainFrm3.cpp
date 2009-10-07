@@ -813,8 +813,8 @@ void CMainFrame::ToggleNagging()
 	BOOL nagging_disabled = GetPrefValBool(g_pref_disable_nagging);
 	SetPrefValBool(&g_pref_disable_nagging, !nagging_disabled);
 	PreferencesSave();
-	UpdateUpdateEdit();
-	UpdateErrorEdit();
+	UpdateUpdateEdit(false /* doLayout */);
+	UpdateErrorEdit(true /* doLayout */);
 }
 
 void CMainFrame::ChangeAccount()
@@ -1198,7 +1198,7 @@ LRESULT CMainFrame::OnLinkLearnSetupOpenDns(LPNMHDR /*pnmh*/)
 // any direct gui calls
 void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 {
-	IpUpdateResult ipUpdateResult =	IpUpdateResultFromString(ipUpdateRes);
+	IpUpdateResult ipUpdateResult = IpUpdateResultFromString(ipUpdateRes);
 	LogIpUpdate(ipUpdateRes);
 	free(m_ipFromHttp);
 	m_ipFromHttp = NULL;
@@ -1259,9 +1259,8 @@ void CMainFrame::OnPreferences(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 	PreferencesSave();
 	BOOL hiddenMode = GetPrefValBool(g_pref_run_hidden);
 	UISetCheck(IDM_RUN_HIDDEN, hiddenMode);
-	UpdateUpdateEdit();
-	UpdateErrorEdit();
-	DoLayout();
+	UpdateUpdateEdit(false /* doLayout */);
+	UpdateErrorEdit(true /* doLayout */);
 }
 
 void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
@@ -1293,10 +1292,10 @@ LRESULT CMainFrame::OnNewVersion(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/
 LRESULT CMainFrame::OnNotifyAboutError(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	BOOL visible = IsWindowVisible();
-	// if the window is already visible, it doesn't matter what error happend
+	// if the window is already visible just update the error messages
 	if (visible) {
-		UpdateUpdateEdit();
-		UpdateErrorEdit();
+		UpdateUpdateEdit(false /* doLayout */);
+		UpdateErrorEdit(true /* doLayout */);
 		BringWindowToTop();
 		return 0;
 	}
@@ -1751,8 +1750,8 @@ void CMainFrame::SwitchToVisibleState()
 		m_notifyIcon.Show();
 	BOOL hiddenMode = GetPrefValBool(g_pref_run_hidden);
 	UISetCheck(IDM_RUN_HIDDEN, hiddenMode);
-	UpdateUpdateEdit();
-	UpdateErrorEdit();
+	UpdateUpdateEdit(false /* doLayout */);
+	UpdateErrorEdit(true /* doLayout */);
 }
 
 void CMainFrame::SwitchToHiddenState()

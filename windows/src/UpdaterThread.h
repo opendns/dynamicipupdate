@@ -139,18 +139,18 @@ public:
 
 	void SendPeriodicUpdate()
 	{
-		char *respDnsOmatic = NULL;
+		char *resp = NULL;
 		m_lastIpUpdateTimeInMs = GetTickCount();
-		char *resp = ::SendIpUpdate();
-		if (g_pref_dns_o_matic) {
-			respDnsOmatic = SendDnsOmaticUpdate();
-			// TODO: do something?
+		BOOL sendDnsOmatic = GetPrefValBool(g_pref_dns_o_matic);
+		if (sendDnsOmatic) {
+			resp = ::SendDnsOmaticUpdate();
+		} else {
+			resp = ::SendIpUpdate();
 		}
 		if (NULL == resp)
 			return;
 		m_updaterObserver->OnIpUpdateResult(resp);
 		free(resp);
-		free(respDnsOmatic);
 	}
 
 	bool ShouldCheckForSoftwareUpgrade()
