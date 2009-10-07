@@ -70,8 +70,7 @@ int Run(bool show)
 	if (wndMain.CreateEx(NULL, r) == NULL)
 		return 0;
 
-	if (TRUE == GetPrefValBool(g_pref_run_hidden)) {
-		wndMain.m_hiddenMode = TRUE;
+	if (GetPrefValBool(g_pref_run_hidden)) {
 		show = false;
 	}
 

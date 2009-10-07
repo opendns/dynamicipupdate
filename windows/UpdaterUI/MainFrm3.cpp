@@ -95,7 +95,6 @@ CMainFrame::CMainFrame()
 	m_updaterThread = NULL;
 	m_newVersionSetupFilepath = NULL;
 	m_forceExitOnClose = false;
-	m_hiddenMode = FALSE;
 	m_hadFirstLayout = false;
 }
 
@@ -1258,8 +1257,8 @@ void CMainFrame::OnPreferences(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 	}
 	// if preferences (potentially) changed, save them and update UI to match
 	PreferencesSave();
-	m_hiddenMode = GetPrefValBool(g_pref_run_hidden);
-	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
+	BOOL hiddenMode = GetPrefValBool(g_pref_run_hidden);
+	UISetCheck(IDM_RUN_HIDDEN, hiddenMode);
 	UpdateUpdateEdit();
 	UpdateErrorEdit();
 	DoLayout();
@@ -1267,15 +1266,15 @@ void CMainFrame::OnPreferences(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 
 void CMainFrame::OnRunHidden(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
 {
-	m_hiddenMode = !m_hiddenMode;
-	SetPrefValBool(&g_pref_run_hidden, m_hiddenMode);
+	BOOL hiddenMode = !GetPrefValBool(g_pref_run_hidden);
+	SetPrefValBool(&g_pref_run_hidden, hiddenMode);
 	PreferencesSave();
 	// when enabling hidden mode, it acts as a command and hides the window
 	// when disabling hidden mode, it acts as an off button. It's a bit weird
-	if (m_hiddenMode)
+	if (hiddenMode)
 		SwitchToHiddenState();
 	else
-		UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
+		UISetCheck(IDM_RUN_HIDDEN, hiddenMode);
 }
 
 void CMainFrame::OnIpUpdatesHistory(UINT /*uCode*/, int /*nID*/, HWND /*hWndCtl*/)
@@ -1750,7 +1749,8 @@ void CMainFrame::SwitchToVisibleState()
 	m_notifyIcon.SetDefaultMenuItem(3, TRUE);
 	if (m_notifyIcon.IsHidden())
 		m_notifyIcon.Show();
-	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
+	BOOL hiddenMode = GetPrefValBool(g_pref_run_hidden);
+	UISetCheck(IDM_RUN_HIDDEN, hiddenMode);
 	UpdateUpdateEdit();
 	UpdateErrorEdit();
 }
@@ -1762,9 +1762,10 @@ void CMainFrame::SwitchToHiddenState()
 	HMENU menu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU1));
 	m_notifyIcon.SetMenu(menu);
 	m_notifyIcon.SetDefaultMenuItem(3, TRUE);
-	if (m_hiddenMode && !m_notifyIcon.IsHidden())
+	BOOL hiddenMode = GetPrefValBool(g_pref_run_hidden);
+	if (hiddenMode && !m_notifyIcon.IsHidden())
 		m_notifyIcon.Hide();
-	UISetCheck(IDM_RUN_HIDDEN, m_hiddenMode);
+	UISetCheck(IDM_RUN_HIDDEN, hiddenMode);
 }
 
 LRESULT CMainFrame::OnErrorNotif(UINT /*uMsg*/, WPARAM specialCmd, LPARAM /*lParam*/)
