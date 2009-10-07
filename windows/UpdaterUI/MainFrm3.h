@@ -53,8 +53,7 @@ static bool g_showDebug = false;
 #define TOP_BAR_TXT _T("OpenDNS Updater")
 
 enum {
-	IDC_CHECK_SEND_UPDATES = 3000,
-	IDC_BUTTON_CHANGE_ACCOUNT,
+	IDC_BUTTON_CHANGE_ACCOUNT = 3000,
 	IDC_BUTTON_CHANGE_NETWORK,
 	IDC_BUTTON_SEND_IP_UPDATE,
 	IDC_LINK_ABOUT,
@@ -176,7 +175,6 @@ public:
 
 	CLinkCtrl		m_linkAbout;
 	CLinkCtrl		m_linkLearnSetup;
-	CButton			m_buttonSendIpUpdates;
 	CButton			m_buttonChangeAccount;
 	CButton			m_buttonChangeConfigureNetwork;
 	CButton			m_buttonUpdate;
@@ -253,7 +251,6 @@ public:
 		MESSAGE_HANDLER_EX(WMAPP_NEW_VERSION, OnNewVersion)
 		MESSAGE_HANDLER_EX(WMAPP_NOTIFY_ABOUT_ERROR, OnNotifyAboutError)
 		MESSAGE_HANDLER_EX(WMAPP_NOTIFY_ICON, OnNotifyIcon)
-		COMMAND_HANDLER_EX(IDC_CHECK_SEND_UPDATES, BN_CLICKED, OnSendUpdatesButtonClicked)
 		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_ACCOUNT, BN_CLICKED, OnChangeAccount)
 		COMMAND_HANDLER_EX(IDC_BUTTON_CHANGE_NETWORK, BN_CLICKED, OnChangeNetwork)
 		COMMAND_HANDLER_EX(IDC_BUTTON_SEND_IP_UPDATE, BN_CLICKED, OnSendUpdate)
@@ -306,7 +303,6 @@ public:
 	BOOL OnEraseBkgnd(CDCHandle dc);
 	bool IsLink(HWND hwnd);
 	bool IsStatic(HWND /*hwnd*/);
-	bool IsCheckBoxButton(HWND hwnd);
 
 	bool IsUsingOpenDns();
 	bool NoNetworksConfigured();
@@ -341,7 +337,6 @@ public:
 
 	void DrawErrorText(CDCHandle *dc, int x, int y, const TCHAR *txt);
 	void DrawDivider(CDCHandle dc, const TCHAR *txt, CRect& rect);
-	void OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
 	void OnChangeAccount(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
 	void OnChangeNetwork(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);
 	void OnSendUpdate(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCtl*/);

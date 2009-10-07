@@ -200,15 +200,6 @@ void CMainFrame::OnSendUpdate(UINT /*uNotifyCode*/, int /*nID*/, CWindow /*wndCt
 	UpdateErrorEdit();
 }
 
-void CMainFrame::OnSendUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
-{
-	CButton b = wndCtl;
-	BOOL checked = b.GetCheck();
-	SetPrefValBool(&g_pref_send_updates, checked);
-	PreferencesSave();
-	UpdateErrorEdit();
-}
-
 // sent by rich edit control so that we can know its desired height
 LRESULT CMainFrame::OnRequestResize(LPNMHDR pnmh)
 {
@@ -229,13 +220,6 @@ bool CMainFrame::IsLink(HWND hwnd)
 	if (hwnd == m_linkAbout.m_hWnd)
 		return true;
 	if (hwnd == m_linkLearnSetup.m_hWnd)
-		return true;
-	return false;
-}
-
-bool CMainFrame::IsCheckBoxButton(HWND hwnd)
-{
-	if (hwnd == m_buttonSendIpUpdates.m_hWnd)
 		return true;
 	return false;
 }
@@ -487,8 +471,6 @@ HBRUSH CMainFrame::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 		//dc.SetBkColor(colWinBg);
 		dc.SetTextColor(colBlack);
 		dc.SetBkMode(TRANSPARENT);
-	} else if (IsCheckBoxButton(hwnd)) {
-		return m_winBgColorBrush;
 	} else {
 		SetMsgHandled(false);
 		return 0;
@@ -927,11 +909,9 @@ void CMainFrame::DoLayout()
 	if (IsLoggedIn()) {
 		m_buttonChangeAccount.SetWindowText(_T("Change account"));
 		m_buttonChangeConfigureNetwork.ShowWindow(SW_SHOW);
-		m_buttonSendIpUpdates.ShowWindow(SW_SHOW);
 	} else {
 		m_buttonChangeAccount.SetWindowText(_T("Log in"));
 		m_buttonChangeConfigureNetwork.ShowWindow(SW_HIDE);
-		m_buttonSendIpUpdates.ShowWindow(SW_HIDE);
 	}
 
 	if (m_showStatusMsgEdit)
@@ -963,15 +943,6 @@ void CMainFrame::DoLayout()
 		m_buttonUpdate.ShowWindow(SW_HIDE);
 
 	SizeButtons(btnDx, m_btnDy);
-
-	// position "Send IP updates" check-box in the bottom right corner
-	CUICheckBoxButtonSizer sendIpUpdatsSizer(m_buttonSendIpUpdates);
-	static const int BTN_SEND_UPDATES_RIGHT_MARGIN = 8;
-	static const int BTN_SEND_UPDATES_BOTTOM_MARGIN = 4;
-	RECT pos;
-	CalcFixedPositionBottomRight(clientDx, clientDy, BTN_SEND_UPDATES_RIGHT_MARGIN, BTN_SEND_UPDATES_BOTTOM_MARGIN, &sendIpUpdatsSizer, pos);
-	m_buttonSendIpUpdates.MoveWindow(&pos);
-	int buttonDy = RectDy(pos);
 
 	CUILinkSizer linkSizer;
 	CUITextSizer textSizer;
@@ -1138,7 +1109,7 @@ void CMainFrame::DoLayout()
 	if (!m_showUpdateMsgEdit && !m_showStatusMsgEdit)
 		y+= 18;
 
-	int minDy = y + buttonDy + 8;
+	int minDy = y + 8;
 
 	// resize the window if the current size is smaller than
 	// what's needed to display content
@@ -1673,13 +1644,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_linkLearnSetup.Create(m_hWnd, r, _T("<a>setup OpenDNS.</a>"), WS_CHILD | WS_VISIBLE);
 	m_linkLearnSetup.SetFont(m_dividerTextFont);
 	m_linkLearnSetup.SetDlgCtrlID(IDC_LINK_LEARN_SETUP_OPENDNS);
-
-	m_buttonSendIpUpdates.Create(m_hWnd, r, _T("Send background IP updates"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX);
-	m_buttonSendIpUpdates.SetFont(m_buttonsFont);
-	//m_buttonSendIpUpdates.SetFont(m_topBarFont);
-	m_buttonSendIpUpdates.SetDlgCtrlID(IDC_CHECK_SEND_UPDATES);
-	BOOL sendingUpdates = GetPrefValBool(g_pref_send_updates);
-	m_buttonSendIpUpdates.SetCheck(sendingUpdates);
 
 	m_buttonChangeAccount.Create(m_hWnd, r, _T("Change account"),  WS_CHILD | WS_VISIBLE);
 	m_buttonChangeAccount.SetFont(m_buttonsFont);
