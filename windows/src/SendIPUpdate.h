@@ -16,6 +16,7 @@ enum IpUpdateResult {
 };
 
 char* SendIpUpdate();
+char *SendDnsOmaticUpdate();
 IpUpdateResult IpUpdateResultFromString(const char *s);
 char *GetUpdateUrl(const TCHAR *version, VersionUpdateCheckType type);
 TCHAR *DownloadUpdateIfNotDownloaded(const char *url);

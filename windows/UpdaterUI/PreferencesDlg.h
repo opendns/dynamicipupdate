@@ -31,18 +31,18 @@ public:
 		return FALSE;
 	}
 
-	void OnSendDnsOmaticButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
+	void OnSendDnsOmaticButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /* wndCtl */)
 	{
 		//CButton b = wndCtl;
 		//BOOL checked = b.GetCheck();
 		//SetPrefValBool(&g_pref_send_updates, checked);
 	}
 
-	void OnRunHiddenButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
+	void OnRunHiddenButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /* wndCtl */)
 	{
 	}
 
-	void OnDisableIpUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow wndCtl)
+	void OnDisableIpUpdatesButtonClicked(UINT /*uNotifyCode*/, int /*nID*/, CWindow /* wndCtl */)
 	{
 	}
 

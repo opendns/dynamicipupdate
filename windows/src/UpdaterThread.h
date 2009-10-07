@@ -15,6 +15,7 @@
 #include "MiscUtil.h"
 #include "SimpleLog.h"
 #include "SendIPUpdate.h"
+#include "Prefs.h"
 
 extern bool g_simulate_upgrade;
 
@@ -138,12 +139,18 @@ public:
 
 	void SendPeriodicUpdate()
 	{
+		char *respDnsOmatic = NULL;
 		m_lastIpUpdateTimeInMs = GetTickCount();
 		char *resp = ::SendIpUpdate();
+		if (g_pref_dns_o_matic) {
+			respDnsOmatic = SendDnsOmaticUpdate();
+			// TODO: do something?
+		}
 		if (NULL == resp)
 			return;
 		m_updaterObserver->OnIpUpdateResult(resp);
 		free(resp);
+		free(respDnsOmatic);
 	}
 
 	bool ShouldCheckForSoftwareUpgrade()

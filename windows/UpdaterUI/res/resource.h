@@ -28,6 +28,8 @@
 #define IDC_CHECK_SEND_DNS_OMATIC       1011
 #define IDC_CHECK_RUN_HIDDEN            1012
 #define IDC_CHECK_DISABLE_IP_UPDATES    1013
+#define IDC_CHECK1                      1014
+#define IDC_CHECK_DONT_NOTIFY_ABOUT_ERRORS 1014
 #define IDR_MENU1                       1500
 #define IDR_MENU2                       1501
 #define IDM_EXIT                        2000
@@ -42,7 +44,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         1014
+#define _APS_NEXT_CONTROL_VALUE         1015
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

@@ -38,6 +38,20 @@ char* SendIpUpdate()
 	return res;
 }
 
+char *SendDnsOmaticUpdate()
+{
+	char *res = NULL;
+/*
+	URL$ = "https://updates.dnsomatic.com/nic/update"
+	URL$ = SetURLPart(URL$, "hostname", Hostname$)
+	URL$ = SetURLPart(URL$, "myip", ip$)
+	URL$ = SetURLPart(URL$, "wildcard", "NOCHG")
+	URL$ = SetURLPart(URL$, "mx", "NOCHG")
+	URL$ = SetURLPart(URL$, "backmx", "NOCHG")
+*/
+	return  res;
+}
+
 IpUpdateResult IpUpdateResultFromString(const char *s)
 {
 	if (StrStartsWithI(s, "The service is not available"))
