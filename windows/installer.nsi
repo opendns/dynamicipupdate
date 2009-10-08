@@ -125,17 +125,15 @@ Section "Install" SecInstall
     SetOverwrite on
 
     ; old client's name
-    StrCpy $0 "OpenDNS Updater.exe"
-    KillProc::KillProcesses
+    Processes::KillProcessAndWait "OpenDNS Updater.exe"
 
     ; our old name
-    StrCpy $0 "OpenDNSDynamicIp.exe"
-    KillProc::KillProcesses
+    Processes::KillProcessAndWait "OpenDNSDynamicIp.exe"
 
     ; our current name
-    StrCpy $0 "${UI_EXE_NAME}"
-    KillProc::KillProcesses
-    Sleep 2000
+    Processes::KillProcessAndWait "${UI_EXE_NAME}"
+    ; empirically we need to sleep a while before the file can be overwritten
+    Sleep 1000
 
     File /oname=${UI_EXE_NAME} UpdaterUI\Release\OpenDNSUpdater.exe
 
@@ -160,8 +158,7 @@ SectionEnd
 Section "Uninstall"
     Call un.GuiOnUninstall
 
-    StrCpy $0 "${UI_EXE_NAME}"
-    KillProc::KillProcesses
+    Processes::KillProcessAndWait "${UI_EXE_NAME}"
     Sleep 1000
 
     ; Remove registry keys
