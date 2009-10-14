@@ -37,7 +37,7 @@ static bool HasDynamicNetworkWithLabel(NetworkInfo *head, const char *label)
 	return false;
 }
 
-static void LogIpUpdate(const char *resp)
+static void GenericLogIpUpdate(const char *resp)
 {
 	slog("sent ip update for user '");
 	assert(g_pref_user_name);
@@ -1199,7 +1199,7 @@ LRESULT CMainFrame::OnLinkLearnSetupOpenDns(LPNMHDR /*pnmh*/)
 void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 {
 	IpUpdateResult ipUpdateResult = IpUpdateResultFromString(ipUpdateRes);
-	LogIpUpdate(ipUpdateRes);
+	GenericLogIpUpdate(ipUpdateRes);
 	free(m_ipFromHttp);
 	m_ipFromHttp = NULL;
 
@@ -1217,7 +1217,7 @@ void CMainFrame::OnIpUpdateResult(char *ipUpdateRes)
 		if (ip) {
 			m_ipFromHttp = StrToTStr(ip+1);
 			if (IpUpdateOk == ipUpdateResult) {
-				LogIpUpdate(ip+1);
+				LogIpUpdateOk(ip+1);
 			} else {
 				assert(IpUpdateNotYours == ipUpdateResult);
 				LogIpUpdateNotYours(ip+1);
