@@ -14,12 +14,15 @@
 #define DASHBOARD_URL_DEV _T("http://www.dev16.sfo.opendns.com/dashboard/networks/")
 #define DASHBOARD_URL _T("http://www.opendns.com/dashboard/networks/")
 
-#define API_HOST_DEV "api.dev16.sfo.opendns.com"
-#define IP_UPDATE_HOST_DEV "www.dev16.sfo.opendns.com"
+#define API_HOST_DEV "api.dev30.vn.opendns.com"
+#define IP_UPDATE_HOST_DEV "www.dev30.vm.opendns.com"
+#define IP_UPDATE_DNS_O_MATIC_HOST_DEV "dnsomatic.dev30.vm.dnsomatic.com"
 #define API_IS_HTTPS_DEV false
 
 #define API_HOST "api.opendns.com"
 #define IP_UPDATE_HOST "updates.opendns.com"
+// TODO: change this to updates.dnsomatic.com when we fix the ssl certificate
+#define IP_UPDATE_DNS_O_MATIC_HOST "www.dnsomatic.com"
 #define API_IS_HTTPS true
 
 UINT g_errorNotifMsg = 0;
@@ -529,6 +532,16 @@ const char *GetIpUpdateHost()
 		return IP_UPDATE_HOST;
 }
 
+const char *GetIpUpdateDnsOMaticHost()
+{
+	if (g_useDevServers)
+		return IP_UPDATE_DNS_O_MATIC_HOST_DEV;
+	else
+		return IP_UPDATE_DNS_O_MATIC_HOST;
+}
+
+// the same URL format is used for dns-o-matic (updates.dnsomatic.com) and
+// updates.opendns.com server. dns-o-matic server ignores v=2 argument but
 const char *GetIpUpdateUrl(BOOL addApiKey)
 {
 	CString url = "/nic/update?token=";

@@ -38,19 +38,30 @@ char* SendIpUpdate()
 	return res;
 }
 
-// TODO: write me
 char *SendDnsOmaticUpdate()
 {
+	assert(CanSendIPUpdates());
+	if (!CanSendIPUpdates())
+		return NULL;
+
 	char *res = NULL;
-/*
-	URL$ = "https://updates.dnsomatic.com/nic/update"
-	URL$ = SetURLPart(URL$, "hostname", Hostname$)
-	URL$ = SetURLPart(URL$, "myip", ip$)
+
+	// TODO: do I need to append the following in url from GetIpUpdateUrl()?
+	/*URL$ = SetURLPart(URL$, "myip", ip$)
 	URL$ = SetURLPart(URL$, "wildcard", "NOCHG")
 	URL$ = SetURLPart(URL$, "mx", "NOCHG")
-	URL$ = SetURLPart(URL$, "backmx", "NOCHG")
-*/
-	return  res;
+	URL$ = SetURLPart(URL$, "backmx", "NOCHG")*/
+
+	const char *urlTxt = GetIpUpdateUrl(TRUE);
+	const char *host = GetIpUpdateDnsOMaticHost();
+
+	HttpResult *httpResult = HttpGet(host, urlTxt, true);
+	free((void*)urlTxt);
+	if (httpResult && httpResult->IsValid()) {
+		res = (char*)httpResult->data.getData(NULL);
+	}
+	delete httpResult;
+	return res;
 }
 
 IpUpdateResult IpUpdateResultFromString(const char *s)

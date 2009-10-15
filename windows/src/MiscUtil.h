@@ -120,6 +120,7 @@ void UseDevServers(bool useDevServers);
 bool UsingDevServers();
 const char *GetApiHost();
 const char *GetIpUpdateHost();
+const char *GetIpUpdateDnsOMaticHost();
 const char *GetIpUpdateUrl(BOOL addApiKey);
 bool IsApiHostHttps();
 const TCHAR *GetDashboardUrl();
