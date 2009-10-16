@@ -33,11 +33,15 @@ class CSignInDlg : public CDialogImpl<CSignInDlg>
 	char *m_username;
 	char *m_pwd;
 
+	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
+
 public:
 	enum { IDD = IDD_DIALOG_SIGNIN };
 
 	BEGIN_MSG_MAP(CSignInDlg)
 		MSG_WM_INITDIALOG(OnInitDialog)
+		MSG_WM_ERASEBKGND(OnEraseBkgnd)
+		MSG_WM_CTLCOLORSTATIC(OnCtlColorStatic)
 		MESSAGE_HANDLER_EX(WM_HTTP_SIGN_IN, OnSignIn)
 		COMMAND_CODE_HANDLER(EN_CHANGE, OnEditChanged)
 		NOTIFY_HANDLER(IDC_SYSLINK_FORGOT_PASSWORD, NM_CLICK, OnSysLinkForgotPassword) 
@@ -106,6 +110,22 @@ public:
 		m_editUsername.SetFocus();
 
 		return FALSE;
+	}
+
+	BOOL OnEraseBkgnd(CDCHandle dc)
+	{
+		CRect		rc;
+		GetClientRect(rc);
+		dc.FillSolidRect(rc, colWinBg);
+		return 1;
+	}
+
+	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd)
+	{
+		HBRUSH br = CommonOnCtlColorStatic(dc, wnd);
+		if (0 == br)
+			SetMsgHandled(false);
+		return br;
 	}
 
 	void SetSignInButtonStatus()

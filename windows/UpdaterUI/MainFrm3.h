@@ -218,8 +218,6 @@ public:
 	static const COLORREF colRed	 = RGB(0xff, 0x00, 0x00);
 	static const COLORREF colRed2    = RGB(0xf7, 0x0c, 0x08);
 
-	HBRUSH				m_winBgColorBrush;
-
 	IP4_ADDRESS			m_ipFromDns;
 	CString				m_ipFromDnsStr;
 	TCHAR *				m_ipFromHttp;
@@ -300,8 +298,6 @@ public:
 	void OnClose();
 	void OnDestroy();
 	BOOL OnEraseBkgnd(CDCHandle dc);
-	bool IsLink(HWND hwnd);
-	bool IsStatic(HWND /*hwnd*/);
 
 	bool IsUsingOpenDns();
 	bool NoNetworksConfigured();

@@ -11,6 +11,7 @@ class CSelectNetworkDlg : public CDialogImpl<CSelectNetworkDlg>
 	CStatic m_staticSelectNetwork;
 	CListBox m_listBoxNetworksList;
 	CButton m_buttonOk;
+	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
 
 public:
 	NetworkInfo *m_selectedNetwork;
@@ -19,6 +20,8 @@ public:
 
 	BEGIN_MSG_MAP(CSelectNetworkDlg)
 		MSG_WM_INITDIALOG(OnInitDialog)
+		MSG_WM_ERASEBKGND(OnEraseBkgnd)
+		MSG_WM_CTLCOLORSTATIC(OnCtlColorStatic)
 		COMMAND_HANDLER(IDC_LIST_NETWORKS, LBN_SELCHANGE, OnSelectionChanged)
 		COMMAND_ID_HANDLER(IDOK, OnButtonOk)
 		COMMAND_ID_HANDLER(IDCANCEL, OnButtonCancel)
@@ -63,6 +66,22 @@ public:
 		if (0 == total)
 			return TRUE;
 		return FALSE;
+	}
+
+	BOOL OnEraseBkgnd(CDCHandle dc)
+	{
+		CRect		rc;
+		GetClientRect(rc);
+		dc.FillSolidRect(rc, colWinBg);
+		return 1;
+	}
+
+	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd)
+	{
+		HBRUSH br = CommonOnCtlColorStatic(dc, wnd);
+		if (0 == br)
+			SetMsgHandled(false);
+		return br;
 	}
 
 	LRESULT OnSelectionChanged(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)

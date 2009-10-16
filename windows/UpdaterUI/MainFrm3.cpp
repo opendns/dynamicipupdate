@@ -91,7 +91,6 @@ CMainFrame::CMainFrame()
 	m_minUpdateEditDx = m_minStatusEditDx = 320 - 16;
 	m_uiState = UI_STATE_VISIBLE;
 	m_minutesSinceLastUpdate = 0;
-	m_winBgColorBrush = ::CreateSolidBrush(colWinBg);
 	m_updaterThread = NULL;
 	m_newVersionSetupFilepath = NULL;
 	m_forceExitOnClose = false;
@@ -103,7 +102,6 @@ CMainFrame::~CMainFrame()
 	free(m_ipFromHttp);
 	free(m_editFontName);
 	free(m_newVersionSetupFilepath);
-	DeleteObject(m_winBgColorBrush);
 	DeleteObject(m_updateBitmap);
 }
 
@@ -212,20 +210,6 @@ LRESULT CMainFrame::OnRequestResize(LPNMHDR pnmh)
 	assert(IDC_EDIT_STATUS == pnmh->idFrom);
 	m_editErrorMsgRequestedDy = RectDy(r->rc);
 	return 0;
-}
-
-bool CMainFrame::IsLink(HWND hwnd)
-{
-	if (hwnd == m_linkAbout.m_hWnd)
-		return true;
-	if (hwnd == m_linkLearnSetup.m_hWnd)
-		return true;
-	return false;
-}
-
-bool CMainFrame::IsStatic(HWND /*hwnd*/)
-{
-	return false;
 }
 
 static void DrawDividerLine(CDCHandle *dc, int y, int x1, int x2, int x3, int x4)
@@ -458,24 +442,10 @@ BOOL CMainFrame::OnEraseBkgnd(CDCHandle dc)
 
 HBRUSH CMainFrame::OnCtlColorStatic(CDCHandle dc, CWindow wnd)
 {
-	HWND hwnd = wnd;
-	// TODO: could probabably do IsLink() and IsStatic() by
-	// comparing WINDOWINFO.atomWindowType (obtained via GetWindowInfo())
-	// with ATOM corresponding to syslink and static classes found
-	// with GetClassInfo()
-	if (IsLink(hwnd)) {
-		dc.SetBkColor(colWinBg);
-		return 0;
-	} else if (IsStatic(hwnd)) {
-		//dc.SetBkColor(colWinBg);
-		dc.SetTextColor(colBlack);
-		dc.SetBkMode(TRANSPARENT);
-	} else {
+	HBRUSH br = CommonOnCtlColorStatic(dc, wnd);
+	if (0 == br)
 		SetMsgHandled(false);
-		return 0;
-	}
-
-	return (HBRUSH)::GetStockObject(NULL_BRUSH);
+	return br;
 }
 
 // returns true if we get valid ip address from both

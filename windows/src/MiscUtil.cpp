@@ -810,3 +810,55 @@ void DeleteOldInstallers()
 	FindClose(h);
 }
 
+#define SYS_LINK_LEN 7
+BOOL IsWndLink(HWND hwnd)
+{
+	TCHAR classNameBuf[256];
+	int len = GetClassName(hwnd, classNameBuf, 256);
+	if (SYS_LINK_LEN != len)
+		return FALSE;
+
+	if (tstreq(classNameBuf, _T("SysLink")))
+		return TRUE;
+	return FALSE;
+}
+
+#define STATIC_LEN 6
+BOOL IsWndStatic(HWND hwnd)
+{
+	TCHAR classNameBuf[256];
+	int len = GetClassName(hwnd, classNameBuf, 256);
+	if (STATIC_LEN != len)
+		return FALSE;
+
+	if (tstreq(classNameBuf, _T("Static")))
+		return TRUE;
+	return FALSE;
+}
+
+// Emulate transparent static/syslink controls by setting a background
+// matching window background
+HBRUSH CommonOnCtlColorStatic(CDCHandle dc, CWindow wnd)
+{
+	HWND hwnd = wnd;
+	static HBRUSH wndBrush = NULL;
+	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
+	static const COLORREF colBlack = RGB(0x00, 0x00, 0x00);
+	if (IsWndLink(hwnd)) {
+		// I have no idea why, but for main window, I need SetBkColor()
+		// but in a dialog I need to return brush, so I do both so that it
+		// works in both contexts
+		dc.SetBkColor(colWinBg);
+		if (!wndBrush)
+			wndBrush = ::CreateSolidBrush(colWinBg);
+		return (HBRUSH) wndBrush;
+	} else if (IsWndStatic(hwnd)) {
+		dc.SetTextColor(colBlack);
+		dc.SetBkMode(TRANSPARENT);
+	} else {
+		return 0;
+	}
+
+	return (HBRUSH)::GetStockObject(NULL_BRUSH);
+}
+

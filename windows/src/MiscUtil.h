@@ -135,6 +135,9 @@ bool IsLeftCtrlPressed();
 bool IsLeftAltAndCtrlPressed();
 TCHAR *FormatUpdateTime(int minutes);
 void DeleteOldInstallers();
+BOOL IsWndLink(HWND hwnd);
+BOOL IsWndStatic(HWND hwnd);
+HBRUSH CommonOnCtlColorStatic(CDCHandle dc, CWindow wnd);
 
 static inline int RectDx(const RECT r)
 {
