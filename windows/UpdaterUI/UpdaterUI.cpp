@@ -4,6 +4,11 @@
 
 #include "stdafx.h"
 
+#define _WIN32_DCOM
+#include <comdef.h>
+#include <Wbemidl.h>
+#pragma comment(lib, "wbemuuid.lib")
+
 #include "base64decode.h"
 #include "WTLThread.h"
 #include "MiscUtil.h"
@@ -443,6 +448,113 @@ static bool IsApiKeyValid(char *apiKey)
 	return true;
 }
 
+#if 0
+int WINAPI _tWinMain(HINSTANCE  /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /* cmdLine */, int /* nCmdShow */)
+{
+	IWbemLocator *pLoc = NULL;
+	IWbemServices *pSvc = NULL;
+	IEnumWbemClassObject* pEnumerator = NULL;
+
+	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED); 
+	if (FAILED(hr))
+		return 1;
+
+	hr =  CoInitializeSecurity(
+		NULL, 
+		-1,                          // COM authentication
+		NULL,                        // Authentication services
+		NULL,                        // Reserved
+		RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication 
+		RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation  
+		NULL,                        // Authentication info
+		EOAC_NONE,                   // Additional capabilities 
+		NULL                         // Reserved
+	);
+
+	if (FAILED(hr))
+		goto Exit;
+
+	hr = CoCreateInstance(
+		CLSID_WbemLocator,             
+		0, 
+		CLSCTX_INPROC_SERVER, 
+		IID_IWbemLocator, (LPVOID *) &pLoc);
+ 
+	if (FAILED(hr))
+		goto Exit;
+
+	// Connect to the root\cimv2 namespace with
+	// the current user and obtain pointer pSvc
+	// to make IWbemServices calls.
+	hr = pLoc->ConnectServer(
+		 _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
+		 NULL,					  // User name. NULL = current user
+		 NULL,					  // User password. NULL = current
+		 0, 					  // Locale. NULL indicates current
+		 NULL,					  // Security flags.
+		 0, 					  // Authority (e.g. Kerberos)
+		 0, 					  // Context object 
+		 &pSvc					  // pointer to IWbemServices proxy
+		 );
+
+	if (FAILED(hr))
+		goto Exit;
+
+	// Set security levels on the proxy -------------------------
+
+	hr = CoSetProxyBlanket(
+		pSvc,						// Indicates the proxy to set
+		RPC_C_AUTHN_WINNT,			// RPC_C_AUTHN_xxx
+		RPC_C_AUTHZ_NONE,			// RPC_C_AUTHZ_xxx
+		NULL,						// Server principal name 
+		RPC_C_AUTHN_LEVEL_CALL,		// RPC_C_AUTHN_LEVEL_xxx 
+		RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
+		NULL,						// client identity
+		EOAC_NONE					// proxy capabilities 
+	);
+
+	if (FAILED(hr))
+		goto Exit;
+
+	hr = pSvc->ExecQuery(
+		bstr_t("WQL"), 
+		bstr_t("SELECT * FROM Win32_OperatingSystem"),
+		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, 
+		NULL,
+		&pEnumerator);
+
+	if (FAILED(hr))
+		goto Exit;
+
+	if (!pEnumerator)
+		goto Exit;
+
+	IWbemClassObject *pclsObj;
+	ULONG uReturn = 0;
+
+	for (;;)
+	{
+		VARIANT vtProp;
+		hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+		if (0 == uReturn || FAILED(hr))
+			break;
+
+		// Get the value of the Name property
+		hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
+		//wcout << " OS Name : " << vtProp.bstrVal << endl;
+		VariantClear(&vtProp);
+		pclsObj->Release();
+	}
+
+Exit:
+	if (pEnumerator) pEnumerator->Release();
+	if (pSvc) pSvc->Release();
+	if (pLoc) pLoc->Release();
+
+	CoUninitialize();
+	return 0;
+}
+#else
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cmdLine, int /* nCmdShow */)
 {
 	int nRet = 0;
@@ -564,3 +676,4 @@ Exit:
 
 	return nRet;
 }
+#endif

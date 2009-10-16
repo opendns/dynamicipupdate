@@ -95,9 +95,9 @@ static const int DIVIDER_TEXT_LEFT_MARGIN = 6;
 static const int DIVIDER_TEXT_RIGHT_MARGIN = 6;
 static const int Y_SPACING = 4;
 
-#define VARIANT 2
+#define UI_VARIANT 2
 
-#if VARIANT == 1
+#if UI_VARIANT == 1
 	static const COLORREF colWinBg = RGB(0xef, 0xeb, 0xde);
 	static const COLORREF colEditBg = colWinBg;
 	static const COLORREF colDivLine = RGB(0xde, 0xdb, 0xde);
