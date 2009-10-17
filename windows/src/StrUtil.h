@@ -42,6 +42,7 @@ void StrSetCopy(char **s, const char *newVal);
 const char *StrFindChar(const char *txt, char c);
 const char *StrFindLastChar(const char *txt, char c);
 int TStrFind(TCHAR *s, TCHAR *sub);
+int WStrFind(WCHAR *s, WCHAR *sub);
 const WCHAR* WStrFindChar(const WCHAR *s, WCHAR c);
 
 bool TStrEndsWithI(TCHAR *s, TCHAR *sub);

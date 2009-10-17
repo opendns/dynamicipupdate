@@ -442,6 +442,25 @@ BOOL tstreqn(TCHAR *s1, TCHAR *s2, int len)
 	return TRUE;
 }
 
+int WStrFind(WCHAR *s, WCHAR *sub)
+{
+	size_t slen = wcslen(s);
+	size_t sublen = wcslen(sub);
+	WCHAR c = *sub++;
+	WCHAR c2;
+	for (size_t i=0; sublen + i <= slen; i++)
+	{
+		c2 = *s++;
+		if (c != c2)
+			continue;
+		if (1 == sublen)
+			return 1;
+		if (0 == wcsncmp(s, sub, sublen-1))
+			return i;
+	}
+	return -1;
+}
+
 int TStrFind(TCHAR *s, TCHAR *sub)
 {
 	size_t slen = tstrlen(s);

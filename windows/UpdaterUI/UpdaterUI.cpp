@@ -448,7 +448,16 @@ static bool IsApiKeyValid(char *apiKey)
 	return true;
 }
 
-#if 0
+#if 1
+// We don't want to change the DNS settings of VirtualBox and VMWare virtual ethernet adapters
+BOOL ShouldSkipNetworkAdapter(WCHAR *caption)
+{
+	if (-1 != WStrFind(caption, L"VirtualBox"))
+		return TRUE;
+	// TODO: add VMWare names
+	return FALSE;
+}
+
 int WINAPI _tWinMain(HINSTANCE  /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTSTR /* cmdLine */, int /* nCmdShow */)
 {
 	IWbemLocator *pLoc = NULL;
@@ -500,8 +509,7 @@ int WINAPI _tWinMain(HINSTANCE  /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTS
 	if (FAILED(hr))
 		goto Exit;
 
-	// Set security levels on the proxy -------------------------
-
+	// Set security levels on the proxy
 	hr = CoSetProxyBlanket(
 		pSvc,						// Indicates the proxy to set
 		RPC_C_AUTHN_WINNT,			// RPC_C_AUTHN_xxx
@@ -518,7 +526,7 @@ int WINAPI _tWinMain(HINSTANCE  /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTS
 
 	hr = pSvc->ExecQuery(
 		bstr_t("WQL"), 
-		bstr_t("SELECT * FROM Win32_OperatingSystem"),
+		bstr_t("SELECT * FROM Win32_NetworkAdapterConfiguration"),
 		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, 
 		NULL,
 		&pEnumerator);
@@ -539,9 +547,20 @@ int WINAPI _tWinMain(HINSTANCE  /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPTS
 		if (0 == uReturn || FAILED(hr))
 			break;
 
-		// Get the value of the Name property
-		hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
-		//wcout << " OS Name : " << vtProp.bstrVal << endl;
+		hr = pclsObj->Get(L"IPEnabled", 0, &vtProp, 0, 0);
+		if (FAILED(hr) || !vtProp.boolVal)
+			goto Next;
+
+		VariantClear(&vtProp);
+		hr = pclsObj->Get(L"Caption", 0, &vtProp, 0, 0);
+		if (FAILED(hr))
+			goto Next;
+
+		WCHAR *s = vtProp.bstrVal;
+		if (ShouldSkipNetworkAdapter(s))
+			goto Next;
+		// TODO: set the DNS settings
+Next:
 		VariantClear(&vtProp);
 		pclsObj->Release();
 	}
