@@ -6,8 +6,9 @@
 
 #include "wbem.h"
 
-#include "StrUtil.h"
 #include "MiscUtil.h"
+#include "SimpleLog.h"
+#include "StrUtil.h"
 
 static void SafeArrayDestroyAll(SAFEARRAY **arr)
 {
@@ -52,56 +53,62 @@ static void SetDnsServers(IWbemServices *wmiSvc, int adapterIdx, OLECHAR *dns1, 
 {
 	IWbemClassObject *	pObject = NULL;
 	IWbemClassObject *	pInstance = NULL;
-	IWbemClassObject *	pMethod = NULL;
+	IWbemClassObject *	pMethodParam = NULL;
 	IWbemClassObject *	pResult = NULL;
 	HRESULT				hr;
-	VARIANT				serverList;
-	VARIANT				vtReturnValue;
+	VARIANT				vtDnsServers;
+	VARIANT				vtRetVal;
 	CString				adapterPath;
 	BSTR				adapterPathBstr = NULL;
 	SAFEARRAY *			dnsServers = NULL;
 	int					retVal;
 
-    hr = wmiSvc->GetObject(bstr_t("Win32_NetworkAdapterConfiguration"), 0, NULL, &pObject, NULL);
-	if (FAILED(hr))
-		goto done;
+	VariantInit(&vtDnsServers);
+	VariantInit(&vtRetVal);
 
-	hr = pObject->GetMethod(bstr_t("SetDNSServerSearchOrder"), 0, &pMethod, NULL);
+	hr = wmiSvc->GetObject(bstr_t("Win32_NetworkAdapterConfiguration"), 0, NULL, &pObject, NULL);
 	if (FAILED(hr))
-		goto done;
+		goto Exit;
 
-#if 0 // TODO: not sure if I need this, seems to work without
-    hr = pMethod->SpawnInstance(0, &pInstance);
+#if 0 // TODO: not sure if I need this, seems to work without it
+	hr = pObject->GetMethod(bstr_t("SetDNSServerSearchOrder"), 0, &pMethodParam, NULL);
 	if (FAILED(hr))
-		goto done;
+		goto Exit;
+
+    hr = pMethodParam->SpawnInstance(0, &pInstance);
+	if (FAILED(hr))
+		goto Exit;
 #endif
 
 	dnsServers = CreateDnsArray(dns1, dns2);
 	if (!dnsServers)
-		goto done;
+		goto Exit;
 
-	serverList.vt = VT_ARRAY | VT_BSTR;
-	serverList.parray = dnsServers;
-	hr = pObject->Put(L"DNSServerSearchOrder", 0, &serverList, 0);
+	vtDnsServers.vt = VT_ARRAY | VT_BSTR;
+	vtDnsServers.parray = dnsServers;
+	hr = pObject->Put(L"DNSServerSearchOrder", 0, &vtDnsServers, 0);
 	if (FAILED(hr))
-		goto done;
+		goto Exit;
 
 	adapterPath.Format("Win32_NetworkAdapterConfiguration.Index='%d'", adapterIdx);
 	adapterPath.SetSysString(&adapterPathBstr);
 	hr = wmiSvc->ExecMethod(adapterPathBstr, bstr_t("SetDNSServerSearchOrder"), 0, NULL, pObject, &pResult, NULL);
 	if (FAILED(hr))
-		goto done;
+		goto Exit;
 
-    hr = pResult->Get(L"ReturnValue", 0, &vtReturnValue, NULL, 0);
+	hr = pResult->Get(L"ReturnValue", 0, &vtRetVal, NULL, 0);
 	if (FAILED(hr))
-		goto done;
+		goto Exit;
 
-	retVal = vtReturnValue.intVal;
+	retVal = vtRetVal.intVal;
+	slogfmt("Set dns servers on adapter %d, retVal=%d", adapterIdx, retVal);
 
-done:
+Exit:
+	VariantClear(&vtDnsServers);
+	VariantClear(&vtRetVal);
 	if (pObject) pObject->Release();
 	if (pInstance) pInstance->Release();
-	if (pMethod) pMethod->Release();
+	if (pMethodParam) pMethodParam->Release();
 	if (pResult) pResult->Release();
 	if (dnsServers) SafeArrayDestroyAll(&dnsServers);
 	::SysFreeString(adapterPathBstr);
