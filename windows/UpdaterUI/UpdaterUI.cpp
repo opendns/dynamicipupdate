@@ -446,9 +446,6 @@ static bool IsApiKeyValid(char *apiKey)
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cmdLine, int /* nCmdShow */)
 {
-#if 0
-	SetOpenDnsServersOnAllAdapters();
-#else
 	int nRet = 0;
 	int specialCmd = SPECIAL_CMD_NONE;
 
@@ -568,4 +565,3 @@ Exit:
 
 	return nRet;
 }
-#endif
