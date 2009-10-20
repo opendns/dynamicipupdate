@@ -448,7 +448,7 @@ static bool IsApiKeyValid(char *apiKey)
 	return true;
 }
 
-#if 1
+#if 0
 static void SetDnsServers(IWbemServices *pSvc, IWbemClassObject *pObj, OLECHAR *srv1, OLECHAR *srv2)
 {
 	HRESULT			hr;

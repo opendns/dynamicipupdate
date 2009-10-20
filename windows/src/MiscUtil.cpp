@@ -553,8 +553,12 @@ const char *GetIpUpdateUrl(BOOL addApiKey)
 	}
 	url += "&v=2";
 	url += "&hostname=";
-	if (g_pref_hostname)
-		url += g_pref_hostname;
+	if (g_pref_hostname) {
+		char *hostnameEncoded = StrUrlEncode(g_pref_hostname);
+		url += hostnameEncoded;
+		free(hostnameEncoded);
+		
+	}
 	const char *urlTxt = (const char*)TStrToStr(url);
 	return urlTxt;
 }
