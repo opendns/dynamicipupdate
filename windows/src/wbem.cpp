@@ -4,104 +4,112 @@
 
 #include "stdafx.h"
 
-#include "StrUtil.h"
 #include "wbem.h"
 
-static void SetDnsServers(IWbemServices *pSvc, IWbemClassObject *pObj, OLECHAR *srv1, OLECHAR *srv2)
+#include "StrUtil.h"
+#include "MiscUtil.h"
+
+static void SafeArrayDestroyAll(SAFEARRAY **arr)
 {
-	HRESULT			hr;
-	SAFEARRAYBOUND	parrayBound;
-	VARIANT			vtProp;
-	_variant_t		serverList;
-	int				srvCount = 0;
-	CString			methodPath;
-	BSTR			methodName = SysAllocString(L"SetDNSServerSearchOrder");
-	BSTR			methodPathBstr = NULL;
-	IWbemClassObject *pAdapterClassObj = NULL;
-	IWbemClassObject *pAdapterClassInst = NULL;
-	IWbemClassObject *pSetDNSServerSearchOrderIn = NULL;
-	IWbemClassObject *pSetDNSServerSearchOrderOut = NULL;
-
-	VariantInit(&vtProp);
-	hr = pObj->Get(L"Index", 0, &vtProp, 0, 0);
-	if (FAILED(hr))
-		goto Exit;
-
-	assert(vtProp.vt == VT_I4);
-	if (vtProp.vt != VT_I4)
-		goto Exit;
-
-	int idx = vtProp.lVal;
-
-	hr = pSvc->GetObject(
-		bstr_t("Win32_NetworkAdapterConfiguration"),
-		WBEM_FLAG_RETURN_WBEM_COMPLETE,
-		NULL,
-		&pAdapterClassObj,
-		NULL);
-	if (FAILED(hr))
-		goto Exit;
-
-	hr = pAdapterClassObj->GetMethod(methodName, 0, &pSetDNSServerSearchOrderIn, NULL);
-	if (FAILED(hr))
-		goto Exit;
-
-	hr = pAdapterClassObj->SpawnInstance(0, &pAdapterClassInst);
-	if (FAILED(hr))
-		goto Exit;
-
-	if (srv1)
-		++srvCount;
-	if (srv2)
-		++srvCount;
-	if (0 == srvCount)
-		return;
-
-	parrayBound.cElements = srvCount;
-	parrayBound.lLbound = 0;
-	serverList.vt = VT_ARRAY | VT_BSTR;
-	if (0 == srvCount) {
-		serverList.parray = NULL;
-	} else {
-		serverList.parray = ::SafeArrayCreateEx(VT_BSTR, 1, &parrayBound, NULL);
-
-		BSTR* dnsServerAddress;
-		::SafeArrayAccessData(serverList.parray, reinterpret_cast<LPVOID*>(&dnsServerAddress));
-		int index = 0;
-		if (srv1)
-		{
-			dnsServerAddress[index] = ::SysAllocString(srv1);
-			index++;
-		}
-		if (srv2) 
-		{
-			dnsServerAddress[index] = ::SysAllocString(srv2);
-			index++;
-		}
-		::SafeArrayUnaccessData(serverList.parray);
-	}
-
-	hr = pAdapterClassObj->Put(bstr_t("DNSServerSearchOrder"), 0, &serverList, 0);
-	if (FAILED(hr))
-		goto Exit;
-
-	methodPath.Format("Win32_NetworkAdapterConfiguration.Index='%d'", (int)idx);
-	methodPath.SetSysString(&methodPathBstr);
-	hr = pSvc->ExecMethod(methodPathBstr, methodName, 0, NULL, pSetDNSServerSearchOrderIn, &pSetDNSServerSearchOrderOut, NULL);
-	if (FAILED(hr))
-		goto Exit;
-Exit:
-	if (pAdapterClassObj) pAdapterClassObj->Release();
-	if (pAdapterClassInst) pAdapterClassInst->Release();
-	if (pSetDNSServerSearchOrderOut) pSetDNSServerSearchOrderOut->Release();
-	if (pSetDNSServerSearchOrderIn) pSetDNSServerSearchOrderIn->Release();
-	::SysFreeString(methodName);
-	::SysFreeString(methodPathBstr);
+	SafeArrayDestroyData(*arr);
+	SafeArrayDestroyDescriptor(*arr);
+	*arr = NULL;
 }
 
-static void ClearDnsServers(IWbemServices *pSvc, IWbemClassObject *pObj)
+static SAFEARRAY *CreateDnsArray(OLECHAR *dns1, OLECHAR *dns2)
 {
-	SetDnsServers(pSvc, pObj, NULL, NULL);
+	int				srvCount = 0;
+	SAFEARRAYBOUND	arrayBound;
+	SAFEARRAY *		dnsArray = NULL;
+	BSTR *			dnsServerAddress;
+
+	if (dns1) ++srvCount;
+	if (dns2) ++srvCount;
+
+	if (0 == srvCount)
+		return NULL;
+
+	arrayBound.cElements = srvCount;
+	arrayBound.lLbound = 0;
+	dnsArray = ::SafeArrayCreateEx(VT_BSTR, 1, &arrayBound, NULL);
+	if (!dnsArray)
+		return NULL;
+
+	::SafeArrayAccessData(dnsArray, reinterpret_cast<LPVOID*>(&dnsServerAddress));
+
+	int index = 0;
+	if (dns1)
+		dnsServerAddress[index++] = ::SysAllocString(dns1);
+
+	if (dns2) 
+		dnsServerAddress[index] = ::SysAllocString(dns2);
+
+	::SafeArrayUnaccessData(dnsArray);
+	return dnsArray;
+}
+
+static void SetDnsServers(IWbemServices *wmiSvc, int adapterIdx, OLECHAR *dns1, OLECHAR *dns2)
+{
+	IWbemClassObject *	pObject = NULL;
+	IWbemClassObject *	pInstance = NULL;
+	IWbemClassObject *	pMethod = NULL;
+	IWbemClassObject *	pResult = NULL;
+	HRESULT				hr;
+	VARIANT				serverList;
+	VARIANT				vtReturnValue;
+	CString				adapterPath;
+	BSTR				adapterPathBstr = NULL;
+	SAFEARRAY *			dnsServers = NULL;
+	int					retVal;
+
+    hr = wmiSvc->GetObject(bstr_t("Win32_NetworkAdapterConfiguration"), 0, NULL, &pObject, NULL);
+	if (FAILED(hr))
+		goto done;
+
+	hr = pObject->GetMethod(bstr_t("SetDNSServerSearchOrder"), 0, &pMethod, NULL);
+	if (FAILED(hr))
+		goto done;
+
+#if 0 // TODO: not sure if I need this, seems to work without
+    hr = pMethod->SpawnInstance(0, &pInstance);
+	if (FAILED(hr))
+		goto done;
+#endif
+
+	dnsServers = CreateDnsArray(dns1, dns2);
+	if (!dnsServers)
+		goto done;
+
+	serverList.vt = VT_ARRAY | VT_BSTR;
+	serverList.parray = dnsServers;
+	hr = pObject->Put(L"DNSServerSearchOrder", 0, &serverList, 0);
+	if (FAILED(hr))
+		goto done;
+
+	adapterPath.Format("Win32_NetworkAdapterConfiguration.Index='%d'", adapterIdx);
+	adapterPath.SetSysString(&adapterPathBstr);
+	hr = wmiSvc->ExecMethod(adapterPathBstr, bstr_t("SetDNSServerSearchOrder"), 0, NULL, pObject, &pResult, NULL);
+	if (FAILED(hr))
+		goto done;
+
+    hr = pResult->Get(L"ReturnValue", 0, &vtReturnValue, NULL, 0);
+	if (FAILED(hr))
+		goto done;
+
+	retVal = vtReturnValue.intVal;
+
+done:
+	if (pObject) pObject->Release();
+	if (pInstance) pInstance->Release();
+	if (pMethod) pMethod->Release();
+	if (pResult) pResult->Release();
+	if (dnsServers) SafeArrayDestroyAll(&dnsServers);
+	::SysFreeString(adapterPathBstr);
+}
+
+static void ClearDnsServers(IWbemServices *pSvc, int adapterIdx)
+{
+	SetDnsServers(pSvc, adapterIdx, NULL, NULL);
 }
 
 // We don't want to change the DNS settings of VirtualBox/VMWare etc. virtual ethernet adapters
@@ -154,9 +162,6 @@ void SetOpenDnsServersOnAllAdapters()
 	if (FAILED(hr))
 		goto Exit;
 
-	// Connect to the root\cimv2 namespace with
-	// the current user and obtain pointer pSvc
-	// to make IWbemServices calls.
 	hr = pLoc->ConnectServer(
 		 bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
 		 NULL,					  // User name. NULL = current user
@@ -205,8 +210,12 @@ void SetOpenDnsServersOnAllAdapters()
 	for (;;)
 	{
 		VARIANT vtProp;
-		WCHAR *s;
+		VARIANT vtCaption;
+		WCHAR *caption = NULL;
+
 		VariantInit(&vtProp);
+		VariantInit(&vtCaption);
+
 		hr = pEnumerator->Next(WBEM_INFINITE, 1, &pObj, &result);
 		if (0 == result)
 			break;
@@ -223,14 +232,17 @@ void SetOpenDnsServersOnAllAdapters()
 		s = vtProp.bstrVal;
 #endif
 
-		VariantClear(&vtProp);
-		hr = pObj->Get(L"Caption", 0, &vtProp, 0, 0);
+		hr = pObj->Get(L"Caption", 0, &vtCaption, 0, 0);
 		if (FAILED(hr))
 			goto Next;
-		s = vtProp.bstrVal;
+		caption = vtCaption.bstrVal;
 
-		if (ShouldSkipNetworkAdapter(s))
+		if (ShouldSkipNetworkAdapter(caption))
 			goto Next;
+
+		// TODO: skip disabled adapters (probably needs to use
+		// Win32_NetworkAdapter.Availability correlated via
+		// MACAddress with Win32_NetworkAdapterConfiguration)
 
 #if 0
 		VariantClear(&vtProp);
@@ -239,9 +251,19 @@ void SetOpenDnsServersOnAllAdapters()
 			goto Next;
 #endif
 
-		SetDnsServers(pSvc, pObj, OLESTR("208.67.222.222"), OLESTR("208.67.220.220 "));
+		VariantClear(&vtProp);
+		hr = pObj->Get(L"Index", 0, &vtProp, 0, 0);
+		if (FAILED(hr))
+			goto Exit;
+		assert(vtProp.vt == VT_I4);
+		if (vtProp.vt != VT_I4)
+			goto Exit;
+		int idx = vtProp.lVal;
+
+		SetDnsServers(pSvc, idx, OLESTR("208.67.222.222"), OLESTR("208.67.220.220"));
 Next:
 		VariantClear(&vtProp);
+		VariantClear(&vtCaption);
 		pObj->Release();
 	}
 
