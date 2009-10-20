@@ -307,6 +307,14 @@
 				RelativePath=".\UpdaterUI.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\src\wbem.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\wbem.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -317,11 +325,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\OpenDNSUpdater.ico"
+				RelativePath=".\res\res\OpenDNSUpdater.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\res\OpenDNSUpdater.ico"
+				RelativePath=".\res\OpenDNSUpdater.ico"
 				>
 			</File>
 			<File
@@ -345,19 +353,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\systray-ok.ico"
-				>
-			</File>
-			<File
 				RelativePath=".\res\res\systray-ok.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\windows_update_icon.bmp"
+				RelativePath=".\res\systray-ok.ico"
 				>
 			</File>
 			<File
 				RelativePath=".\res\res\windows_update_icon.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\windows_update_icon.bmp"
 				>
 			</File>
 		</Filter>

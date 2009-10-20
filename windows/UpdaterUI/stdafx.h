@@ -37,6 +37,10 @@ extern CAppModule _Module;
 #include <assert.h>
 #include "pstdint.h"
 
+#define _WIN32_DCOM
+#include <comdef.h>
+#include <Wbemidl.h>
+
 #pragma comment(lib, "dnsapi.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "shlwapi.lib")
@@ -44,4 +48,5 @@ extern CAppModule _Module;
 #pragma comment(lib, "mpr.lib")
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "wbemuuid.lib")
 
