@@ -135,8 +135,9 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if (!hostname)
         hostname = @"";
-    NSString *url = [NSString stringWithFormat:@"%@/nic/update?token=%@&api_key=%@&v=2&hostname=%@", IP_UPDATE_HOST, tokenEncoded, API_KEY, hostname];
-    return url;    
+    NSString *hostnameEncoded = [hostname stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *url = [NSString stringWithFormat:@"%@/nic/update?token=%@&api_key=%@&v=2&hostname=%@", IP_UPDATE_HOST, tokenEncoded, API_KEY, hostnameEncoded];
+    return url;
 }
 
 - (void)showErrorInKeyWindow:(NSString*)error additionalText:(NSString*)s {
