@@ -10,6 +10,9 @@
 #include "TypoExceptions.h"
 #include "IpUpdatesHistoryDlg.h"
 #include "PreferencesDlg.h"
+#include "wbem.h"
+
+#define AUTO_CONFIGURE 1
 
 // should we show errors via baloon messages in systray?
 // the code is there but we don't show at this moment
@@ -1011,10 +1014,17 @@ void CMainFrame::DoLayout()
 		textSizer.SetText(_T("Yes"));
 		m_linkLearnSetup.ShowWindow(SW_HIDE);
 	} else {
+#if AUTO_CONFIGURE
+		textSizer.SetText(_T("No. Configure OpenDNS on this computer.  "));
+		s = textSizer.GetIdealSize2();
+		minDx = max(minDx, s.cx + LEFT_MARGIN + RIGHT_MARGIN);
+		textSizer.SetText(_T("No. "));
+#else
 		textSizer.SetText(_T("No. Learn how to setup OpenDNS.  "));
 		s = textSizer.GetIdealSize2();
 		minDx = max(minDx, s.cx + LEFT_MARGIN + RIGHT_MARGIN);
 		textSizer.SetText(_T("No. Learn how to "));
+#endif
 		s = textSizer.GetIdealSize2();
 		int linkX = LEFT_MARGIN + DIVIDER_TEXT_LEFT_MARGIN + s.cx;
 		int linkY = m_txtStatusRect.bottom + DIVIDER_Y_SPACING + 6;
@@ -1160,7 +1170,14 @@ LRESULT CMainFrame::OnLinkAbout(LPNMHDR /*pnmh*/)
 
 LRESULT CMainFrame::OnLinkLearnSetupOpenDns(LPNMHDR /*pnmh*/)
 {
+#if AUTO_CONFIGURE
+	SetOpenDnsServersOnAllAdapters();
+	if (m_updaterThread) {
+		m_updaterThread->ForceIpCheck();
+	}
+#else
 	LaunchUrl(SETUP_OPENDNS_URL);
+#endif
 	return 0;
 }
 
@@ -1609,7 +1626,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 	m_linkAbout.SetFont(m_defaultGuiFont);
 	m_linkAbout.SetDlgCtrlID(IDC_LINK_ABOUT);
 
+#if AUTO_CONFIGURE
+	m_linkLearnSetup.Create(m_hWnd, r, _T("<a>Configure OpenDNS on this computer.</a>"), WS_CHILD | WS_VISIBLE);
+#else
 	m_linkLearnSetup.Create(m_hWnd, r, _T("<a>setup OpenDNS.</a>"), WS_CHILD | WS_VISIBLE);
+#endif
 	m_linkLearnSetup.SetFont(m_dividerTextFont);
 	m_linkLearnSetup.SetDlgCtrlID(IDC_LINK_LEARN_SETUP_OPENDNS);
 

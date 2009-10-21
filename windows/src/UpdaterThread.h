@@ -228,6 +228,11 @@ public:
 		SetEvent(m_event);
 	}
 
+	void ForceIpCheck()
+	{
+		SetEvent(m_event);
+	}
+
 	void Stop(bool wait=false)
 	{
 		m_stop = true;

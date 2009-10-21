@@ -121,6 +121,8 @@ static void ClearDnsServers(IWbemServices *pSvc, int adapterIdx)
 
 // We don't want to change the DNS settings of VirtualBox/VMWare etc. virtual ethernet adapters
 // I wish I knew a better heurstic to filter non-physical adapters
+// VirtualPC 2007 SP1 driver doesn't seem to need exclusion (has "IPEnabled" as false).
+// TODO: maybe VirtualPC 2007 SP1 driver has IPEnabled only when it's running?
 static BOOL ShouldSkipNetworkAdapter(WCHAR *caption)
 {
 	// virtual adapter from VirtualBox
@@ -137,13 +139,10 @@ static BOOL ShouldSkipNetworkAdapter(WCHAR *caption)
 
 void SetOpenDnsServersOnAllAdapters()
 {
-	IWbemLocator *pLoc = NULL;
-	IWbemServices *pSvc = NULL;
-	IEnumWbemClassObject* pEnumerator = NULL;
-
-	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED); 
-	if (FAILED(hr))
-		return;
+	HRESULT					hr;
+	IWbemLocator *			pLoc = NULL;
+	IWbemServices *			pSvc = NULL;
+	IEnumWbemClassObject *	pEnumerator = NULL;
 
 	hr =  CoInitializeSecurity(
 		NULL, 
@@ -227,6 +226,11 @@ void SetOpenDnsServersOnAllAdapters()
 		if (0 == result)
 			break;
 
+		hr = pObj->Get(L"Caption", 0, &vtCaption, 0, 0);
+		if (FAILED(hr))
+			goto Next;
+		caption = vtCaption.bstrVal;
+
 		hr = pObj->Get(L"IPEnabled", 0, &vtProp, 0, 0);
 		if (FAILED(hr) || !vtProp.boolVal)
 			goto Next;
@@ -238,11 +242,6 @@ void SetOpenDnsServersOnAllAdapters()
 			goto Next;
 		s = vtProp.bstrVal;
 #endif
-
-		hr = pObj->Get(L"Caption", 0, &vtCaption, 0, 0);
-		if (FAILED(hr))
-			goto Next;
-		caption = vtCaption.bstrVal;
 
 		if (ShouldSkipNetworkAdapter(caption))
 			goto Next;
@@ -279,7 +278,6 @@ Exit:
 	if (pSvc) pSvc->Release();
 	if (pLoc) pLoc->Release();
 
-	CoUninitialize();
 	return;
 }
 

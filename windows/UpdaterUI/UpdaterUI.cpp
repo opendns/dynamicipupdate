@@ -445,8 +445,13 @@ static bool IsApiKeyValid(char *apiKey)
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cmdLine, int /* nCmdShow */)
 {
-	int nRet = 0;
-	int specialCmd = SPECIAL_CMD_NONE;
+	HRESULT		hr;
+	int			nRet = 0;
+	int			specialCmd = SPECIAL_CMD_NONE;
+
+	hr = ::CoInitializeEx(0, COINIT_MULTITHREADED); 
+	if (FAILED(hr))
+		return 1;
 
 #ifdef DEBUG
 	int failedCount = run_unit_tests();
@@ -488,13 +493,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 
 	FindSimulatedError(cmdLine);
 
-	HRESULT hRes = ::CoInitialize(NULL);
-	ATLASSERT(SUCCEEDED(hRes));
 	static const DWORD allClasses = 0xffff;
 	AtlInitCommonControls(allClasses);
 
-	hRes = _Module.Init(NULL, hInstance);
-	ATLASSERT(SUCCEEDED(hRes));
+	hr = _Module.Init(NULL, hInstance);
+	ATLASSERT(SUCCEEDED(hr));
 
 	LPCTSTR richEditLibName = CRichEditCtrl::GetLibraryName();
 	HINSTANCE hInstRich = ::LoadLibrary(richEditLibName);
