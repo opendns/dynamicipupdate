@@ -90,7 +90,7 @@ static void SetDnsServers(IWbemServices *wmiSvc, int adapterIdx, OLECHAR *dns1, 
 	if (FAILED(hr))
 		goto Exit;
 
-	adapterPath.Format("Win32_NetworkAdapterConfiguration.Index='%d'", adapterIdx);
+	adapterPath.Format(_T("Win32_NetworkAdapterConfiguration.Index='%d'"), adapterIdx);
 	adapterPath.SetSysString(&adapterPathBstr);
 	hr = wmiSvc->ExecMethod(adapterPathBstr, bstr_t("SetDNSServerSearchOrder"), 0, NULL, pObject, &pResult, NULL);
 	if (FAILED(hr))
