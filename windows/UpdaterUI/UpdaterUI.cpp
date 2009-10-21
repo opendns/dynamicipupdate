@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "stdafx.h"
-#include "wbem.h"
 
 #include "base64decode.h"
 #include "WTLThread.h"
