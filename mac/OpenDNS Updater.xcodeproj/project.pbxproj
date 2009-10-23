@@ -13,7 +13,6 @@
 		7F760648106D4D9500BAC2D1 /* Sparkle.framework in Copy Files: Frameworks */ = {isa = PBXBuildFile; fileRef = 7F76062F106D4D5D00BAC2D1 /* Sparkle.framework */; };
 		7FE5F9380FFD421700879CC4 /* LoginItemsAE.c in Sources */ = {isa = PBXBuildFile; fileRef = 7FE5F9350FFD421700879CC4 /* LoginItemsAE.c */; };
 		7FF293010FFC29DD000A1604 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF293000FFC29DD000A1604 /* AppController.m */; };
-		7FF293030FFC29F1000A1604 /* notes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7FF293020FFC29F1000A1604 /* notes.txt */; };
 		7FF293050FFC29FC000A1604 /* menuicon.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7FF293040FFC29FC000A1604 /* menuicon.tif */; };
 		7FF293070FFC2A04000A1604 /* opendns.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7FF293060FFC2A04000A1604 /* opendns.icns */; };
 		7FF293160FFC2A15000A1604 /* NSObject+SBJSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF2930B0FFC2A15000A1604 /* NSObject+SBJSON.m */; };
@@ -62,7 +61,6 @@
 		7FF292FE0FFC29DD000A1604 /* ApiKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApiKey.h; sourceTree = "<group>"; };
 		7FF292FF0FFC29DD000A1604 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		7FF293000FFC29DD000A1604 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; wrapsLines = 1; };
-		7FF293020FFC29F1000A1604 /* notes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
 		7FF293040FFC29FC000A1604 /* menuicon.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = menuicon.tif; sourceTree = "<group>"; };
 		7FF293060FFC2A04000A1604 /* opendns.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = opendns.icns; sourceTree = "<group>"; };
 		7FF293090FFC2A15000A1604 /* JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSON.h; sourceTree = "<group>"; };
@@ -176,7 +174,6 @@
 			children = (
 				7FF293060FFC2A04000A1604 /* opendns.icns */,
 				7FF293040FFC29FC000A1604 /* menuicon.tif */,
-				7FF293020FFC29F1000A1604 /* notes.txt */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
@@ -279,7 +276,6 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
-				7FF293030FFC29F1000A1604 /* notes.txt in Resources */,
 				7FF293050FFC29FC000A1604 /* menuicon.tif in Resources */,
 				7FF293070FFC2A04000A1604 /* opendns.icns in Resources */,
 			);
