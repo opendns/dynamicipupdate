@@ -12,7 +12,10 @@
 #include "PreferencesDlg.h"
 #include "wbem.h"
 
-#define AUTO_CONFIGURE 1
+/* If set to 1, when the user is not using OpenDNS, we'll
+   show the link to automatically configure computer's DNS
+   to use DNS servers */
+#define AUTO_CONFIGURE 0
 
 // should we show errors via baloon messages in systray?
 // the code is there but we don't show at this moment
