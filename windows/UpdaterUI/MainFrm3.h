@@ -57,6 +57,7 @@ enum {
 	IDC_BUTTON_CHANGE_NETWORK,
 	IDC_BUTTON_SEND_IP_UPDATE,
 	IDC_LINK_ABOUT,
+	IDC_LINK_SETTINGS,
 	IDC_LINK_LEARN_SETUP_OPENDNS,
 	IDC_EDIT_STATUS,
 	IDC_EDIT_UPDATE,
@@ -175,6 +176,7 @@ public:
 
 	CLinkCtrl		m_linkAbout;
 	CLinkCtrl		m_linkLearnSetup;
+	CLinkCtrl		m_linkSettings;
 	CButton			m_buttonChangeAccount;
 	CButton			m_buttonChangeConfigureNetwork;
 	CButton			m_buttonUpdate;
@@ -267,6 +269,7 @@ public:
 		NOTIFY_HANDLER_EX(IDC_EDIT_UPDATE, EN_SELCHANGE, OnSelChange)
 
 		NOTIFY_HANDLER_EX(IDC_LINK_ABOUT, NM_CLICK, OnLinkAbout)
+		NOTIFY_HANDLER_EX(IDC_LINK_SETTINGS, NM_CLICK, OnLinkSettings)
 		NOTIFY_HANDLER_EX(IDC_LINK_LEARN_SETUP_OPENDNS, NM_CLICK, OnLinkLearnSetupOpenDns)
 
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
@@ -328,6 +331,7 @@ public:
 
 	LRESULT OnLinkStatusEdit(LPNMHDR pnmh);
 	LRESULT OnLinkAbout(LPNMHDR /*pnmh*/);
+	LRESULT OnLinkSettings(LPNMHDR /*pnmh*/);
 	LRESULT OnLinkLearnSetupOpenDns(LPNMHDR /*pnmh*/);
 
 	void DrawErrorText(CDCHandle *dc, int x, int y, const TCHAR *txt);

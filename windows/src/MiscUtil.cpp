@@ -840,6 +840,19 @@ BOOL IsWndStatic(HWND hwnd)
 	return FALSE;
 }
 
+#define BUTTON_LEN 6
+BOOL IsWndButton(HWND hwnd)
+{
+	TCHAR classNameBuf[256];
+	int len = GetClassName(hwnd, classNameBuf, 256);
+	if (BUTTON_LEN != len)
+		return FALSE;
+
+	if (tstreq(classNameBuf, _T("Button")))
+		return TRUE;
+	return FALSE;
+}
+
 // Emulate transparent static/syslink controls by setting a background
 // matching window background
 HBRUSH CommonOnCtlColorStatic(CDCHandle dc, CWindow wnd)
@@ -848,7 +861,7 @@ HBRUSH CommonOnCtlColorStatic(CDCHandle dc, CWindow wnd)
 	static HBRUSH wndBrush = NULL;
 	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
 	static const COLORREF colBlack = RGB(0x00, 0x00, 0x00);
-	if (IsWndLink(hwnd)) {
+	if (IsWndLink(hwnd) || IsWndButton(hwnd)) {
 		// I have no idea why, but for main window, I need SetBkColor()
 		// but in a dialog I need to return brush, so I do both so that it
 		// works in both contexts

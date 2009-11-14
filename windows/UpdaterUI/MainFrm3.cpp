@@ -932,6 +932,11 @@ void CMainFrame::DoLayout()
 	static const int LINK_ABOUT_BOTTOM_MARGIN = 5;
 	m_linkAbout.MoveWindow(x, clientDy - s.cy - LINK_ABOUT_BOTTOM_MARGIN, s.cx, s.cy);
 
+	// position "Settings" link in the bottom right corner
+	linkSizer.SetWindow(m_linkSettings);
+	linkSizer.SetFont(m_defaultGuiFont);
+	s = linkSizer.GetIdealSize2();
+	m_linkSettings.MoveWindow(clientDx - s.cx - RIGHT_MARGIN, clientDy - s.cy - LINK_ABOUT_BOTTOM_MARGIN, s.cx, s.cy);
 #if 0
 	// position title in the middle of top bar
 	RECT topBarRect = {0, 0, clientDx, TOP_BAR_DY};
@@ -1154,6 +1159,12 @@ void CMainFrame::OnIpCheckResult(IP4_ADDRESS myIp)
 			PostMessage(WMAPP_NOTIFY_ABOUT_ERROR, NER_NOT_USING_OPENDNS);
 		}
 	}
+}
+
+LRESULT CMainFrame::OnLinkSettings(LPNMHDR /*pnmh*/)
+{
+	OnPreferences(0, 0, 0);
+	return 0;
 }
 
 LRESULT CMainFrame::OnLinkAbout(LPNMHDR /*pnmh*/)
@@ -1636,6 +1647,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT /* lpCreateStruct */)
 #endif
 	m_linkLearnSetup.SetFont(m_dividerTextFont);
 	m_linkLearnSetup.SetDlgCtrlID(IDC_LINK_LEARN_SETUP_OPENDNS);
+
+	m_linkSettings.Create(m_hWnd, r, _T("<a>Settings</a>"),  WS_CHILD | WS_VISIBLE);
+	m_linkSettings.SetFont(m_defaultGuiFont);
+	m_linkSettings.SetDlgCtrlID(IDC_LINK_SETTINGS);
 
 	m_buttonChangeAccount.Create(m_hWnd, r, _T("Change account"),  WS_CHILD | WS_VISIBLE);
 	m_buttonChangeAccount.SetFont(m_buttonsFont);

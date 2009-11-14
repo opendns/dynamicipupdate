@@ -9,11 +9,15 @@
 
 class CPreferencesDlg : public CDialogImpl<CPreferencesDlg>
 {
+	static const COLORREF colWinBg = RGB(0xf7, 0xfb, 0xff);
+
 public:
 	enum { IDD = IDD_DIALOG_PREFERENCES };
 
 	BEGIN_MSG_MAP(CPreferencesDlg)
 		MSG_WM_INITDIALOG(OnInitDialog)
+		MSG_WM_ERASEBKGND(OnEraseBkgnd)
+		MSG_WM_CTLCOLORSTATIC(OnCtlColorStatic)
 		COMMAND_ID_HANDLER(IDOK, OnButtonOk)
 		COMMAND_ID_HANDLER(IDCANCEL, OnButtonCancel)
 	END_MSG_MAP()
@@ -56,6 +60,22 @@ public:
 		SetCheckValue(IDC_CHECK_DONT_NOTIFY_ABOUT_ERRORS, g_pref_disable_nagging);
 		SetCheckValueInverted(IDC_CHECK_DISABLE_IP_UPDATES, g_pref_send_updates);
 		return FALSE;
+	}
+
+	BOOL OnEraseBkgnd(CDCHandle dc)
+	{
+		CRect		rc;
+		GetClientRect(rc);
+		dc.FillSolidRect(rc, colWinBg);
+		return 1;
+	}
+
+	HBRUSH OnCtlColorStatic(CDCHandle dc, CWindow wnd)
+	{
+		HBRUSH br = CommonOnCtlColorStatic(dc, wnd);
+		if (0 == br)
+			SetMsgHandled(false);
+		return br;
 	}
 
 	void UpdatePrefsValues()
