@@ -402,6 +402,8 @@ void LaunchUrl(const TCHAR *url)
 	sei.nShow   = SW_SHOWNORMAL;
 
 	res = ShellExecuteEx(&sei);
+	if (!res)
+		SeeLastError();
 }
 
 void ExecWithParams(const TCHAR *exe, const TCHAR *params, bool hidden)
