@@ -449,7 +449,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR cm
 	int			nRet = 0;
 	int			specialCmd = SPECIAL_CMD_NONE;
 
-	hr = ::CoInitializeEx(0, COINIT_MULTITHREADED); 
+	// TODO: COINIT_MULTITHREADED makes launching urls with ShellExecuteEx() not work
+	// figure out if the other works for wmi
+	//hr = ::CoInitializeEx(0, COINIT_MULTITHREADED);
+	hr = ::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	if (FAILED(hr))
 		return 1;
 
