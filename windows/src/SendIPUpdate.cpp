@@ -29,7 +29,7 @@ char* SendIpUpdate()
 	const char *urlTxt = GetIpUpdateUrl(TRUE);
 	const char *host = GetIpUpdateHost();
 
-	HttpResult *httpResult = HttpGet(host, urlTxt, true);
+	HttpResult *httpResult = HttpGet(host, urlTxt, INTERNET_DEFAULT_HTTPS_PORT);
 	free((void*)urlTxt);
 	if (httpResult && httpResult->IsValid()) {
 		res = (char*)httpResult->data.getData(NULL);
@@ -55,7 +55,7 @@ char *SendDnsOmaticUpdate()
 	const char *urlTxt = GetIpUpdateUrl(TRUE);
 	const char *host = GetIpUpdateDnsOMaticHost();
 
-	HttpResult *httpResult = HttpGet(host, urlTxt, true);
+	HttpResult *httpResult = HttpGet(host, urlTxt, INTERNET_DEFAULT_HTTPS_PORT);
 	free((void*)urlTxt);
 	if (httpResult && httpResult->IsValid()) {
 		res = (char*)httpResult->data.getData(NULL);
@@ -182,7 +182,7 @@ char *GetUpdateUrl(const TCHAR *version, VersionUpdateCheckType type)
 		assert(0);
 
 	CString url = AutoUpdateUrl(version, typeStr);
-	HttpResult *res = HttpGet(AUTO_UPDATE_HOST, url, false /* https */);
+	HttpResult *res = HttpGet(AUTO_UPDATE_HOST, url);
 	if (!res || !res->IsValid())
 		return NULL;
 	char *s = (char *)res->data.getData(NULL);
