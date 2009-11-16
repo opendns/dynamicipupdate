@@ -1,3 +1,4 @@
+!addplugindir bin
 !include "MUI.nsh"
 SetCompressor /SOLID lzma
 
