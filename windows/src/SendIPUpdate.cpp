@@ -161,6 +161,8 @@ Error:
 	return NULL;
 }
 
+#define TEST_UPDATE_LOCALLY 0
+
 // sends auto-update check. Returns url of the new version to download
 // if an update is available or NULL if update is not available
 // (or there was an error getting the upgrade info)
@@ -182,7 +184,11 @@ char *GetUpdateUrl(const TCHAR *version, VersionUpdateCheckType type)
 		assert(0);
 
 	CString url = AutoUpdateUrl(version, typeStr);
+#if TEST_UPDATE_LOCALLY
+	HttpResult *res = HttpGet("127.0.0.1", url, 8080);
+#else
 	HttpResult *res = HttpGet(AUTO_UPDATE_HOST, url);
+#endif
 	if (!res || !res->IsValid())
 		return NULL;
 	char *s = (char *)res->data.getData(NULL);
