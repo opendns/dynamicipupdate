@@ -29,16 +29,16 @@ public:
 HttpResult* HttpGet(const WCHAR *url);
 HttpResult* HttpGet(const char *url);
 
-HttpResult* HttpGet(const WCHAR *host, const WCHAR *url, bool https);
-HttpResult* HttpGet(const char *host, const char *url, bool https);
+HttpResult* HttpGet(const WCHAR *host, const WCHAR *url, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
+HttpResult* HttpGet(const char *host, const char *url, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
 
-HttpResult* HttpGetWithBasicAuth(const WCHAR *host, const WCHAR *url, const WCHAR *userName, const WCHAR *pwd, bool https);
-HttpResult* HttpGetWithBasicAuth(const char *host, const char *url, const char *userName, const char *pwd, bool https);
+HttpResult* HttpGetWithBasicAuth(const WCHAR *host, const WCHAR *url, const WCHAR *userName, const WCHAR *pwd, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
+HttpResult* HttpGetWithBasicAuth(const char *host, const char *url, const char *userName, const char *pwd, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
 
-HttpResult* HttpPost(const char *host, const char *url, const char *params, bool https);
-HttpResult* HttpPost(const WCHAR *host, const WCHAR *url, const char *params, bool https);
-HttpResult* HttpPostData(const char *host, const char *url, void *data, DWORD dataSize, bool https);
-HttpResult* HttpPostData(const WCHAR *host, const WCHAR *url, void *data, DWORD dataSize, bool https);
+HttpResult* HttpPost(const char *host, const char *url, const char *params, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
+HttpResult* HttpPost(const WCHAR *host, const WCHAR *url, const char *params, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
+HttpResult* HttpPostData(const char *host, const char *url, void *data, DWORD dataSize, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
+HttpResult* HttpPostData(const WCHAR *host, const WCHAR *url, void *data, DWORD dataSize, INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT);
 bool HttpPostAsync(const char *host, const char *url, const char *params, bool https, HWND hwndToNotify, UINT msg);
 
 #endif

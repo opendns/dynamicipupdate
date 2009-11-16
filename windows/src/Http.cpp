@@ -42,7 +42,7 @@ static bool CreateAndStartThread(LPTHREAD_START_ROUTINE proc, LPVOID procArg)
 	return true;
 }
 
-bool SetupSessionAndRequest(const WCHAR *host, const WCHAR *url, bool https, 
+static bool SetupSessionAndRequest(const WCHAR *host, const WCHAR *url, INTERNET_PORT port, 
 	const WCHAR *method, HINTERNET *hSession, HINTERNET *hConnect, HINTERNET *hRequest)
 {
 	*hSession = WinHttpOpen(L"OpenDNS Updater Client",  
@@ -52,16 +52,12 @@ bool SetupSessionAndRequest(const WCHAR *host, const WCHAR *url, bool https,
 	if (!*hSession)
 		goto Error;
 
-	INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT;
-	if (https)
-		port = INTERNET_DEFAULT_HTTPS_PORT;
-
 	*hConnect = WinHttpConnect(*hSession, host, port, 0);
 	if (!*hConnect)
 		goto Error;
 
 	DWORD flags = 0;
-	if (https)
+	if (INTERNET_DEFAULT_HTTPS_PORT == port)
 		flags = WINHTTP_FLAG_SECURE;
 
 	*hRequest = WinHttpOpenRequest(*hConnect, method, url,
@@ -114,7 +110,7 @@ Error:
 	return false;
 }
 
-HttpResult* HttpGet(const WCHAR *host, const WCHAR *url, bool https)
+HttpResult* HttpGet(const WCHAR *host, const WCHAR *url, INTERNET_PORT port)
 {
 	BOOL		ok;
 	HINTERNET	hSession = NULL, hConnect = NULL, hRequest = NULL;
@@ -123,7 +119,7 @@ HttpResult* HttpGet(const WCHAR *host, const WCHAR *url, bool https)
 	if (!res)
 		return NULL;
 
-	ok = SetupSessionAndRequest(host, url, https, L"GET", &hSession, &hConnect, &hRequest);
+	ok = SetupSessionAndRequest(host, url, port, L"GET", &hSession, &hConnect, &hRequest);
 	if (!ok)
 		goto Error;
 
@@ -152,7 +148,7 @@ Error:
 	goto Exit;
 }
 
-HttpResult* HttpGetWithBasicAuth(const WCHAR *host, const WCHAR *url, const WCHAR *userName, const WCHAR *pwd, bool https)
+HttpResult* HttpGetWithBasicAuth(const WCHAR *host, const WCHAR *url, const WCHAR *userName, const WCHAR *pwd, INTERNET_PORT port)
 {
 	BOOL		ok;
 	HINTERNET	hSession = NULL, hConnect = NULL, hRequest = NULL;
@@ -161,7 +157,7 @@ HttpResult* HttpGetWithBasicAuth(const WCHAR *host, const WCHAR *url, const WCHA
 	if (!res)
 		return NULL;
 
-	ok = SetupSessionAndRequest(host, url, https, L"GET", &hSession, &hConnect, &hRequest);
+	ok = SetupSessionAndRequest(host, url, port, L"GET", &hSession, &hConnect, &hRequest);
 	if (!ok)
 		goto Error;
 	
@@ -196,7 +192,7 @@ Error:
 }
 
 // TODO: should report non-200 results as NULL?
-HttpResult* HttpGetWithBasicAuth(const char *host, const char *url, const char *userName, const char *pwd, bool https)
+HttpResult* HttpGetWithBasicAuth(const char *host, const char *url, const char *userName, const char *pwd,  INTERNET_PORT port)
 {
 	WCHAR *host2 = StrToWstrSimple(host);
 	WCHAR *url2 = StrToWstrSimple(url);
@@ -204,7 +200,7 @@ HttpResult* HttpGetWithBasicAuth(const char *host, const char *url, const char *
 	WCHAR *pwd2 = StrToWstrSimple(pwd);
 	HttpResult *res = NULL;
 	if (host2 && url2 && userName2 && pwd2)
-		res = HttpGetWithBasicAuth(host2, url2, userName2, pwd2, https);
+		res = HttpGetWithBasicAuth(host2, url2, userName2, pwd2, port);
 	free(host2);
 	free(url2);
 	free(userName2);
@@ -214,9 +210,9 @@ HttpResult* HttpGetWithBasicAuth(const char *host, const char *url, const char *
 
 HttpResult* HttpGet(const WCHAR *url)
 {
-	bool https = false;
+	INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT;
 	if (WStrStartsWithI(url, L"https://")) {
-		https = true;
+		port = INTERNET_DEFAULT_HTTPS_PORT;
 		url += 8; // skip https://
 	} else if (WStrStartsWithI(url, L"http://")) {
 		url += 7; // skip http://
@@ -234,7 +230,7 @@ HttpResult* HttpGet(const WCHAR *url)
 	WCHAR* host = WStrDupN(url, hostLen);
 	if (!host)
 		return NULL;
-	HttpResult *res = HttpGet((const WCHAR*)host, urlPart, https);
+	HttpResult *res = HttpGet((const WCHAR*)host, urlPart, port);
 	free(host);
 	return res;
 }
@@ -249,19 +245,19 @@ HttpResult* HttpGet(const char *url)
 	return res;
 }
 
-HttpResult* HttpGet(const char *host, const char *url, bool https)
+HttpResult* HttpGet(const char *host, const char *url,  INTERNET_PORT port)
 {
 	WCHAR *host2 = StrToWstrSimple(host);
 	WCHAR *url2 = StrToWstrSimple(url);
 	HttpResult *res = NULL;
 	if (host2 && url2)
-		res = HttpGet(host2, url2, https);
+		res = HttpGet(host2, url2, port);
 	free(host2);
 	free(url2);
 	return res;
 }
 
-HttpResult* HttpPost(const WCHAR *host, const WCHAR *url, const char *params, bool https)
+HttpResult* HttpPost(const WCHAR *host, const WCHAR *url, const char *params,  INTERNET_PORT port)
 {
 	BOOL		ok;
 	HINTERNET	hSession = NULL, hConnect = NULL, hRequest = NULL;
@@ -270,7 +266,7 @@ HttpResult* HttpPost(const WCHAR *host, const WCHAR *url, const char *params, bo
 	if (!res)
 		return NULL;
 
-	ok = SetupSessionAndRequest(host, url, https, L"POST", &hSession, &hConnect, &hRequest);
+	ok = SetupSessionAndRequest(host, url, port, L"POST", &hSession, &hConnect, &hRequest);
 	if (!ok)
 		goto Error;
 
@@ -306,19 +302,19 @@ Error:
 	goto Exit;
 }
 
-HttpResult* HttpPost(const char *host, const char *url, const char *params, bool https)
+HttpResult* HttpPost(const char *host, const char *url, const char *params, INTERNET_PORT port)
 {
 	WCHAR *host2 = StrToWstrSimple(host);
 	WCHAR *url2 = StrToWstrSimple(url);
 	HttpResult *res = NULL;
 	if (host2 && url2)
-		res = HttpPost(host2, url2, params, https);
+		res = HttpPost(host2, url2, params, port);
 	free(host2);
 	free(url2);
 	return res;
 }
 
-HttpResult* HttpPostData(const WCHAR *host, const WCHAR *url, void *data, DWORD dataSize, bool https)
+HttpResult* HttpPostData(const WCHAR *host, const WCHAR *url, void *data, DWORD dataSize, INTERNET_PORT port)
 {
 #if 0
 	inet = _wininet.InternetOpenA(CLIENTNAME "/" UT_VERSION_ID, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0 );
@@ -333,7 +329,7 @@ HttpResult* HttpPostData(const WCHAR *host, const WCHAR *url, void *data, DWORD 
 	if (!res)
 		return NULL;
 
-	ok = SetupSessionAndRequest(host, url, https, L"POST", &hSession, &hConnect, &hRequest);
+	ok = SetupSessionAndRequest(host, url, port, L"POST", &hSession, &hConnect, &hRequest);
 	if (!ok)
 		goto Error;
 
@@ -358,13 +354,13 @@ Error:
 	goto Exit;
 }
 
-HttpResult* HttpPostData(const char *host, const char *url, void *data, DWORD dataSize, bool https)
+HttpResult* HttpPostData(const char *host, const char *url, void *data, DWORD dataSize,  INTERNET_PORT port)
 {
 	WCHAR *host2 = StrToWstrSimple(host);
 	WCHAR *url2 = StrToWstrSimple(url);
 	HttpResult *res = NULL;
 	if (host2 && url2)
-		res = HttpPostData(host2, url2, data, dataSize, https);
+		res = HttpPostData(host2, url2, data, dataSize, port);
 	free(host2);
 	free(url2);
 	return res;
@@ -390,7 +386,10 @@ public:
 static DWORD WINAPI HttpPostThread(LPVOID arg)
 {
 	HttpPostThreadData *data = (HttpPostThreadData*)arg;
-	HttpResult *result = HttpPost(data->m_host, data->m_url, data->m_params, data->m_https);
+	INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT;
+	if (data->m_https)
+		port = INTERNET_DEFAULT_HTTPS_PORT;
+	HttpResult *result = HttpPost(data->m_host, data->m_url, data->m_params, port);
 	PostMessage(data->m_hwndToNotify, data->m_msg, (WPARAM)result, 0);
 	delete data;
 	return 0;
