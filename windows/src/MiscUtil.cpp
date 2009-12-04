@@ -172,18 +172,6 @@ CString SettingsFileNameInDir(const TCHAR *dir)
 	return fileName;
 }
 
-static bool IsValidAutoUpdateType(const char *type)
-{
-	// install, uninstall or check
-	if (streq(type, "i"))
-		return true;
-	if (streq(type, "u"))
-		return true;
-	if (streq(type, "c"))
-		return true;
-	return false;
-}
-
 // assumes <name> and <val> are already properly url-encoded
 static void AddUrlParam(CString& s, const char *name, const char *val)
 {
@@ -194,7 +182,7 @@ static void AddUrlParam(CString& s, const char *name, const char *val)
 	s += val;
 }
 
-static CString CommonUrlPart(CString url)
+CString CommonUrlPart(CString url)
 {
 	CString s = url;
 	char num[32];
@@ -237,28 +225,6 @@ static CString CommonUrlPart(CString url)
 	s += num;
 
 	return s;
-}
-
-CString AutoUpdateUrl(const TCHAR *version, const char *type)
-{
-	assert(IsValidAutoUpdateType(type));
-	CString s = AUTO_UPDATE_URL;
-
-	s += "?v=";
-	s += version;
-
-	s += "&t=";
-	s += type;
-	return CommonUrlPart(s);
-}
-
-CString CrashDumpUrl(const TCHAR *version)
-{
-	CString s = CRASH_DUMP_URL;
-	s += "?v=";
-	s += version;
-	s += "&app=updaterwin";
-	return CommonUrlPart(s);
 }
 
 CString ApiParamsSignIn(const char* userName, const char* password)

@@ -23,11 +23,6 @@ extern UINT g_errorNotifMsg;
 #define MAIN_FRAME_TITLE _T("OpenDNS Updater v") PROGRAM_VERSION
 #define API_URL "/v1/"
 
-#define AUTO_UPDATE_HOST _T("opendnsupdate.appspot.com")
-#define AUTO_UPDATE_URL "/updatecheck/dynamicipwin"
-
-#define CRASH_DUMP_URL "/crashsubmit"
-
 #define COMMON_DATA_DIR_REG_KEY_PATH  _T("SOFTWARE\\OpenDNS Updater")
 #define COMMON_DATA_DIR_REG_KEY_NAME  _T("Common Dir")
 
@@ -96,8 +91,7 @@ CString SettingsFileName();
 CString SettingsFileNameInDir(const TCHAR *dir);
 CString OldSettingsFileName();
 CString OldSettingsFileName2();
-CString AutoUpdateUrl(const TCHAR *version, const char *type);
-CString CrashDumpUrl(const TCHAR *version);
+CString CommonUrlPart(CString url);
 
 CString ApiParamsSignIn(const char* userName, const char* password);
 CString ApiParamsNetworksGet(const char *token);

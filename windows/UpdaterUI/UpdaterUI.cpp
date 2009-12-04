@@ -357,27 +357,37 @@ static void DoUninstallStep()
 	}
 }
 
+#define CRASH_DUMP_URL "/crashsubmit"
+
+static CString CrashDumpUrl(const TCHAR *version)
+{
+	CString s = CRASH_DUMP_URL;
+	s += "?v=";
+	s += version;
+	s += "&app=updaterwin";
+	return CommonUrlPart(s);
+}
+
 void SubmitAndDeleteCrashDump(const TCHAR *filePath)
 {
 	CString url;
+	CString host;
 	uint64_t fileSize;
 	char *fileData = FileReadAll(filePath, &fileSize);
 	if (!fileData)
 		goto Exit;
 
-	//char *host = "127.0.0.1";
-	char *host = "opendnsupdate.appspot.com";
+	//host = "127.0.0.1";
+	host = "opendnsupdate.appspot.com";
 	url = CrashDumpUrl(PROGRAM_VERSION);
-	char *url2 = TStrToStr(url);
 	DWORD dataSize = (DWORD)fileSize;
-	HttpResult *httpResult = HttpPostData(host, url2, fileData, dataSize, false /*https*/);
+	HttpResult *httpResult = HttpPostData(host, url, fileData, dataSize);
 	if (httpResult && httpResult->IsValid()) {
 		char *res = (char*)httpResult->data.getData(NULL);
 		slog("Sent crashdump. Response: ");
 		slognl(res);
 		free(res);
 	}
-	free(url2);
 Exit:
 	DeleteFile(filePath);
 }

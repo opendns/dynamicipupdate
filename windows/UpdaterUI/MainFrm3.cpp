@@ -1371,8 +1371,10 @@ void CMainFrame::StartDownloadNetworks(char *token, int supressFlags)
 	// TODO: could do it async but probably not worth it
 	//HttpPostAsync(API_HOST, API_URL, paramsTxt, API_IS_HTTPS, m_hWnd, WM_HTTP_DOWNLOAD_NETOWRKS);
 	const char *apiHost = GetApiHost();
-	bool apiHostIsHttps = IsApiHostHttps();
-	HttpResult *httpRes = HttpPost(apiHost, API_URL, paramsTxt, apiHostIsHttps);
+	INTERNET_PORT port = INTERNET_DEFAULT_HTTP_PORT;
+	if (IsApiHostHttps())
+		port = INTERNET_DEFAULT_HTTPS_PORT;
+	HttpResult *httpRes = HttpPost(apiHost, API_URL, paramsTxt, port);
 	free((void*)paramsTxt);
 	OnDownloadNetworks(0, (WPARAM)httpRes, (LPARAM)supressFlags);
 }

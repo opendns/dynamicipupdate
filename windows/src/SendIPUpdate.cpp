@@ -161,7 +161,42 @@ Error:
 	return NULL;
 }
 
+static bool IsValidAutoUpdateType(const char *type)
+{
+	// install, uninstall or check
+	if (streq(type, "i"))
+		return true;
+	if (streq(type, "u"))
+		return true;
+	if (streq(type, "c"))
+		return true;
+	return false;
+}
+
+#define AUTO_UPDATE_URL "/updatecheck/dynamicipwin"
+
+static CString AutoUpdateUrl(const TCHAR *version, const char *type)
+{
+	assert(IsValidAutoUpdateType(type));
+	CString s = AUTO_UPDATE_URL;
+
+	s += "?v=";
+	s += version;
+
+	s += "&t=";
+	s += type;
+	return CommonUrlPart(s);
+}
+
 #define TEST_UPDATE_LOCALLY 0
+
+#if TEST_UPDATE_LOCALLY
+#define AUTO_UPDATE_HOST _T("127.0.0.1")
+#define AUTO_UPDATE_PORT 8080
+#else
+#define AUTO_UPDATE_HOST _T("opendnsupdate.appspot.com")
+#define AUTO_UPDATE_PORT 80
+#endif
 
 // sends auto-update check. Returns url of the new version to download
 // if an update is available or NULL if update is not available
@@ -184,11 +219,7 @@ char *GetUpdateUrl(const TCHAR *version, VersionUpdateCheckType type)
 		assert(0);
 
 	CString url = AutoUpdateUrl(version, typeStr);
-#if TEST_UPDATE_LOCALLY
-	HttpResult *res = HttpGet("127.0.0.1", url, 8080);
-#else
-	HttpResult *res = HttpGet(AUTO_UPDATE_HOST, url);
-#endif
+	HttpResult *res = HttpGet(AUTO_UPDATE_HOST, url, AUTO_UPDATE_PORT);
 	if (!res || !res->IsValid())
 		return NULL;
 	char *s = (char *)res->data.getData(NULL);
