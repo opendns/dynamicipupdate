@@ -150,7 +150,7 @@ def nsis(version):
     run_cmd_throw("makensis", "/DVERSION=%s" % version, "installer")
 
 def sign(version):
-    run_cmd_throw("signtool", "sign", "/f", "opendns-sign.pfx", "/p", "bulba", "/d", '"OpenDNS Updater"', "/du", '"http://www.opendns.com/support/"', "/t", "http://timestamp.comodoca.com/authenticode", installer_name(version))
+    run_cmd_throw("signtool", "sign", "/f", "opendns-sign.pfx", "/p", "199fremont!", "/d", '"OpenDNS Updater"', "/du", '"http://www.opendns.com/support/"', "/t", "http://timestamp.comodoca.com/authenticode", installer_name(version))
 
 def valid_api_key(key):
     valid_chars = "0123456789ABCDEF"
