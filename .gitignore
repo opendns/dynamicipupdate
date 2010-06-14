@@ -2,9 +2,12 @@
 windows/UpdaterUI/Debug/
 windows/UpdaterUI/Release/
 windows/Service/Debug/
-Swindows/ervice/Release/
+windows/Service/Release/
+windows/13Updater/Debug/
+windows/13Updater/Release/
 windows/src/ApiKey.h
 windows/opendns-sign.pfx
+windows/awscreds.py
 *.ncb
 *.suo
 *.aps
