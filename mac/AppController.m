@@ -63,7 +63,7 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 
 @end
 
-@interface NSTableDataSourceDynamicNetworks : NSObject {
+@interface NSTableDataSourceDynamicNetworks : NSObject <NSTableViewDataSource> {
     NSArray *networks_;
 }
 
@@ -73,7 +73,6 @@ NSString * UNS_NO_NETWORK_SELECTED = @"unnonetsel";
 @end
 
 @implementation NSTableDataSourceDynamicNetworks
-
 - (id)initWithNetworks:(NSArray*)networks {
     networks_ = [networks retain];
     return self;
@@ -104,6 +103,28 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     return [s1 isEqualToString:s2];
 }
 
+@interface NSString (URINSStringAdditions)
+- (NSString *) urlEncode;
+@end
+
+@implementation NSString (URINSStringAdditions)
+
+- (NSString *) urlEncode {
+    CFStringRef encodedCFString = CFURLCreateStringByAddingPercentEscapes
+    (kCFAllocatorDefault, (CFStringRef)self, NULL,
+     CFSTR(":/?#[]@!$ &'()*+,;=\"<>%{}|\\^~`"),
+     CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));        
+    NSString *encodedString = (NSString *) encodedCFString;
+	NSString *newString = NSMakeCollectable(encodedString);
+    [newString autorelease];
+	if (newString) {
+		return newString;
+	}
+	return @"";
+}
+
+@end
+
 @implementation AppController
 
 + (void)initialize {
@@ -113,30 +134,30 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
 }
 
 - (NSString*)apiSignInStringForAccount:(NSString*)account withPassword:(NSString*)password {
-    NSString *accountEncoded = [account stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *passwordEncoded = [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *url = [NSString stringWithFormat:@"api_key=%@&method=account_signin&username=%@&password=%@", API_KEY, accountEncoded, passwordEncoded];
+    NSString *accountEncoded = [account urlEncode];
+    NSString *passwordEncoded = [password urlEncode];
+    NSString *url = [NSString stringWithFormat:@"api_key=%@&method=account_signin&username=%@&password=%@", [API_KEY urlEncode], accountEncoded, passwordEncoded];
     return url;
 }
 
 - (NSString*)apiGetNetworksStringForToken:(NSString*)token {
-    NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *url = [NSString stringWithFormat:@"api_key=%@&method=networks_get&token=%@", API_KEY, tokenEncoded];
+    NSString *tokenEncoded = [token urlEncode];
+    NSString *url = [NSString stringWithFormat:@"api_key=%@&method=networks_get&token=%@", [API_KEY urlEncode], tokenEncoded];
     return url;
 }
 
 - (NSString*)apiNetworksDynamicSetForNetwork:(NSString*)networkId withToken:token {
-    NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *url = [NSString stringWithFormat:@"api_key=%@&method=network_dynamic_set&token=%@&network_id=%@&setting=on", API_KEY, tokenEncoded, networkId];
+    NSString *tokenEncoded = [token urlEncode];
+    NSString *url = [NSString stringWithFormat:@"api_key=%@&method=network_dynamic_set&token=%@&network_id=%@&setting=on", [API_KEY urlEncode], tokenEncoded, networkId];
     return url;    
 }
 
 - (NSString*)apiIpUpdateForToken:(NSString*)token andHostname:(NSString*)hostname {
-    NSString *tokenEncoded = [token stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *tokenEncoded = [token urlEncode];
     if (!hostname)
         hostname = @"";
-    NSString *hostnameEncoded = [hostname stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *url = [NSString stringWithFormat:@"%@/nic/update?token=%@&api_key=%@&v=2&hostname=%@", IP_UPDATE_HOST, tokenEncoded, API_KEY, hostnameEncoded];
+    NSString *hostnameEncoded = [hostname urlEncode];
+    NSString *url = [NSString stringWithFormat:@"%@/nic/update?token=%@&api_key=%@&v=2&hostname=%@", [IP_UPDATE_HOST urlEncode], tokenEncoded, [API_KEY urlEncode], hostnameEncoded];
     return url;
 }
 
@@ -237,13 +258,17 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
     NSString *s = [[NSString alloc] initWithData:retrievedData encoding:NSUTF8StringEncoding];
 
     IpUpdateResult ipUpdateResult = [self ipUpdateResultFromString:s];
-    if (IpUpdateNotAvailable == ipUpdateResult)
-            return;
+    if (IpUpdateNotAvailable == ipUpdateResult) {
+        [s release];
+        return;
+    }
 
     // TODO: this might happen if a user made a network non-dynamic behind our back
     // not sure what to do in this case - re-download networks?
-    if (IpUpdateNoHost == ipUpdateResult)
+    if (IpUpdateNoHost == ipUpdateResult) {
+        [s release];
         return;
+    }
 
     if ((IpUpdateOk == ipUpdateResult) || (IpUpdateNotYours == ipUpdateResult)) {
         NSRange spacePos = [s rangeOfString:@" "];
@@ -253,7 +278,7 @@ static BOOL NSStringsEqual(NSString *s1, NSString *s2) {
             ipAddressFromHttp_ = [[s substringFromIndex:pos+1] retain];
         }
     }
-
+    [s release];
     if (ipUpdateResult == ipUpdateResult_)
          return;
 
@@ -593,7 +618,7 @@ Exit:
 	// TODO: should not be necessary, because I do have SUSendProfileInfo
 	// boolean value set to YES in info.plist. For whatever reason, it
 	// doesn't work
-	[updater_ setSendsSystemProfile:YES];
+    [updater_ setSendsSystemProfile:YES];
     [textError_ setHorizontallyResizable:NO];
     [textError_ setVerticallyResizable:YES];
     
@@ -691,17 +716,21 @@ Exit:
 
 - (NSString*)lastUpdateText {
     if (0 == minutesSinceLastIpUpdate_) {
-        return @"Less than a minute ago.";
+        return NSLocalizedString(@"Less than a minute ago.", @"IP address was recently updated");
     }
     int hours = minutesSinceLastIpUpdate_ / 60;
     int minutes = minutesSinceLastIpUpdate_ % 60;
     NSString *s = @"";
     if (hours > 0) {
-        s = [self formatNum:hours withPostfix:@"hr"];
+        s = [self formatNum:hours withPostfix:NSLocalizedString(@"hr", @"hour, for how recently an IP has been updated")];
         s = [s stringByAppendingString:@" "];
     }
-    s = [s stringByAppendingString:[self formatNum:minutes withPostfix:@"minute"]];
-    return [s stringByAppendingString:@" ago."];
+    s = [s stringByAppendingString:[self formatNum:minutes withPostfix:NSLocalizedString(@"minute", @"minute, for how recently an IP has been updated")]];
+    NSString *prefix = NSLocalizedString(@"-", @"prefix, for a time in the past, or - for none");
+    if (![prefix isEqualToString: @"-"]) {
+        s = [prefix stringByAppendingString: s];
+    }
+    return [s stringByAppendingString:NSLocalizedString(@" ago.", @"postfix, for a time in the past")];
 }
 
 - (BOOL)noNetworksConfigured {
@@ -738,17 +767,17 @@ Exit:
     if ([self isLoggedIn]) {
         [textAccount_ setTextColor:[NSColor blackColor]];
         [textAccount_ setTitleWithMnemonic:account];
-        [buttonChangeAccount_ setTitle:@"Change account"];
+        [buttonChangeAccount_ setTitle:NSLocalizedString(@"Change account", @"Change account, in status window")];
     } else {
         [textAccount_ setTextColor:[NSColor redColor]];
-        [textAccount_ setTitleWithMnemonic:@"Not signed in"];
-        [buttonChangeAccount_ setTitle:@"Sign in"];
+        [textAccount_ setTitleWithMnemonic:NSLocalizedString(@"Not signed in", @"Not signed in, in status window")];
+        [buttonChangeAccount_ setTitle:NSLocalizedString(@"Sign in", @"sign in, in status window")];
     }
 
     BOOL updateNowAlreadyDisabled = NO;
     if (![self isLoggedIn]) {
         [textHostname_ setTextColor:[NSColor redColor]];
-        [textHostname_ setTitleWithMnemonic:@"Not signed in"];
+        [textHostname_ setTitleWithMnemonic:NSLocalizedString(@"Not signed in", @"Not signed in, in status window")];
         [buttonChangeNetwork_ setEnabled:NO];
     } else {
         [buttonChangeNetwork_ setEnabled:YES];
@@ -756,31 +785,31 @@ Exit:
         NSRect buttonFrame = NSMakeRect(210, 3, 143, 32);
         if ([self noNetworksConfigured]) {
             [textHostname_ setTextColor:[NSColor redColor]];
-            [textHostname_ setTitleWithMnemonic:@"No networks"];
-            [buttonChangeNetwork_ setTitle:@"Refresh network list"];
+            [textHostname_ setTitleWithMnemonic:NSLocalizedString(@"No networks", @"Network unreachable")];
+            [buttonChangeNetwork_ setTitle:NSLocalizedString(@"Refresh network list", @"")];
             // this one is bigger
             buttonFrame = NSMakeRect(186, 3, 166, 32);
 
             updateNowAlreadyDisabled = YES;
             [textLastUpdated_ setTextColor:[NSColor redColor]];
-            [textLastUpdated_ setTitleWithMnemonic:@"No networks"];
+            [textLastUpdated_ setTitleWithMnemonic:NSLocalizedString(@"No networks", @"Network unreachable")];
             [buttonUpdateNow_ setEnabled:NO];
         } else if ([self noDynamicNetworks]) {
             [textHostname_ setTextColor:[NSColor redColor]];
-            [textHostname_ setTitleWithMnemonic:@"No dynamic IP networks"];
+            [textHostname_ setTitleWithMnemonic:NSLocalizedString(@"No dynamic IP networks", @"")];
             [buttonChangeNetwork_ setTitle:@"Select network"];
             updateNowAlreadyDisabled = YES;
             [textLastUpdated_ setTextColor:[NSColor redColor]];
-            [textLastUpdated_ setTitleWithMnemonic:@"No dynamic IP networks"];
+            [textLastUpdated_ setTitleWithMnemonic:NSLocalizedString(@"No dynamic IP networks", @"")];
             [buttonUpdateNow_ setEnabled:NO];
         } else if ([self networkNotSelected]) {
             [textHostname_ setTextColor:[NSColor redColor]];
-            [textHostname_ setTitleWithMnemonic:@"No network selected"];
-            [buttonChangeNetwork_ setTitle:@"Select network"];
+            [textHostname_ setTitleWithMnemonic:NSLocalizedString(@"No network selected", @"")];
+            [buttonChangeNetwork_ setTitle:NSLocalizedString(@"Select network", @"")];
 
             updateNowAlreadyDisabled = YES;
             [textLastUpdated_ setTextColor:[NSColor redColor]];
-            [textLastUpdated_ setTitleWithMnemonic:@"No network selected"];
+            [textLastUpdated_ setTitleWithMnemonic:NSLocalizedString(@"No network selected", @"")];
             [buttonUpdateNow_ setEnabled:NO];
         } else {
             [textHostname_ setTextColor:[NSColor blackColor]];
@@ -788,7 +817,7 @@ Exit:
             if (0 == [hostname length])
                 hostname = @"default";
             [textHostname_ setTitleWithMnemonic:hostname];
-            [buttonChangeNetwork_ setTitle:@"Change network"];
+            [buttonChangeNetwork_ setTitle:NSLocalizedString(@"Change network", @"")];
         }
         [buttonChangeNetwork_ setFrame:buttonFrame];
     }
@@ -801,27 +830,27 @@ Exit:
     else {
 		// TODO: show a different text in red?
         [textIpAddress_ setTitleWithMnemonic:@""];
-		[menuItemIpAddr_ setTitle:@"IP: unavailable"];
+		[menuItemIpAddr_ setTitle:NSLocalizedString(@"IP: unavailable", @"No IP assigned yet")];
     }
 
     if (usingOpenDns_) {
         [textUsingOpenDns_ setTextColor:[NSColor blackColor]];
-        [textUsingOpenDns_ setTitleWithMnemonic:@"Yes"];
+        [textUsingOpenDns_ setTitleWithMnemonic:NSLocalizedString(@"Yes", @"Using OpenDNS")];
     } else {
         [textUsingOpenDns_ setTextColor:[NSColor redColor]];
-        [textUsingOpenDns_ setTitleWithMnemonic:@"No"];
+        [textUsingOpenDns_ setTitleWithMnemonic:NSLocalizedString(@"No", @"Not using OpenDNS")];
     }
 
     if (![self isLoggedIn]) {
         [textLastUpdated_ setTextColor:[NSColor redColor]];
-        [textLastUpdated_ setTitleWithMnemonic:@"Not signed in"];
+        [textLastUpdated_ setTitleWithMnemonic:NSLocalizedString(@"Not signed in", @"Not signed in, in status window")];
         [buttonUpdateNow_ setEnabled:NO];
         return;
     }
 
     if (!sendingUpdates) {
         [textLastUpdated_ setTextColor:[NSColor redColor]];
-        [textLastUpdated_ setTitleWithMnemonic:@"Updates disabled"];
+        [textLastUpdated_ setTitleWithMnemonic:NSLocalizedString(@"Updates disabled", @"IP updates disabled")];
         [buttonUpdateNow_ setEnabled:NO];
         return;
     }
@@ -842,35 +871,35 @@ Exit:
         if ([self noNetworksConfigured]) {
             if (needNewline) [errorMsg appendString:@"\n\n"];
             needNewline = YES;
-            [errorMsg appendString:@"You don't have any networks. First, add a network in your OpenDNS account. Then refresh network list."];
+            [errorMsg appendString:NSLocalizedString(@"You don't have any networks. First, add a network in your OpenDNS account. Then refresh network list.", @"")];
         } else if ([self noDynamicNetworks]) {
             if (needNewline) [errorMsg appendString:@"\n\n"];
             needNewline = YES;
-            [errorMsg appendString:@"None of your networks is configured for dynamic IP updates. First, configure a network for dynamic IP updates in your OpenDNS account. Then select a network."];
+            [errorMsg appendString:NSLocalizedString(@"None of your networks is configured for dynamic IP updates. First, configure a network for dynamic IP updates in your OpenDNS account. Then select a network.", @"")];
         } else if ([self networkNotSelected]) {
             if (needNewline) [errorMsg appendString:@"\n\n"];
             needNewline = YES;
-            [errorMsg appendString:@"You need to select one of your networks."];
+            [errorMsg appendString:NSLocalizedString(@"You need to select one of your networks.", @"")];
         }
     }
 
     if (IpUpdateNotYours == ipUpdateResult_) {
         if (needNewline) [errorMsg appendString:@"\n\n"];
         needNewline = YES;
-        [errorMsg appendFormat:@"Your IP address is taken by another user. Learn more at %@", LEARN_MORE_IP_ADDRESS_TAKEN_URL];
+        [errorMsg appendFormat:NSLocalizedString(@"Your IP address is taken by another user. Learn more at %@", @""), LEARN_MORE_IP_ADDRESS_TAKEN_URL];
     }
     
     if (IpUpdateBadAuth == ipUpdateResult_) {
         // this should never happen
         if (needNewline) [errorMsg appendString:@"\n\n"];
         needNewline = YES;
-        [errorMsg appendString:@"Your authorization token is invalid."];
+        [errorMsg appendString:NSLocalizedString(@"Your authorization token is invalid.", @"")];
     }
 
     if ([self dnsVsHttpIpMismatch]) {
         if (needNewline) [errorMsg appendString:@"\n\n"];
         needNewline = YES;
-        [errorMsg appendFormat:@"Your OpenDNS settings might not work due to DNS IP address (%@) and HTTP IP address (%@) mismatch. Learn more at %@", currentIpAddressFromDns_, ipAddressFromHttp_, LEARN_MORE_IP_MISMATCH_URL];
+        [errorMsg appendFormat:NSLocalizedString(@"Your OpenDNS settings might not work due to DNS IP address (%@) and HTTP IP address (%@) mismatch. Learn more at %@", @""), currentIpAddressFromDns_, ipAddressFromHttp_, LEARN_MORE_IP_MISMATCH_URL];
     }
     
     if (needNewline) [errorMsg appendString:@"\n"];
@@ -1030,9 +1059,9 @@ Exit:
 
 - (void)showLoginWindow {
     if ([self isLoggedIn]) {
-        [buttonQuitCancel_ setTitle:@"Cancel"];
+        [buttonQuitCancel_ setTitle:NSLocalizedString(@"Cancel", @"Cancel, in login window")];
     } else {
-        [buttonQuitCancel_ setTitle:@"Quit"];
+        [buttonQuitCancel_ setTitle:NSLocalizedString(@"Quit", @"Quit, in login window")];
     }
     [editOpenDnsAccount_ setTitleWithMnemonic:@""];
     [editOpenDnsPassword_ setTitleWithMnemonic:@""];
@@ -1064,11 +1093,11 @@ Exit:
 }
 
 - (void)showLoginError {
-    [self showErrorInKeyWindow:@"Login failed" additionalText:@"Please double-check your username and password."];
+    [self showErrorInKeyWindow:NSLocalizedString(@"Login failed", @"") additionalText:NSLocalizedString(@"Please double-check your username and password.", @"")];
 }
 
 - (void)showGenericNetworkError {
-    [self showErrorInKeyWindow:@"Network error" additionalText:@"Error downloading data"];    
+    [self showErrorInKeyWindow:NSLocalizedString(@"Network error", @"") additionalText:NSLocalizedString(@"Error downloading data", @"")];    
 }
 
 - (void)setButtonLoginStatus {
@@ -1112,8 +1141,8 @@ Exit:
     dynamicNetwork = [networks findFirstDynamicNetwork];
     if (1 == dynamicCount) {
         if (!suppressUI) {
-            [self showErrorInKeyWindow:@"No other networks available" 
-                        additionalText:@"You only have one network configured for dynamic IP updates."];
+            [self showErrorInKeyWindow:NSLocalizedString(@"No other networks available", @"")
+                        additionalText:NSLocalizedString(@"You only have one network configured for dynamic IP updates.", @"")];
         }
         goto SetDynamicNetwork;
     }
@@ -1127,6 +1156,7 @@ Exit:
     }
     NSTableDataSourceDynamicNetworks *dataSource = [[NSTableDataSourceDynamicNetworks alloc] initWithNetworks:dynamicNetworks];
     [tableNetworksList_ setDataSource:dataSource];
+    [dataSource release];
     [tableNetworksList_ setTarget:self];
     [tableNetworksList_ setAction:@selector(selectNetworkClick:)];
     [tableNetworksList_ setDoubleAction:@selector(selectNetworkDoubleClick:)];
@@ -1142,14 +1172,14 @@ Exit:
     return;
 
 Error:
-    [self showErrorInKeyWindow:@"Error downloading information"
+    [self showErrorInKeyWindow:NSLocalizedString(@"Error downloading information", @"")
                 additionalText:@""];
     return;
     
 NoNetworks:
     if (!suppressUI) {
-        [self showErrorInKeyWindow:@"You have no networks" 
-                    additionalText:@"Add a network and enable dynamic IP updates in your OpenDNS account."];
+        [self showErrorInKeyWindow:NSLocalizedString(@"You have no networks", @"")
+                    additionalText:NSLocalizedString(@"Add a network and enable dynamic IP updates in your OpenDNS account.", @"")];
     }
     [prefs setObject:UNS_NO_NETWORKS forKey:PREF_USER_NETWORKS_STATE];
     [prefs setObject:@"" forKey:PREF_HOSTNAME];
@@ -1160,8 +1190,8 @@ NoDynamicNetworks:
     if (dynamicNetwork)
         goto SetDynamicNetwork;
     if (!suppressUI) {
-        [self showErrorInKeyWindow:@"No networks enabled for dynamic IP updates" 
-                    additionalText:@"Make sure at least one network is enabled for dynamic IP updates in your OpenDNS account."];
+        [self showErrorInKeyWindow:NSLocalizedString(@"No networks enabled for dynamic IP updates", @"") 
+                    additionalText:NSLocalizedString(@"Make sure at least one network is enabled for dynamic IP updates in your OpenDNS account.", @"")];
     }
 
     [prefs setObject:UNS_NO_DYNAMIC_IP_NETWORKS forKey:PREF_USER_NETWORKS_STATE];

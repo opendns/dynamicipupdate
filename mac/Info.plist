@@ -21,7 +21,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>CFBundleVersion</key>
-	<string>3.0b7</string>
+	<string>3.1</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

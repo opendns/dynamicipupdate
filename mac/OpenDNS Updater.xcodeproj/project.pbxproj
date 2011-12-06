@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0187BD6213CB989A00B00C8F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0187BD6013CB989A00B00C8F /* Localizable.strings */; };
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		7F5E49FA1002C1A30049E0F5 /* NSDictionary+Networks.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F5E49F91002C1A30049E0F5 /* NSDictionary+Networks.m */; };
 		7F760630106D4D5D00BAC2D1 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F76062F106D4D5D00BAC2D1 /* Sparkle.framework */; };
@@ -45,6 +46,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0187BD5913CB7B4800B00C8F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = "/Users/frank/svn/projects/desktop/opendns-dynamicipupdate/mac/fr.lproj/InfoPlist.strings"; sourceTree = "<absolute>"; };
+		0187BD5A13CB7B4800B00C8F /* fr */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = fr; path = "/Users/frank/svn/projects/desktop/opendns-dynamicipupdate/mac/fr.lproj/MainMenu.xib"; sourceTree = "<absolute>"; };
+		0187BD6113CB989A00B00C8F /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/Localizable.strings; sourceTree = "<group>"; };
+		0187BD6313CB98AB00B00C8F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -177,6 +182,7 @@
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
+				0187BD6013CB989A00B00C8F /* Localizable.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -257,9 +263,18 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "OpenDNS Updater" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+				fr,
+				English,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* OpenDNS Updater2 */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -278,6 +293,7 @@
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
 				7FF293050FFC29FC000A1604 /* menuicon.tif in Resources */,
 				7FF293070FFC2A04000A1604 /* opendns.icns in Resources */,
+				0187BD6213CB989A00B00C8F /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -307,10 +323,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		0187BD6013CB989A00B00C8F /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0187BD6113CB989A00B00C8F /* English */,
+				0187BD6313CB98AB00B00C8F /* fr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				089C165DFE840E0CC02AAC07 /* English */,
+				0187BD5913CB7B4800B00C8F /* fr */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -319,6 +345,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				1DDD58150DA1D0A300B32029 /* English */,
+				0187BD5A13CB7B4800B00C8F /* fr */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -337,7 +364,6 @@
 					"\"$(SRCROOT)/Sparkle/build/Debug\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -370,19 +396,20 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = "STRIP_GDATA_FETCH_LOGGING=1";
-				GCC_VERSION = 4.0;
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
-				SDKROOT = macosx10.4;
+				RUN_CLANG_STATIC_ANALYZER = YES;
+				SDKROOT = macosx;
 				SEPARATE_STRIP = YES;
 			};
 			name = Debug;
@@ -390,17 +417,18 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PREPROCESSOR_DEFINITIONS = "STRIP_GDATA_FETCH_LOGGING=1";
-				GCC_VERSION = 4.0;
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				PREBINDING = NO;
-				SDKROOT = macosx10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				RUN_CLANG_STATIC_ANALYZER = YES;
+				SDKROOT = macosx;
 				SEPARATE_STRIP = YES;
 			};
 			name = Release;
